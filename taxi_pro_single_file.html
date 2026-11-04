@@ -1,104 +1,224 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<meta name="theme-color" content="#10131d">
-<title>TAXI PRO | تاكسي برو</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<title>MONSTER CHESS</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 <style>
-:root{--gold:#ffc900;--gold2:#ffad00;--ink:#10131d;--panel:#1b1e2a;--muted:#858b9b;--white:#fff;--line:#303544;--red:#ed454d;--blue:#2678f5}
-*{box-sizing:border-box}body{margin:0;background:#0b0d14;color:#fff;font-family:Tahoma,Arial,sans-serif}button,input,select{font:inherit}button{cursor:pointer;border:0}.app{max-width:520px;min-height:100vh;margin:auto;background:#121520;position:relative;overflow:hidden;padding-bottom:86px;box-shadow:0 0 40px #0008}.top{padding:22px 18px 18px;background:radial-gradient(ellipse at 80% 0,#394052,#171a25 65%);position:relative;overflow:hidden}.brand{display:flex;align-items:center;gap:12px}.logo{width:56px;height:56px;border-radius:17px;background:var(--gold);color:#111;display:grid;place-items:center;font-size:31px;font-weight:900;box-shadow:0 5px 18px #ffc90055}.brand h1{font-size:29px;margin:0;font-style:italic}.brand h1 span{color:var(--gold)}.tag{color:#d6d8df;margin:6px 0 0;font-size:13px}.city{position:absolute;left:12px;bottom:8px;opacity:.13;font-size:55px}.content{padding:15px}.role-switch{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:15px}.role{padding:14px 8px;border-radius:18px;background:#222634;color:#fff;border:1px solid #51596b;font-weight:bold;font-size:17px;box-shadow:0 4px 0 #090b11}.role.active{background:linear-gradient(130deg,#ffe34d,#ffb900);color:#111;border-color:#ffe66b}.card{background:#1d2230;border:1px solid #303748;border-radius:20px;padding:16px;margin-bottom:13px;box-shadow:0 8px 20px #0002}.card h2{font-size:19px;margin:0 0 12px}.muted{color:#aab0bf;font-size:13px;line-height:1.7}.field{margin:10px 0}.field label{display:block;color:#c8ccd6;font-size:13px;margin-bottom:7px}.field input,.field select{width:100%;background:#10141f;color:#fff;border:1px solid #394154;border-radius:12px;padding:14px;outline:none}.field input:focus,.field select:focus{border-color:var(--gold)}.primary{width:100%;padding:15px;border-radius:15px;background:linear-gradient(120deg,#ffe34b,#ffb900);color:#111;font-weight:900;font-size:18px;box-shadow:0 4px 0 #a87500}.secondary{background:#292f3e;color:#fff;border:1px solid #444d60;border-radius:12px;padding:12px}.link{background:none;color:var(--gold);padding:10px}.hidden{display:none!important}.map-wrap{height:270px;border-radius:20px;overflow:hidden;border:1px solid #485064;position:relative;background:#dfe4eb}.map{height:100%;width:100%;z-index:1}.map-hint{position:absolute;z-index:500;bottom:10px;right:10px;background:#111d;color:#fff;padding:8px 11px;border-radius:10px;font-size:12px}.place{display:flex;align-items:center;gap:12px;background:#fff;color:#111;border-radius:15px;padding:13px;margin:10px 0;box-shadow:0 4px 13px #0002}.place .ico{font-size:24px}.place input{border:0;outline:0;width:100%;font-weight:bold;font-size:15px;color:#111;background:transparent}.fare{display:flex;justify-content:space-between;align-items:center;background:#0d1019;border:1px solid #41485a;border-radius:17px;padding:15px;margin:12px 0}.fare strong{font-size:25px;color:var(--gold)}.fare small{display:block;color:#c4c8d2;margin-bottom:4px}.quick{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.quick button{background:#282e3d;color:#fff;border:1px solid #3a4357;padding:11px 4px;border-radius:12px;font-size:12px}.quick button.selected{border-color:var(--gold);color:var(--gold)}.bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(520px,100%);display:grid;grid-template-columns:repeat(4,1fr);background:#10131d;border-top:1px solid #353b4c;padding:8px 4px max(8px,env(safe-area-inset-bottom));z-index:1000}.nav{background:none;color:#aeb4c2;padding:7px 2px;font-size:12px}.nav b{display:block;font-size:22px;margin-bottom:3px}.nav.active{color:var(--gold)}.statgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.stat{background:#111622;border-radius:13px;padding:13px}.stat strong{display:block;color:var(--gold);font-size:22px;margin-top:5px}.ride{background:#111622;border:1px solid #353e52;border-radius:15px;padding:14px;margin:10px 0}.ride .row{display:flex;justify-content:space-between;gap:8px;align-items:center}.pill{background:#253c2d;color:#7ef0a2;padding:5px 9px;border-radius:20px;font-size:11px}.danger{color:#ff777d}.notice{font-size:12px;color:#aeb4c2;line-height:1.7;text-align:center;margin:12px 4px}.toast{position:fixed;z-index:2000;bottom:95px;left:50%;transform:translateX(-50%);background:#fff;color:#111;padding:12px 17px;border-radius:12px;box-shadow:0 5px 25px #0007;max-width:90%;text-align:center}.topline{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.back{background:#2a3040;color:white;border-radius:10px;padding:8px 12px}.avatar{width:42px;height:42px;border-radius:50%;background:#ffc900;color:#111;display:grid;place-items:center;font-size:22px}.divider{height:1px;background:#343b4c;margin:13px 0}
+*{box-sizing:border-box}
+body{
+ margin:0;background:#101326;color:white;
+ font-family:Arial,sans-serif;text-align:center;
+}
+header{
+ padding:20px;background:#191d38;
+ border-bottom:2px solid #a77cff;
+}
+h1{color:#c39aff;margin:5px;font-size:27px}
+.sub{color:#aaa;font-size:13px}
+.screen{padding:18px;max-width:500px;margin:auto}
+.card{
+ background:#202541;border:1px solid #424b70;
+ border-radius:18px;padding:17px;margin:12px 0;
+}
+button{
+ border:0;border-radius:12px;padding:14px;
+ background:#9562ed;color:white;
+ font-size:16px;font-weight:bold;
+ width:100%;margin:5px 0;
+}
+button:active{transform:scale(.97)}
+.secondary{background:#343b5b}
+input{
+ width:100%;padding:14px;border-radius:10px;
+ border:1px solid #555;background:#11172b;
+ color:white;font-size:17px;text-align:center;
+}
+#board{
+ display:grid;grid-template-columns:repeat(8,1fr);
+ width:min(94vw,420px);margin:15px auto;
+ border:5px solid #303653;border-radius:8px;
+ overflow:hidden;
+}
+.square{
+ aspect-ratio:1;display:flex;align-items:center;
+ justify-content:center;font-size:clamp(24px,8vw,42px);
+ cursor:pointer;position:relative;
+}
+.light{background:#e4d3b9}
+.dark{background:#718b80}
+.selected{background:#e6c84c!important}
+.target:after{
+ content:"";position:absolute;width:25%;height:25%;
+ border-radius:50%;background:#245d39;
+}
+.monster{filter:drop-shadow(1px 2px 1px #333)}
+.info{color:#e4caff;font-size:14px;margin:10px}
+.hidden{display:none}
+.small{font-size:12px;color:#aaa}
 </style>
 </head>
 <body>
-<div class="app">
-<header class="top">
- <div class="brand"><div class="logo">⌖</div><div><h1>TAXI <span>PRO</span></h1><p class="tag">أسرع .. أسهل .. آمن</p></div></div>
- <div class="city">✦ ✦ ✦</div>
+
+<header>
+<h1>👹 MONSTER CHESS</h1>
+<div class="sub">وحوشك... استراتيجيتك... انتصارك!</div>
 </header>
-<main class="content">
-<section id="auth">
- <div class="role-switch">
-  <button class="role active" data-role="rider" onclick="chooseRole('rider')">👤 زبون</button>
-  <button class="role" data-role="driver" onclick="chooseRole('driver')">🚕 سائق</button>
- </div>
- <div class="card">
-  <h2 id="authTitle">مرحباً بك في TAXI PRO</h2>
-  <p class="muted" id="authDesc">اختر نوع الحساب، ثم أدخل رقم هاتفك للمتابعة.</p>
-  <div class="field"><label>رقم الهاتف</label><input id="phone" type="tel" inputmode="tel" placeholder="07XXXXXXXXX" maxlength="15"></div>
-  <div class="field"><label>كلمة المرور</label><input id="password" type="password" placeholder="أدخل كلمة المرور" minlength="4"></div>
-  <div id="driverFields" class="hidden">
-   <div class="field"><label>الاسم الكامل</label><input id="driverName" placeholder="اسم السائق"></div>
-   <div class="field"><label>نوع السيارة</label><input id="car" placeholder="مثال: تويوتا كورولا"></div>
-   <div class="field"><label>رقم لوحة السيارة</label><input id="plate" placeholder="رقم اللوحة"></div>
-  </div>
-  <button class="primary" onclick="login()">دخول / إنشاء حساب</button>
-  <p class="notice">نسخة أولية للتجربة على جهازك. تسجيل الدخول هنا محلي وليس تحققاً حقيقياً برسالة SMS.</p>
- </div>
-</section>
 
-<section id="riderHome" class="hidden">
- <div class="topline"><div><b id="welcomeRider">أهلاً بك 👋</b><div class="muted">إلى أين نذهب اليوم؟</div></div><div class="avatar">👤</div></div>
- <div class="map-wrap"><div id="riderMap" class="map"></div><div class="map-hint">حرّك الخريطة أو حدّد موقعك</div></div>
- <div class="place"><span class="ico">📍</span><input id="pickup" placeholder="موقع الانطلاق" readonly><button class="link" onclick="locate('rider')">◎</button></div>
- <div class="place"><span class="ico">🔴</span><input id="destination" placeholder="إلى أين تريد الذهاب؟"></div>
+<div class="screen" id="home">
  <div class="card">
-  <h2>اختر نوع الرحلة</h2>
-  <div class="quick" id="carTypes">
-   <button class="selected" onclick="setCarType(this,'عادي',1000)">🚕 عادي<br>اقتصادي</button>
-   <button onclick="setCarType(this,'مميز',1500)">🚘 مميز<br>راحة أكثر</button>
-   <button onclick="setCarType(this,'عائلي',2000)">🚙 عائلي<br>مساحة أكبر</button>
-  </div>
-  <div class="fare"><div><small>الأجرة التقديرية</small><strong id="fare">1000 دينار</strong></div><div>كل 4 كم<br><b>تقديري</b></div></div>
-  <button class="primary" onclick="requestRide()">🚕 اطلب تكسي الآن</button>
+  <div style="font-size:65px">🐉 👹 🐺</div>
+  <h2>مرحباً بك في عالم الوحوش</h2>
+  <p>استعد لخوض معركة الشطرنج!</p>
  </div>
- <div class="card"><h2>خدمات إضافية</h2><div class="quick"><button onclick="toast('خدمة الحجز المسبق قيد الربط')">🕒 حجز مسبق</button><button onclick="toast('خدمة التوصيل قيد الربط')">📦 توصيل</button><button onclick="toast('خدمة الرحلات النسائية قيد الإعداد')">🛡️ رحلة آمنة</button></div></div>
-</section>
-
-<section id="driverHome" class="hidden">
- <div class="topline"><div><b id="welcomeDriver">لوحة السائق</b><div class="muted">إدارة عملك ورحلاتك</div></div><div class="avatar">🚕</div></div>
+ <button onclick="showGame()">🎮 مباراة تجريبية</button>
+ <button onclick="createRoom()">🌍 إنشاء غرفة أونلاين</button>
+ <button class="secondary" onclick="joinRoom()">🔑 الانضمام إلى غرفة</button>
  <div class="card">
-  <div class="row" style="display:flex;justify-content:space-between;align-items:center"><div><h2 style="margin:0">حالة استقبال الطلبات</h2><small class="muted">فعّل الظهور حتى تصلك الطلبات</small></div><button id="onlineBtn" class="secondary" onclick="toggleOnline()">⚫ غير متصل</button></div>
+  <h3>🏆 التصنيف العالمي</h3>
+  <p>سيظهر ترتيب اللاعبين بعد تفعيل الخادم.</p>
  </div>
- <div class="map-wrap"><div id="driverMap" class="map"></div><div class="map-hint">موقعك على الخريطة</div></div>
- <div class="statgrid" style="margin-top:12px"><div class="stat">أرباح اليوم<strong id="earnings">0 د.ع</strong></div><div class="stat">الرحلات<strong id="trips">0</strong></div></div>
- <div class="card"><h2>طلبات الرحلات القريبة</h2><div id="driverRequests" class="muted">فعّل حالة الاتصال حتى تظهر الطلبات المتاحة.</div></div>
- <div class="card"><h2>ملف السائق</h2><p class="muted" id="driverProfile">بيانات السيارة</p><button class="secondary" onclick="toast('تعديل الملف الشخصي سيكون متاحاً بعد ربط قاعدة البيانات')">تعديل البيانات</button></div>
-</section>
-
-<section id="tripsPage" class="hidden"><div class="topline"><h2>رحلاتي</h2><button class="back" onclick="goHome()">رجوع</button></div><div class="card" id="tripsList">لا توجد رحلات محفوظة بعد.</div></section>
-<section id="chatPage" class="hidden"><div class="topline"><h2>المحادثات</h2><button class="back" onclick="goHome()">رجوع</button></div><div class="card"><h2>مركز الرسائل</h2><p class="muted">المحادثة بين السائق والزبون تحتاج خادماً وقاعدة بيانات حتى تعمل بين الأجهزة.</p></div></section>
-<section id="settingsPage" class="hidden"><div class="topline"><h2>الإعدادات</h2><button class="back" onclick="goHome()">رجوع</button></div><div class="card"><h2>حسابك</h2><p id="accountInfo" class="muted"></p><button class="secondary" onclick="logout()">تسجيل الخروج</button><div class="divider"></div><button class="secondary" onclick="toast('سياسة الخصوصية وشروط الاستخدام تُضاف قبل النشر')">الخصوصية والشروط</button></div></section>
-</main>
-<nav id="bottom" class="bottom hidden">
- <button class="nav active" onclick="showPage('home',this)"><b>⌂</b>الرئيسية</button>
- <button class="nav" onclick="showPage('trips',this)"><b>▤</b>رحلاتي</button>
- <button class="nav" onclick="showPage('chat',this)"><b>☏</b>محادثة</button>
- <button class="nav" onclick="showPage('settings',this)"><b>⚙</b>الإعدادات</button>
-</nav>
 </div>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<div class="screen hidden" id="game">
+ <h2>⚔️ ساحة المعركة</h2>
+ <div class="card">
+  <div>🐉 فريق الوحوش الملكي</div>
+  <div class="info" id="status">الأبيض يبدأ اللعب</div>
+  <div id="board"></div>
+  <div class="info" id="turn">دور الأبيض</div>
+ </div>
+ <button class="secondary" onclick="restart()">🔄 إعادة المباراة</button>
+ <button onclick="backHome()">🏠 الرئيسية</button>
+</div>
+
+<div class="screen hidden" id="room">
+ <div class="card">
+  <h2>🌍 غرفة المباراة</h2>
+  <p>رمز الغرفة التجريبي:</p>
+  <h1 id="roomCode">----</h1>
+  <p class="small">الغرفة حالياً تجريبية وليست متصلة بلاعبين حقيقيين.</p>
+  <button onclick="copyRoom()">نسخ الرمز</button>
+  <button class="secondary" onclick="backHome()">رجوع</button>
+ </div>
+</div>
+
 <script>
-const $=id=>document.getElementById(id);
-let role='rider',user=null,carType='عادي',baseFare=1000,online=false,riderMap,driverMap,riderMarker,driverMarker,selectedLat=null,selectedLng=null;
-let rides=JSON.parse(localStorage.getItem('taxipro_rides')||'[]');
-function toast(msg){let t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2600)}
-function chooseRole(r){role=r;document.querySelectorAll('.role').forEach(b=>b.classList.toggle('active',b.dataset.role===r));$('driverFields').classList.toggle('hidden',r!=='driver');$('authTitle').textContent=r==='driver'?'تسجيل السائق':'مرحباً بك في TAXI PRO';$('authDesc').textContent=r==='driver'?'أدخل بياناتك وبيانات السيارة للبدء.':'أدخل رقم هاتفك وكلمة المرور للمتابعة.'}
-function login(){let phone=$('phone').value.trim(),pass=$('password').value;if(!/^0[0-9]{9,10}$/.test(phone)){toast('أدخل رقم هاتف عراقي صحيحاً');return}if(pass.length<4){toast('كلمة المرور يجب أن تكون 4 أحرف على الأقل');return}let name=role==='driver'?$('driverName').value.trim():'زبون';if(role==='driver'&&(!name||!$('car').value.trim()||!$('plate').value.trim())){toast('أكمل اسم السائق ونوع السيارة ورقم اللوحة');return}user={role,phone,name,car:$('car').value,plate:$('plate').value};localStorage.setItem('taxipro_user',JSON.stringify(user));enterApp()}
-function enterApp(){$('auth').classList.add('hidden');$('bottom').classList.remove('hidden');$('accountInfo').textContent=`${user.name} — ${user.phone} — ${user.role==='driver'?'سائق':'زبون'}`;if(user.role==='driver'){$('driverHome').classList.remove('hidden');$('welcomeDriver').textContent='أهلاً '+user.name;$('driverProfile').textContent=`السيارة: ${user.car} | اللوحة: ${user.plate}`;initMap('driver')}else{$('riderHome').classList.remove('hidden');$('welcomeRider').textContent='أهلاً '+user.name;initMap('rider')}renderTrips()}
-function logout(){localStorage.removeItem('taxipro_user');user=null;online=false;document.querySelectorAll('main section').forEach(s=>s.classList.add('hidden'));$('auth').classList.remove('hidden');$('bottom').classList.add('hidden');chooseRole('rider')}
-function goHome(){showPage('home',document.querySelector('.nav'))}
-function showPage(p,btn){['riderHome','driverHome','tripsPage','chatPage','settingsPage'].forEach(id=>$(id).classList.add('hidden'));if(p==='home')$(user.role==='driver'?'driverHome':'riderHome').classList.remove('hidden');else $(p+'Page').classList.remove('hidden');document.querySelectorAll('.nav').forEach(n=>n.classList.remove('active'));if(btn)btn.classList.add('active');if(p==='trips')renderTrips()}
-function initMap(which){if(!window.L)return;setTimeout(()=>{let id=which==='rider'?'riderMap':'driverMap';if(which==='rider'&&riderMap){riderMap.invalidateSize();return}if(which==='driver'&&driverMap){driverMap.invalidateSize();return}let map=L.map(id).setView([31.057,46.257],13);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(map);if(which==='rider'){riderMap=map;map.on('click',e=>{selectedLat=e.latlng.lat;selectedLng=e.latlng.lng;$('pickup').value=`موقع محدد (${selectedLat.toFixed(4)}, ${selectedLng.toFixed(4)})`;if(riderMarker)riderMap.removeLayer(riderMarker);riderMarker=L.marker(e.latlng).addTo(map)})}else{driverMap=map;driverMarker=L.marker([31.057,46.257]).addTo(map).bindPopup('موقع السائق')}} ,250)}
-function locate(which){if(!navigator.geolocation){toast('المتصفح لا يدعم تحديد الموقع');return}navigator.geolocation.getCurrentPosition(pos=>{let lat=pos.coords.latitude,lng=pos.coords.longitude;selectedLat=lat;selectedLng=lng;if(which==='rider'){riderMap.setView([lat,lng],16);if(riderMarker)riderMap.removeLayer(riderMarker);riderMarker=L.marker([lat,lng]).addTo(riderMap);$('pickup').value=`موقعي الحالي (${lat.toFixed(4)}, ${lng.toFixed(4)})`}else{driverMap.setView([lat,lng],16);if(driverMarker)driverMap.removeLayer(driverMarker);driverMarker=L.marker([lat,lng]).addTo(driverMap).bindPopup('موقعك الحالي')}} ,()=>toast('اسمح للتطبيق بالوصول إلى الموقع'))}
-function setCarType(btn,type,price){carType=type;baseFare=price;document.querySelectorAll('#carTypes button').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');$('fare').textContent=price+' دينار'}
-function requestRide(){let dest=$('destination').value.trim();if(!dest){toast('اكتب الوجهة أولاً');return}let ride={id:Date.now(),phone:user.phone,from:$('pickup').value||'موقعي الحالي',to:dest,type:carType,fare:baseFare,status:'بانتظار سائق',time:new Date().toLocaleString('ar-IQ')};rides.unshift(ride);localStorage.setItem('taxipro_rides',JSON.stringify(rides));toast('تم حفظ طلبك على هذا الجهاز كطلب تجريبي');renderTrips()}
-function toggleOnline(){online=!online;$('onlineBtn').textContent=online?'🟢 متصل الآن':'⚫ غير متصل';$('onlineBtn').style.borderColor=online?'#4edb8a':'#444d60';renderRequests()}
-function renderRequests(){let box=$('driverRequests');if(!online){box.textContent='فعّل حالة الاتصال حتى تظهر الطلبات المتاحة.';return}let pending=rides.filter(r=>r.status==='بانتظار سائق');if(!pending.length){box.textContent='لا توجد طلبات حالياً.';return}box.innerHTML='';pending.forEach(r=>{let d=document.createElement('div');d.className='ride';d.innerHTML=`<div class="row"><b>طلب رحلة #${r.id.toString().slice(-5)}</b><span class="pill">جديد</span></div><p class="muted">من: ${escapeHtml(r.from)}<br>إلى: ${escapeHtml(r.to)}<br>النوع: ${r.type}</p><div class="row"><b style="color:var(--gold)">${r.fare} د.ع</b><button class="secondary" onclick="acceptRide(${r.id})">قبول الطلب</button></div>`;box.appendChild(d)})}
-function acceptRide(id){let r=rides.find(x=>x.id===id);if(r){r.status='قبله السائق';r.driver=user.name;localStorage.setItem('taxipro_rides',JSON.stringify(rides));toast('تم قبول الرحلة محلياً');renderRequests();renderTrips()}}
-function renderTrips(){let box=$('tripsList');if(!box)return;let mine=user?.role==='driver'?rides.filter(r=>r.driver===user.name):rides.filter(r=>r.phone===user?.phone);if(!mine.length){box.textContent='لا توجد رحلات محفوظة بعد.';return}box.innerHTML='';mine.forEach(r=>{let d=document.createElement('div');d.className='ride';d.innerHTML=`<b>رحلة #${r.id.toString().slice(-5)}</b><p class="muted">من: ${escapeHtml(r.from)}<br>إلى: ${escapeHtml(r.to)}<br>${r.time}</p><div class="row"><span class="pill">${escapeHtml(r.status)}</span><b style="color:var(--gold)">${r.fare} د.ع</b></div>`;box.appendChild(d)})}
-function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-(function restore(){try{let u=JSON.parse(localStorage.getItem('taxipro_user'));if(u){user=u;enterApp()}}catch(e){}})();
+const monster={
+ w:{k:"🐉",q:"👑",r:"🗿",b:"🧙",n:"🐺",p:"👾"},
+ b:{k:"🐲",q:"🧛",r:"🪨",b:"🦉",n:"🐗",p:"👹"}
+};
+
+let chess;
+let selected=null;
+let possible=[];
+
+function show(id){
+ ["home","game","room"].forEach(x=>
+ document.getElementById(x).classList.add("hidden"));
+ document.getElementById(id).classList.remove("hidden");
+}
+
+function showGame(){
+ if(!window.Chess){
+  alert("تعذر تحميل محرك الشطرنج. تحقق من الإنترنت.");
+  return;
+ }
+ chess=new Chess();
+ selected=null;
+ possible=[];
+ show("game");
+ draw();
+}
+
+function draw(){
+ const board=document.getElementById("board");
+ board.innerHTML="";
+ const matrix=chess.board();
+
+ matrix.forEach((row,r)=>{
+  row.forEach((piece,c)=>{
+   const sq=document.createElement("div");
+   const file="abcdefgh"[c];
+   const rank=8-r;
+   const name=file+rank;
+   sq.className="square "+((r+c)%2?"dark":"light");
+
+   if(selected===name)sq.classList.add("selected");
+   if(possible.includes(name))sq.classList.add("target");
+
+   if(piece){
+    const color=piece.color==="w"?"w":"b";
+    sq.innerHTML='<span class="monster">'+monster[color][piece.type]+'</span>';
+   }
+
+   sq.onclick=()=>clickSquare(name);
+   board.appendChild(sq);
+  });
+ });
+
+ document.getElementById("turn").textContent=
+ chess.turn()==="w"?"دور الأبيض ⚪":"دور الأسود ⚫";
+
+ let message="المباراة مستمرة";
+ if(chess.in_checkmate())message="🏆 كش مات! انتهت المباراة";
+ else if(chess.in_draw())message="تعادل!";
+ else if(chess.in_check())message="⚠️ الملك في كش!";
+
+ document.getElementById("status").textContent=message;
+}
+
+function clickSquare(square){
+ if(chess.game_over())return;
+
+ if(selected){
+  let move=chess.move({from:selected,to:square,promotion:"q"});
+  if(move){
+   selected=null;
+   possible=[];
+   draw();
+   return;
+  }
+ }
+
+ const piece=chess.get(square);
+ if(piece&&piece.color===chess.turn()){
+  selected=square;
+  possible=chess.moves({square,verbose:true}).map(m=>m.to);
+ }else{
+  selected=null;
+  possible=[];
+ }
+ draw();
+}
+
+function restart(){
+ chess.reset();
+ selected=null;
+ possible=[];
+ draw();
+}
+
+function backHome(){show("home")}
+
+function createRoom(){
+ const code="MON"+Math.floor(1000+Math.random()*9000);
+ document.getElementById("roomCode").textContent=code;
+ show("room");
+}
+
+function joinRoom(){
+ const code=prompt("أدخل رمز الغرفة:");
+ if(code)alert("هذه خاصية تجريبية. سيتم تفعيل الانضمام بعد ربط الخادم.");
+}
+
+function copyRoom(){
+ const code=document.getElementById("roomCode").textContent;
+ if(navigator.clipboard)
+ navigator.clipboard.writeText(code).then(()=>alert("تم نسخ الرمز"));
+}
 </script>
-</body></html>
+</body>
+</html>
