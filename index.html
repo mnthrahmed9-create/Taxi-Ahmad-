@@ -84,10 +84,12 @@ select{font-family:inherit;font-weight:800;color:#fff;background:#123c33;border:
 #promotion{display:none;padding:10px;margin-top:9px;border-radius:13px;background:#164236}
 #promotion .controls{margin-top:8px}
 #notice{min-height:22px;color:#ffe69a;font-size:12px;margin-top:8px}
-#settings{display:none;position:fixed;inset:0;z-index:50;background:#000b;align-items:center;justify-content:center;padding:15px}
-.modal{width:min(94%,390px);padding:22px;border:1px solid var(--gold);border-radius:22px;background:linear-gradient(145deg,#174538,#0b211f);box-shadow:0 20px 60px #000b}
-.setting-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #ffffff22;font-size:13px}
+#settings{display:none;position:fixed;inset:0;z-index:50;background:#000b;align-items:center;justify-content:center;padding:15px;overflow:auto}
+.modal{width:min(94%,410px);padding:22px;border:1px solid var(--gold);border-radius:22px;background:linear-gradient(145deg,#174538,#0b211f);box-shadow:0 20px 60px #000b;max-height:92vh;overflow:auto}
+.setting-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #ffffff22;font-size:13px}
 input[type=checkbox]{width:21px;height:21px;accent-color:#36d99a}
+input[type=range]{width:130px;accent-color:#36d99a;cursor:pointer}
+.cam-val{color:#ffe69a;font-weight:900;min-width:52px;text-align:left;display:inline-block}
 footer{color:#91b7a8;font-size:10px;padding:18px}
 #splash{position:fixed;inset:0;z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;
  background:radial-gradient(circle,#1d6048,#061511 68%,#020807);transition:opacity .8s}
@@ -104,6 +106,7 @@ footer{color:#91b7a8;font-size:10px;padding:18px}
  #game{height:54vh;min-height:320px}
  .btn.small{min-width:83px;padding:8px 9px}
  .game-panel{padding:9px}
+ input[type=range]{width:105px}
 }
 </style>
 </head>
@@ -123,9 +126,9 @@ footer{color:#91b7a8;font-size:10px;padding:18px}
   <button class="btn gold large" onclick="startGame()">⚔️ ابدأ المعركة</button>
   <div class="menu-grid">
    <div class="info-card"><b>💎 منحوتات أسطورية</b>شخصيات ثلاثية الأبعاد لكل قطعة</div>
-   <div class="info-card"><b>🏰 قلعة الغابة</b>الرقعة محمية داخل سور وأبراج</div>
+   <div class="info-card"><b>🏰 قلعة واسعة</b>ساحة كبيرة وأسوار وأبراج تحيط بالرقعة</div>
    <div class="info-card"><b>🤖 خصم ذكي</b>العب ضد الكمبيوتر بمستويين</div>
-   <div class="info-card"><b>♟️ شطرنج حقيقي</b>قوانين وحركات وترقية البيدق</div>
+   <div class="info-card"><b>🎥 كاميرا ثابتة</b>اضبطها من العدادات في الإعدادات</div>
   </div>
   <div id="notice"></div>
   <button class="btn purple small" onclick="openSettings()">⚙️ الإعدادات</button>
@@ -141,6 +144,7 @@ footer{color:#91b7a8;font-size:10px;padding:18px}
    <button class="btn gold small" onclick="newGame()">🔄 جديدة</button>
    <button class="btn blue small" onclick="undoMove()">↩️ تراجع</button>
    <button class="btn red small" onclick="backMenu()">🏠 الرئيسية</button>
+   <button class="btn purple small" onclick="openSettings()">🎥 الكاميرا</button>
   </div>
  </div>
  <div id="game"></div>
@@ -160,8 +164,26 @@ footer{color:#91b7a8;font-size:10px;padding:18px}
  <div class="modal">
   <h2>⚙️ إعدادات المملكة</h2>
   <div class="setting-row"><span>🔊 صوت الحركة</span><input id="sound" type="checkbox" checked></div>
-  <p>يمكنك تدوير زاوية الكاميرا وسحبها بإصبعك، مع بقاء قاعدة الشطرنج ثابتة داخل ساحة القلعة.</p>
-  <button class="btn" onclick="closeSettings()">حفظ وإغلاق</button>
+
+  <h2 style="font-size:16px;margin-top:18px">🎥 ضبط الكاميرا</h2>
+  <div class="setting-row">
+   <span>📏 المسافة</span>
+   <span><input id="camDist" type="range" min="8" max="34" step="0.5" value="17"><span class="cam-val" id="camDistVal">17</span></span>
+  </div>
+  <div class="setting-row">
+   <span>⬆️ الارتفاع</span>
+   <span><input id="camHeight" type="range" min="4" max="32" step="0.5" value="15"><span class="cam-val" id="camHeightVal">15</span></span>
+  </div>
+  <div class="setting-row">
+   <span>🔄 الدوران</span>
+   <span><input id="camAngle" type="range" min="0" max="360" step="1" value="38"><span class="cam-val" id="camAngleVal">38°</span></span>
+  </div>
+
+  <p style="margin-top:14px">الكاميرا ثابتة ولا تتحرك بالسحب — اضبطها من العدادات أعلاه، والإعدادات تُحفظ تلقائياً.</p>
+  <div class="controls">
+   <button class="btn blue small" onclick="resetCamera()">↺ استعادة</button>
+   <button class="btn" onclick="closeSettings()">حفظ وإغلاق</button>
+  </div>
  </div>
 </div>
 <footer>KOKTON GAME STUDIOS • MONSTER CHESS 3D</footer>
@@ -179,7 +201,6 @@ setTimeout(()=>{const s=document.getElementById("splash");if(s){s.classList.add(
 
 <script type="module">
 import * as THREE from "three";
-import {OrbitControls} from "three/addons/controls/OrbitControls.js";
 import {Chess} from "chess";
 
 const chess=new Chess();
@@ -188,12 +209,14 @@ const files="abcdefgh";
 let selected=null,thinking=false,pendingPromotion=null,gameStarted=false,initialized=false;
 let snapshots=[],pieceMeshes=[],lastMoveSquares=[];
 const squareMeshes=[];
+
 const scene=new THREE.Scene();
 scene.background=new THREE.Color(0x0a2620);
-scene.fog=new THREE.Fog(0x0a2620,17,40);
+scene.fog=new THREE.Fog(0x0a2620,28,80);
 
-const camera=new THREE.PerspectiveCamera(38,1,.1,120);
-camera.position.set(8.6,9.8,11.6);
+const camera=new THREE.PerspectiveCamera(38,1,.1,200);
+const cameraTarget=new THREE.Vector3(0,.1,0);
+const camState={radius:17,height:15,angle:38};
 
 const renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:"high-performance"});
 renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.6));
@@ -204,64 +227,43 @@ renderer.toneMapping=THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure=1.15;
 holder.appendChild(renderer.domElement);
 
-const controls=new OrbitControls(camera,renderer.domElement);
-controls.target.set(0,.1,0);
-controls.enableDamping=true;
-controls.dampingFactor=.07;
-controls.enablePan=false;
-controls.minDistance=8;
-controls.maxDistance=20;
-controls.maxPolarAngle=1.18;   // نبقى فوق الأسوار
-controls.minPolarAngle=.35;
+// ---- كاميرا ثابتة تُضبط من العدادات فقط ----
+function applyCamera(){
+ const a=camState.angle*Math.PI/180;
+ camera.position.set(
+  Math.sin(a)*camState.radius,
+  camState.height,
+  Math.cos(a)*camState.radius
+ );
+ camera.lookAt(cameraTarget);
+ camera.updateProjectionMatrix();
+}
 
 scene.add(new THREE.HemisphereLight(0xcaffeb,0x18352b,2.1));
 const keyLight=new THREE.DirectionalLight(0xfff3d0,3.1);
-keyLight.position.set(5,12,7);keyLight.castShadow=true;
-keyLight.shadow.mapSize.set(1536,1536);
-keyLight.shadow.camera.left=-9;keyLight.shadow.camera.right=9;
-keyLight.shadow.camera.top=9;keyLight.shadow.camera.bottom=-9;
+keyLight.position.set(7,16,9);keyLight.castShadow=true;
+keyLight.shadow.mapSize.set(2048,2048);
+keyLight.shadow.camera.left=-13;keyLight.shadow.camera.right=13;
+keyLight.shadow.camera.top=13;keyLight.shadow.camera.bottom=-13;
+keyLight.shadow.camera.near=.5;keyLight.shadow.camera.far=60;
 scene.add(keyLight);
-const greenLight=new THREE.PointLight(0x20e69a,65,20);
-greenLight.position.set(-5,4,-4);scene.add(greenLight);
-const blueLight=new THREE.PointLight(0x39bfff,55,18);
-blueLight.position.set(5,3,5);scene.add(blueLight);
+const greenLight=new THREE.PointLight(0x20e69a,65,24);
+greenLight.position.set(-6,4,-6);scene.add(greenLight);
+const blueLight=new THREE.PointLight(0x39bfff,55,22);
+blueLight.position.set(6,3,6);scene.add(blueLight);
 
-const floor=new THREE.Mesh(new THREE.PlaneGeometry(140,140),
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(160,160),
  new THREE.MeshStandardMaterial({color:0x102c22,roughness:1}));
 floor.rotation.x=-Math.PI/2;floor.position.y=-.72;floor.receiveShadow=true;scene.add(floor);
 
-// أرضية الغابة: حلقات حجرية زخرفية داخل الساحة
-const decor=new THREE.Group();scene.add(decor);
-const stoneMat=new THREE.MeshStandardMaterial({color:0x245344,roughness:.82});
-for(let i=0;i<16;i++){
- const a=i*Math.PI*2/16;
- const x=Math.cos(a)*5.5,z=Math.sin(a)*5.5;
- const rock=new THREE.Mesh(new THREE.DodecahedronGeometry(.32,0),stoneMat);
- rock.position.set(x,-.5,z);rock.scale.set(1,.6,1.3);rock.rotation.y=a;
- rock.castShadow=true;decor.add(rock);
-}
-const pedestal=new THREE.Group();scene.add(pedestal);
-const baseMat=new THREE.MeshStandardMaterial({color:0x123b30,metalness:.55,roughness:.32});
-const base=new THREE.Mesh(new THREE.BoxGeometry(8.85,.62,8.85),baseMat);
-base.position.y=-.39;base.castShadow=true;base.receiveShadow=true;pedestal.add(base);
-const goldMat=new THREE.MeshStandardMaterial({color:0xe5bd55,metalness:.78,roughness:.23});
-function trim(w,h,d,x,y,z){
- const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),goldMat);
- m.position.set(x,y,z);m.castShadow=true;pedestal.add(m);
-}
-trim(8.95,.07,.07,0,-.15,4.39);trim(8.95,.07,.07,0,-.15,-4.39);
-trim(.07,.07,8.8,4.39,-.15,0);trim(.07,.07,8.8,-4.39,-.15,0);
-const board=new THREE.Group();scene.add(board);
-const pieces=new THREE.Group();scene.add(pieces);
-
 /* =========================================================
-   قلعة الغابة: سور محيط كامل + أبراج زوايا + بوابة + شرفات
-   الرقعة والقطع تقع داخل الساحة
+   قلعة الغابة: ساحة أوسع + سور محيط + أبراج + بوابة + مشاعل
+   COURT كبّر الساحة فصار فيه مسافة واسعة حول الرقعة
    ========================================================= */
-const COURT   = 6.7;    // نصف عرض ساحة القلعة
-const WALL_H  = 2.35;   // ارتفاع السور
-const WALL_T  = 0.92;   // سماكة السور
-const GY      = -0.72;  // منسوب أرض الساحة
+const COURT  = 9.8;     // نصف عرض ساحة القلعة (كان 6.7)
+const WALL_H = 2.6;     // ارتفاع السور
+const WALL_T = 0.95;    // سماكة السور
+const GY     = -0.72;   // منسوب أرض الساحة
 
 const castle=new THREE.Group();scene.add(castle);
 
@@ -273,6 +275,7 @@ const windowGlow =new THREE.MeshStandardMaterial({color:0xffd477,emissive:0xff8a
 const ironMat    =new THREE.MeshStandardMaterial({color:0x1d2429,metalness:.85,roughness:.38});
 const bannerA    =new THREE.MeshStandardMaterial({color:0x12836a,roughness:.85,side:THREE.DoubleSide});
 const bannerB    =new THREE.MeshStandardMaterial({color:0x8a2f45,roughness:.85,side:THREE.DoubleSide});
+const goldMat    =new THREE.MeshStandardMaterial({color:0xe5bd55,metalness:.78,roughness:.23});
 
 function cBox(w,h,d,x,y,z,mat=castleStone,ry=0){
  const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
@@ -289,6 +292,16 @@ const yard=new THREE.Mesh(new THREE.BoxGeometry(COURT*2+.9,.14,COURT*2+.9),
   new THREE.MeshStandardMaterial({color:0x30504a,roughness:.96}));
 yard.position.set(0,GY+.07,0);yard.receiveShadow=true;castle.add(yard);
 
+// حلقات حجرية زخرفية داخل الساحة
+const stoneMat=new THREE.MeshStandardMaterial({color:0x245344,roughness:.82});
+for(let i=0;i<20;i++){
+ const a=i*Math.PI*2/20;
+ const x=Math.cos(a)*6.9,z=Math.sin(a)*6.9;
+ const rock=new THREE.Mesh(new THREE.DodecahedronGeometry(.34,0),stoneMat);
+ rock.position.set(x,GY+.18,z);rock.scale.set(1,.6,1.3);rock.rotation.y=a;
+ rock.castShadow=true;rock.receiveShadow=true;castle.add(rock);
+}
+
 // جدار مستقيم مع شرفات مسننة وفتحات سهام مضيئة
 function wallRun(axis,fixed,a,b,h=WALL_H,t=WALL_T){
  const len=b-a; if(len<=.08) return;
@@ -298,17 +311,17 @@ function wallRun(axis,fixed,a,b,h=WALL_H,t=WALL_T){
  const w=axis==="x"?len:t;
  const d=axis==="x"?t:len;
  cBox(w,h,d,cx,GY+h/2,cz);
- cBox(w+.16,.18,d+.16,cx,GY+h+.09,cz,castleEdge);          // إفريز علوي
- const n=Math.max(2,Math.round(len/.8)), step=len/n;
- for(let i=0;i<n;i++){                                      // شرفات مسننة
+ cBox(w+.16,.18,d+.16,cx,GY+h+.09,cz,castleEdge);
+ const n=Math.max(2,Math.round(len/.9)), step=len/n;
+ for(let i=0;i<n;i++){
   const p=a+step*(i+.5);
   const mx=axis==="x"?p:fixed, mz=axis==="x"?fixed:p;
   const mw=axis==="x"?step*.52:t*.92;
   const md=axis==="x"?t*.92:step*.52;
   cBox(mw,.44,md,mx,GY+h+.4,mz);
  }
- const sn=Math.max(1,Math.round(len/2.6));
- for(let i=0;i<sn;i++){                                     // فتحات سهام مضيئة
+ const sn=Math.max(1,Math.round(len/3));
+ for(let i=0;i<sn;i++){
   const p=a+(len/sn)*(i+.5);
   for(const side of [-1,1]){
    const ox=axis==="x"?0:side*(t/2+.02);
@@ -320,52 +333,51 @@ function wallRun(axis,fixed,a,b,h=WALL_H,t=WALL_T){
 }
 
 // برج دائري بسقف مخروطي ونوافذ مضيئة وراية
-function cTower(x,z,h=4.4,r=.82,banner=bannerA){
+function cTower(x,z,h=4.6,r=.85,banner=bannerA){
  cCyl(r*.9,r*1.06,h,x,GY+h/2,z,12);
  cCyl(r*1.22,r*1.34,.34,x,GY+.17,z,12,castleTrim);
  cCyl(r*1.02,r*1.02,.15,x,GY+h-.36,z,12,goldMat);
- const roof=new THREE.Mesh(new THREE.ConeGeometry(r*1.34,1.6,12),roofMat);
- roof.position.set(x,GY+h+.8,z);roof.castShadow=true;castle.add(roof);
- const fin=new THREE.Mesh(new THREE.SphereGeometry(.14,12,10),goldMat);
- fin.position.set(x,GY+h+1.62,z);castle.add(fin);
+ const roof=new THREE.Mesh(new THREE.ConeGeometry(r*1.34,1.7,12),roofMat);
+ roof.position.set(x,GY+h+.85,z);roof.castShadow=true;castle.add(roof);
+ const fin=new THREE.Mesh(new THREE.SphereGeometry(.15,12,10),goldMat);
+ fin.position.set(x,GY+h+1.72,z);castle.add(fin);
  const ang=Math.atan2(-x,-z);
  for(const off of [-.45,.45]){
   const a=ang+off;
   cBox(.17,.38,.11, x+Math.sin(a)*(r*.95), GY+h*.62, z+Math.cos(a)*(r*.95), windowGlow, a);
  }
- // راية
- cCyl(.035,.035,1.6,x,GY+h+1.05,z,6,ironMat);
- const flag=new THREE.Mesh(new THREE.PlaneGeometry(.9,.52),banner);
- flag.position.set(x+.48,GY+h+1.55,z);
+ cCyl(.035,.035,1.7,x,GY+h+1.1,z,6,ironMat);
+ const flag=new THREE.Mesh(new THREE.PlaneGeometry(.95,.55),banner);
+ flag.position.set(x+.5,GY+h+1.6,z);
  flag.rotation.y=Math.atan2(x,z);
  castle.add(flag);
 }
 
-// --- بناء الأسوار الأربعة ---
-wallRun("x",-COURT,-COURT,COURT);              // السور الشمالي (الخلفي)
-wallRun("z",-COURT,-COURT,COURT);              // السور الغربي
-wallRun("z", COURT,-COURT,COURT);              // السور الشرقي
-wallRun("x", COURT,-COURT,-1.35);              // السور الجنوبي — يسار البوابة
-wallRun("x", COURT, 1.35, COURT);              // السور الجنوبي — يمين البوابة
+// --- الأسوار الأربعة ---
+wallRun("x",-COURT,-COURT,COURT);
+wallRun("z",-COURT,-COURT,COURT);
+wallRun("z", COURT,-COURT,COURT);
+wallRun("x", COURT,-COURT,-1.55);
+wallRun("x", COURT, 1.55, COURT);
 
-// --- أبراج الزوايا الأربعة ---
-cTower(-COURT,-COURT,4.6,.86,bannerA);
-cTower( COURT,-COURT,4.6,.86,bannerB);
-cTower(-COURT, COURT,4.6,.86,bannerB);
-cTower( COURT, COURT,4.6,.86,bannerA);
+// --- أبراج الزوايا ---
+cTower(-COURT,-COURT,4.8,.9,bannerA);
+cTower( COURT,-COURT,4.8,.9,bannerB);
+cTower(-COURT, COURT,4.8,.9,bannerB);
+cTower( COURT, COURT,4.8,.9,bannerA);
 
 // --- بوابة القلعة في السور الجنوبي ---
-for(const x of [-1.62,1.62]) cTower(x,COURT,3.9,.64,bannerB);
-cBox(3.6,.55,1.25,0,GY+2.42,COURT,castleEdge);            // عتبة البوابة
-cBox(3.75,.10,.05,0,GY+2.72,COURT+.64,goldMat);           // شريط ذهبي
-const gArch=new THREE.Mesh(new THREE.TorusGeometry(.96,.11,8,26,Math.PI),goldMat);
-gArch.position.set(0,GY+1.95,COURT+.52);castle.add(gArch);
-for(let i=-2;i<=2;i++) cBox(.10,1.95,.10, i*.42, GY+1.0, COURT+.44, ironMat);   // مصراع حديدي
-for(let j=0;j<3;j++)  cBox(1.85,.10,.10, 0, GY+.35+j*.62, COURT+.44, ironMat);
-const castleLight=new THREE.PointLight(0xff8a32,28,14);
-castleLight.position.set(0,GY+1.6,COURT-.9);castle.add(castleLight);
+for(const x of [-1.85,1.85]) cTower(x,COURT,4.05,.68,bannerB);
+cBox(3.95,.58,1.3,0,GY+2.5,COURT,castleEdge);
+cBox(4.1,.10,.05,0,GY+2.82,COURT+.66,goldMat);
+const gArch=new THREE.Mesh(new THREE.TorusGeometry(1.02,.11,8,26,Math.PI),goldMat);
+gArch.position.set(0,GY+2.0,COURT+.54);castle.add(gArch);
+for(let i=-2;i<=2;i++) cBox(.10,2.0,.10, i*.46, GY+1.0, COURT+.46, ironMat);
+for(let j=0;j<3;j++)  cBox(2.05,.10,.10, 0, GY+.35+j*.64, COURT+.46, ironMat);
+const castleLight=new THREE.PointLight(0xff8a32,30,16);
+castleLight.position.set(0,GY+1.7,COURT-1.0);castle.add(castleLight);
 
-// --- مشاعل على أرض الساحة ---
+// --- مشاعل على أرض الساحة (موزّعة على المساحة الواسعة) ---
 const candleLights=[];
 function candle(x,z){
  const stand=new THREE.Mesh(new THREE.CylinderGeometry(.13,.22,.52,8),castleEdge);
@@ -376,12 +388,29 @@ function candle(x,z){
  const flame=new THREE.Mesh(new THREE.ConeGeometry(.08,.26,9),new THREE.MeshStandardMaterial({
   color:0xffd36a,emissive:0xff7a16,emissiveIntensity:3.4,roughness:.25}));
  flame.position.set(x,GY+1.14,z);castle.add(flame);
- const light=new THREE.PointLight(0xff9b3d,2.6,4.4);
+ const light=new THREE.PointLight(0xff9b3d,2.8,5);
  light.position.set(x,GY+1.2,z);castle.add(light);
  candleLights.push({flame,light,phase:Math.random()*6.28});
 }
-for(const [x,z] of [[-4.9,-4.9],[4.9,-4.9],[-4.9,4.9],[4.9,4.9],[-2.95,5.35],[2.95,5.35]]) candle(x,z);
+for(const [x,z] of [
+ [-7.6,-7.6],[7.6,-7.6],[-7.6,7.6],[7.6,7.6],
+ [-3.1,8.4],[3.1,8.4],
+ [-8.4,0],[8.4,0]
+]) candle(x,z);
 
+// --- قاعدة الرقعة ---
+const baseMat=new THREE.MeshStandardMaterial({color:0x123b30,metalness:.55,roughness:.32});
+const base=new THREE.Mesh(new THREE.BoxGeometry(8.85,.62,8.85),baseMat);
+base.position.y=-.39;base.castShadow=true;base.receiveShadow=true;scene.add(base);
+function trim(w,h,d,x,y,z){
+ const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),goldMat);
+ m.position.set(x,y,z);m.castShadow=true;scene.add(m);
+}
+trim(8.95,.07,.07,0,-.15,4.39);trim(8.95,.07,.07,0,-.15,-4.39);
+trim(.07,.07,8.8,4.39,-.15,0);trim(.07,.07,8.8,-4.39,-.15,0);
+
+const board=new THREE.Group();scene.add(board);
+const pieces=new THREE.Group();scene.add(pieces);
 
 function position(square){
  return {x:files.indexOf(square[0])-3.5,z:3.5-(Number(square[1])-1)};
@@ -403,7 +432,6 @@ function makeBoard(){
    board.add(mesh);squareMeshes.push(mesh);
   }
  }
- // أحجار صغيرة عند زوايا القاعدة
  for(const x of [-4.12,4.12])for(const z of [-4.12,4.12]){
   const gem=new THREE.Mesh(new THREE.OctahedronGeometry(.16),new THREE.MeshStandardMaterial({
    color:0x54ffd0,emissive:0x087c58,emissiveIntensity:.6,metalness:.3,roughness:.2}));
@@ -411,7 +439,6 @@ function makeBoard(){
  }
 }
 
-// خامات الفرق: الجليد فيروزي/سماوي، والنار قرمزي/بنفسجي
 function createMaterials(color){
  const ice=color==="w";
  return {
@@ -439,15 +466,12 @@ function spikeRow(g,mat,count,y,z,spread,size){
  }
 }
 function monster(type,color){
- const g=new THREE.Group(),m=createMaterials(color),ice=color==="w";
- // قاعدة ثقيلة وأقدام مدرعة
- const footMat=m.armor;
- orb(g,footMat,0,.17,0,.43,.16,.39);
+ const g=new THREE.Group(),m=createMaterials(color);
+ orb(g,m.armor,0,.17,0,.43,.16,.39);
  for(const x of [-.24,.24]){
   orb(g,m.skin,x,.22,.04,.17,.18,.22);
   for(let c=-1;c<=1;c++) horn(g,m.horn,x+c*.075,.12,.24,.052,Math.PI);
  }
- // جذع عضلي عريض
  orb(g,m.skin,0,.57,0,.39,.43,.32);
  orb(g,m.armor,0,.52,.20,.34,.29,.17);
  orb(g,m.accent,0,.58,.365,.15,.105,.035);
@@ -457,7 +481,6 @@ function monster(type,color){
   horn(g,m.horn,x*1.12,.27,.12,.085,Math.PI);
   horn(g,m.horn,x*1.18,.83,-.02,.16,x<0?-.5:.5);
  }
- // رأس بملامح أوضح: جبهة، فك، أنف وفم وأنياب
  orb(g,m.skin,0,1.02,.045,.35,.34,.31);
  orb(g,m.armor,0,.83,.245,.29,.17,.18);
  orb(g,m.dark,0,.91,.405,.19,.065,.035);
@@ -474,13 +497,11 @@ function monster(type,color){
   horn(g,m.horn,x,.91,.445,.043,Math.PI);
   horn(g,m.horn,x,.98,.445,.032,0);
  }
- // قرون خلفية وصفائح ظهرية
  horn(g,m.horn,-.24,1.30,-.08,.19,-.55);
  horn(g,m.horn,.24,1.30,-.08,.19,.55);
  for(let i=0;i<5;i++){
   horn(g,m.accent,(i-2)*.13,.82,-.29,.105,(i-2)*.14);
  }
- // اختلافات واضحة بين الملك والوزير والقلعة وبقية القطع
  if(type==="k"){
   orb(g,m.gold,0,1.36,0,.39,.105,.34);
   addMesh(g,new THREE.CylinderGeometry(.29,.39,.20,10),m.gold,0,1.48,0);
@@ -714,6 +735,44 @@ function onBoardTap(event){
  if(piece&&piece.color==="w"){selected=clicked;showMoves(selected);playSound()}
 }
 
+/* =========================
+   عدادات الكاميرا
+   ========================= */
+const camDistEl=document.getElementById("camDist");
+const camHeightEl=document.getElementById("camHeight");
+const camAngleEl=document.getElementById("camAngle");
+const camDistVal=document.getElementById("camDistVal");
+const camHeightVal=document.getElementById("camHeightVal");
+const camAngleVal=document.getElementById("camAngleVal");
+
+function readCam(save=true){
+ camState.radius=parseFloat(camDistEl.value);
+ camState.height=parseFloat(camHeightEl.value);
+ camState.angle=parseFloat(camAngleEl.value);
+ camDistVal.textContent=camState.radius.toFixed(1);
+ camHeightVal.textContent=camState.height.toFixed(1);
+ camAngleVal.textContent=Math.round(camState.angle)+"°";
+ applyCamera();
+ if(save){
+  try{localStorage.setItem("mc3d_cam",JSON.stringify({r:camState.radius,h:camState.height,a:camState.angle}))}catch(e){}
+ }
+}
+function loadCam(){
+ try{
+  const s=JSON.parse(localStorage.getItem("mc3d_cam")||"null");
+  if(s&&typeof s.r==="number"){
+   camDistEl.value=s.r;camHeightEl.value=s.h;camAngleEl.value=s.a;
+  }
+ }catch(e){}
+ readCam(false);
+}
+[camDistEl,camHeightEl,camAngleEl].forEach(el=>el.addEventListener("input",()=>readCam(true)));
+window.resetCamera=()=>{
+ camDistEl.value=17;camHeightEl.value=15;camAngleEl.value=38;
+ readCam(true);
+};
+loadCam();
+
 window.startGame=()=>{
  document.getElementById("menuScreen").style.display="none";
  document.getElementById("gameScreen").style.display="block";
@@ -762,22 +821,21 @@ renderer.domElement.addEventListener("pointerup",e=>{
  const dx=e.clientX-downX,dy=e.clientY-downY;
  if(Math.hypot(dx,dy)<8)onBoardTap(e);
 });
+
 function animate(){
- requestAnimationFrame(animate);controls.update();
+ requestAnimationFrame(animate);
  const t=performance.now()*.001;
- // حركة تنفس بسيطة للوحوش من دون تحريك الرقعة
  for(const p of pieceMeshes){
   p.position.y=.105+Math.sin(t*2.1+p.position.x*2+p.position.z)*.018;
   if(p.userData.aura)p.userData.aura.rotation.z=t*.35;
  }
- // ارتعاش ألسنة اللهب في مشاعل الساحة
  for(const c of candleLights){
   const f=1+Math.sin(t*6.5+c.phase)*.2+Math.sin(t*11+c.phase*1.7)*.09;
-  c.light.intensity=2.6*f;
+  c.light.intensity=2.8*f;
   c.flame.scale.set(.92+.1*f,.9+.16*f,.92+.1*f);
  }
  greenLight.intensity=62+Math.sin(t*1.4)*8;
- castleLight.intensity=26+Math.sin(t*2.6)*4;
+ castleLight.intensity=28+Math.sin(t*2.6)*4;
  renderer.render(scene,camera);
 }
 resize();animate();
