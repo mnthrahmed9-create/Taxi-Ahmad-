@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الوحش الصخري الضخم</title>
+    <title>الوحش الصخري - الزعيم المدرع</title>
     <style>
         body { margin: 0; overflow: hidden; background-color: #111; font-family: sans-serif; }
         canvas { display: block; }
@@ -11,12 +11,12 @@
             position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
             color: #00aaff; background: rgba(0,0,0,0.7); padding: 10px 20px;
             border-radius: 8px; border: 1px solid #00aaff; z-index: 10; text-align: center;
-            pointer-events: none;
+            pointer-events: none; font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <div id="info">👾 الوحش الصخري جاهز (بدون ملفات خارجية)</div>
+    <div id="info">⚔️ الزعيم الصخري المدرع جاهز (درع + خوذة)</div>
 
     <script type="importmap">
         {
@@ -31,13 +31,13 @@
         import * as THREE from 'three';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-        // 1. إعداد المشهد والكاميرا
+        // 1. إعداد المشهد
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x151515);
         scene.fog = new THREE.Fog(0x151515, 20, 60);
 
         const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 8, 18); // كاميرا ترى الوحش كاملاً
+        camera.position.set(0, 8, 20);
 
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
@@ -48,14 +48,14 @@
 
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
-        controls.target.set(0, 3, 0);
+        controls.target.set(0, 3.5, 0);
         controls.maxPolarAngle = Math.PI / 2 - 0.05;
 
         // 2. الإضاءة
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
         scene.add(ambientLight);
 
-        const dirLight = new THREE.DirectionalLight(0xffffff, 2);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 2.5);
         dirLight.position.set(10, 20, 10);
         dirLight.castShadow = true;
         dirLight.shadow.mapSize.width = 2048;
@@ -66,9 +66,8 @@
         dirLight.shadow.camera.bottom = -15;
         scene.add(dirLight);
 
-        // إضاءة زرقاء خفية للوحش
-        const blueLight = new THREE.PointLight(0x0088ff, 20, 15);
-        blueLight.position.set(0, 5, 2);
+        const blueLight = new THREE.PointLight(0x0088ff, 25, 15);
+        blueLight.position.set(0, 5, 3);
         scene.add(blueLight);
 
         // 3. بناء رقعة الشطرنج
@@ -93,53 +92,55 @@
         scene.add(boardGroup);
 
         // ==========================================
-        // 4. برمجة الوحش الصخري (من الصفر)
+        // 4. برمجة الوحش الصخري (مع الدرع والخوذة)
         // ==========================================
         const monster = new THREE.Group();
 
-        // خامات الوحش
+        // --- الخامات (Materials) ---
+        // الصخور العادية
         const rockMat = new THREE.MeshStandardMaterial({ 
-            color: 0x556677, 
-            roughness: 0.9, 
-            flatShading: true // هذا يجعل شكله حاد وصخري
+            color: 0x556677, roughness: 0.9, flatShading: true 
         });
-        
+        // الصخور الداكنة
         const darkRockMat = new THREE.MeshStandardMaterial({ 
-            color: 0x334455, 
-            roughness: 1.0, 
-            flatShading: true 
+            color: 0x334455, roughness: 1.0, flatShading: true 
         });
-
+        // المعدن (للدرع والخوذة)
+        const armorMat = new THREE.MeshStandardMaterial({ 
+            color: 0x7a8b9e, metalness: 0.8, roughness: 0.3, flatShading: true 
+        });
+        // حواف ذهبية للزينة
+        const goldMat = new THREE.MeshStandardMaterial({ 
+            color: 0xd4af37, metalness: 0.9, roughness: 0.2 
+        });
+        // البلورات الزرقاء
         const crystalMat = new THREE.MeshStandardMaterial({ 
-            color: 0x00aaff, 
-            emissive: 0x0055aa,
-            roughness: 0.2,
-            flatShading: true 
+            color: 0x00aaff, emissive: 0x0055aa, roughness: 0.2, flatShading: true 
         });
-
+        // العيون
         const eyeMat = new THREE.MeshBasicMaterial({ color: 0x00ffff });
 
-        // دالة مساعدة لصنع الصخور
-        function createRock(radius, colorMat, detail = 0) {
-            const geo = new THREE.DodecahedronGeometry(radius, detail);
+        // دالة لصنع الصخور
+        function createRock(radius, colorMat) {
+            const geo = new THREE.DodecahedronGeometry(radius, 0);
             const rock = new THREE.Mesh(geo, colorMat);
             rock.castShadow = true;
             rock.receiveShadow = true;
             return rock;
         }
 
-        // --- الجسم (ضخم وعريض) ---
+        // --- 1. الجسم الأساسي ---
         const torso = createRock(2.5, rockMat);
         torso.scale.set(1.2, 1, 0.9);
         torso.position.y = 3;
         monster.add(torso);
 
-        // --- الرأس ---
+        // --- 2. الرأس ---
         const head = createRock(1.2, darkRockMat);
         head.position.set(0, 5.5, 0.5);
         monster.add(head);
 
-        // --- العيون المتوهجة ---
+        // --- 3. العيون ---
         const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.2, 8, 8), eyeMat);
         eyeL.position.set(-0.5, 5.7, 1.6);
         monster.add(eyeL);
@@ -148,39 +149,26 @@
         eyeR.position.set(0.5, 5.7, 1.6);
         monster.add(eyeR);
 
-        // --- الأكتاف والأذرع ---
-        // الكتف الأيسر
-        const shoulderL = createRock(1.2, rockMat);
-        shoulderL.position.set(-2.5, 4.5, 0);
-        monster.add(shoulderL);
-
+        // --- 4. الأكتاف والأذرع ---
         const armL = createRock(1.0, darkRockMat);
         armL.position.set(-3.0, 2.5, 0.5);
-        armL.scale.set(1, 1.5, 1);
+        armL.scale.set(1, 1.6, 1);
         monster.add(armL);
-
-        // الكتف الأيمن
-        const shoulderR = createRock(1.2, rockMat);
-        shoulderR.position.set(2.5, 4.5, 0);
-        monster.add(shoulderR);
 
         const armR = createRock(1.0, darkRockMat);
         armR.position.set(3.0, 2.5, 0.5);
-        armR.scale.set(1, 1.5, 1);
+        armR.scale.set(1, 1.6, 1);
         monster.add(armR);
 
-        // --- الأشواك الزرقاء (البلورات) على الظهر والرأس ---
-        const spikeGeo = new THREE.ConeGeometry(0.4, 1.5, 4); // شكل هرمي حاد
-        
+        // --- 5. الأشواك الزرقاء على الظهر ---
+        const spikeGeo = new THREE.ConeGeometry(0.4, 1.8, 4);
         const spikePositions = [
-            { x: 0, y: 7, z: -0.5, rotX: -0.2 }, // فوق الرأس
-            { x: -1, y: 6.5, z: -0.5, rotX: -0.5 },
-            { x: 1, y: 6.5, z: -0.5, rotX: -0.5 },
-            { x: -1.5, y: 5.5, z: -1, rotX: -0.8 },
-            { x: 1.5, y: 5.5, z: -1, rotX: -0.8 },
-            { x: 0, y: 5, z: -2, rotX: -1.2 } // على الظهر
+            { x: -1, y: 6, z: -0.8, rotX: -0.5 },
+            { x: 1, y: 6, z: -0.8, rotX: -0.5 },
+            { x: -1.5, y: 5, z: -1.2, rotX: -0.8 },
+            { x: 1.5, y: 5, z: -1.2, rotX: -0.8 },
+            { x: 0, y: 4.5, z: -2, rotX: -1.2 } 
         ];
-
         spikePositions.forEach(pos => {
             const spike = new THREE.Mesh(spikeGeo, crystalMat);
             spike.position.set(pos.x, pos.y, pos.z);
@@ -189,11 +177,86 @@
             monster.add(spike);
         });
 
+        // ==========================================
+        // 6. إضافة الدرع (Armor)
+        // ==========================================
+        // درع الصدر (معدني يغطي البطن)
+        const chestPlateGeo = new THREE.CylinderGeometry(2.2, 2.6, 2, 8, 1, false, 0, Math.PI);
+        const chestPlate = new THREE.Mesh(chestPlateGeo, armorMat);
+        chestPlate.rotation.y = Math.PI; // توجيه الدرع للأمام
+        chestPlate.position.set(0, 3, 0.8);
+        chestPlate.castShadow = true;
+        monster.add(chestPlate);
+
+        // زخرفة ذهبية على الصدر
+        const chestEmblem = new THREE.Mesh(new THREE.OctahedronGeometry(0.4), goldMat);
+        chestEmblem.position.set(0, 3.5, 2.2);
+        monster.add(chestEmblem);
+
+        // أكتاف مدرعة (Pauldrons)
+        const shoulderL = new THREE.Mesh(new THREE.DodecahedronGeometry(1.4, 0), armorMat);
+        shoulderL.position.set(-2.6, 4.5, 0);
+        shoulderL.scale.set(1, 0.8, 1);
+        shoulderL.castShadow = true;
+        monster.add(shoulderL);
+
+        const shoulderR = new THREE.Mesh(new THREE.DodecahedronGeometry(1.4, 0), armorMat);
+        shoulderR.position.set(2.6, 4.5, 0);
+        shoulderR.scale.set(1, 0.8, 1);
+        shoulderR.castShadow = true;
+        monster.add(shoulderR);
+
+        // أساور معدنية على الأذرع (Gauntlets)
+        const gauntletL = new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.2, 0.8, 6), armorMat);
+        gauntletL.position.set(-3.0, 2.5, 0.5);
+        gauntletL.rotation.z = Math.PI / 8;
+        monster.add(gauntletL);
+
+        const gauntletR = new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.2, 0.8, 6), armorMat);
+        gauntletR.position.set(3.0, 2.5, 0.5);
+        gauntletR.rotation.z = -Math.PI / 8;
+        monster.add(gauntletR);
+
+        // ==========================================
+        // 7. إضافة الخوذة (Helmet)
+        // ==========================================
+        // القبة العلوية للخوذة
+        const helmetDome = new THREE.Mesh(new THREE.SphereGeometry(1.35, 8, 8, 0, Math.PI * 2, 0, Math.PI / 2), armorMat);
+        helmetDome.position.set(0, 5.7, 0.5);
+        helmetDome.castShadow = true;
+        monster.add(helmetDome);
+
+        // واقي الوجه (يغطي الأنف ويترك العيون مكشوفة)
+        const visor = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.6, 0.4), darkRockMat);
+        visor.position.set(0, 5.3, 1.5);
+        monster.add(visor);
+
+        // حواف الخوذة (ذهبية)
+        const helmetBrim = new THREE.Mesh(new THREE.TorusGeometry(1.35, 0.1, 8, 8), goldMat);
+        helmetBrim.rotation.x = Math.PI / 2;
+        helmetBrim.position.set(0, 5.7, 0.5);
+        monster.add(helmetBrim);
+
+        // قرون الخوذة (يمين ويسار)
+        const hornGeo = new THREE.ConeGeometry(0.25, 1.8, 6);
+        
+        const hornL = new THREE.Mesh(hornGeo, armorMat);
+        hornL.position.set(-1.2, 6.5, 0.5);
+        hornL.rotation.z = Math.PI / 3; // ميلان للخارج
+        hornL.rotation.x = -Math.PI / 8;
+        monster.add(hornL);
+
+        const hornR = new THREE.Mesh(hornGeo, armorMat);
+        hornR.position.set(1.2, 6.5, 0.5);
+        hornR.rotation.z = -Math.PI / 3;
+        hornR.rotation.x = -Math.PI / 8;
+        monster.add(hornR);
+
         // إضافة الوحش للمشهد
         scene.add(monster);
 
         // ==========================================
-        // 5. الحركة (أنيميشن)
+        // 8. الحركة (أنيميشن)
         // ==========================================
         const clock = new THREE.Clock();
 
@@ -202,10 +265,10 @@
             const time = clock.getElapsedTime();
 
             // تنفس الوحش (صعود ونزول خفيف)
-            monster.position.y = Math.sin(time * 1.5) * 0.1;
+            monster.position.y = Math.sin(time * 1.5) * 0.15;
             
-            // اهتزاز الأشواك الزرقاء (توهج)
-            blueLight.intensity = 15 + Math.sin(time * 5) * 5;
+            // اهتزاز الإضاءة الزرقاء
+            blueLight.intensity = 20 + Math.sin(time * 4) * 8;
 
             controls.update();
             renderer.render(scene, camera);
