@@ -2,20 +2,49 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>عرض الوحش 3D</title>
     <style>
-        body { margin: 0; overflow: hidden; background-color: #222; }
+        body { margin: 0; overflow: hidden; background-color: #1a1a1a; font-family: sans-serif; }
         canvas { display: block; }
+        /* شاشة التحميل */
+        #loading {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 20px;
+            z-index: 10;
+            text-align: center;
+            background: rgba(0,0,0,0.7);
+            padding: 20px;
+            border-radius: 10px;
+        }
+        #error-msg {
+            position: absolute;
+            top: 10px; left: 50%;
+            transform: translateX(-50%);
+            color: #ff5555;
+            background: #330000;
+            padding: 10px 20px;
+            border-radius: 5px;
+            display: none;
+            z-index: 20;
+        }
     </style>
 </head>
 <body>
 
-    <!-- استدعاء مكتبة Three.js وملحقاتها -->
+    <!-- رسائل مساعدة للمستخدم -->
+    <div id="loading">جاري تحميل الوحش... ⏳</div>
+    <div id="error-msg">❌ خطأ: لم يتم العثور على ملف monster.glb. تأكد من رفعه!</div>
+
+    <!-- استدعاء مكتبة Three.js من سيرفر jsDelivr (أكثر استقراراً من unpkg) -->
     <script type="importmap">
         {
             "imports": {
-                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+                "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
             }
         }
     </script>
@@ -25,65 +54,81 @@
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-        // 1. إعداد المشهد (Scene)
+        // 1. إعداد المشهد
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x222222); // لون الخلفية غامق
+        scene.background = new THREE.Color(0x1a1a1a); // خلفية داكنة
+        scene.fog = new THREE.Fog(0x1a1a1a, 10, 50); // ضباب خفيف لإعطاء جمالية
 
-        // 2. إعداد الكاميرا (Camera)
+        // 2. إعداد الكاميرا
         const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 5, 10); // تحديد موقع الكاميرا
+        camera.position.set(0, 3, 8); // موقع الكاميرا (X, Y, Z)
 
         // 3. إعداد العارض (Renderer)
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.shadowMap.enabled = true; // تشغيل الظلال
+        renderer.setPixelRatio(window.devicePixelRatio); // لجعل الصورة أوضح على الجوال
+        renderer.shadowMap.enabled = true; // تفعيل الظلال
+        renderer.outputColorSpace = THREE.SRGBColorSpace; // ألوان أفضل
         document.body.appendChild(renderer.domElement);
 
-        // 4. إضافة الإضاءة (Lighting)
+        // 4. إضافة الإضاءة
         const ambientLight = new THREE.AmbientLight(0xffffff, 1.5); // إضاءة عامة
         scene.add(ambientLight);
 
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 2); // إضاءة موجهة للظل
-        directionalLight.position.set(5, 10, 5);
-        directionalLight.castShadow = true;
-        scene.add(directionalLight);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 2);
+        dirLight.position.set(5, 10, 5);
+        dirLight.castShadow = true;
+        scene.add(dirLight);
 
-        // 5. التحكم بالكاميرا (تدوير، تكبير، تحريك)
+        // 5. التحكم بالكاميرا (تحريك وتكبير)
         const controls = new OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true; // حركة سلسة
+        controls.enableDamping = true;
+        controls.target.set(0, 1, 0); // نقطة التركيز (على صدر الوحش)
 
-        // 6. تحميل مجسم الوحش (ملف GLB)
+        // 6. تحميل ملف الوحش
         const loader = new GLTFLoader();
-        // ضع اسم ملف الوحش هنا (يجب أن يكون في نفس المجلد)
-        loader.load('monster.glb', function (gltf) {
-            const model = gltf.scene;
-            
-            // تصغير أو تكبير الوحش ليناسب الشاشة (عدل الرقم حسب الحاجة)
-            model.scale.set(1, 1, 1); 
-            
-            // تفعيل الظلال
-            model.traverse((child) => {
-                if (child.isMesh) {
-                    child.castShadow = true;
-                    child.receiveShadow = true;
-                }
-            });
+        
+        // ملاحظة: تأكد أن اسم الملف هنا يطابق تماماً اسم الملف المرفوع على GitHub
+        loader.load(
+            './monster.glb', 
+            function (gltf) {
+                // عند النجاح
+                const model = gltf.scene;
+                
+                // إذا كان الوحش صغيراً أو كبيراً جداً، يمكنك تعديل الحجم من هنا:
+                // model.scale.set(1.5, 1.5, 1.5); 
 
-            scene.add(model);
-        }, undefined, function (error) {
-            console.error('حدث خطأ في تحميل الملف:', error);
-        });
+                model.traverse((child) => {
+                    if (child.isMesh) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+                    }
+                });
 
-        // 7. حركة الكاميرا (تحديث مستمر)
+                scene.add(model);
+                document.getElementById('loading').style.display = 'none'; // إخفاء رسالة التحميل
+            },
+            function (xhr) {
+                // نسبة التحميل (تظهر في الكونسول)
+                console.log((xhr.loaded / xhr.total * 100) + '% تم التحميل');
+            },
+            function (error) {
+                // عند الفشل
+                console.error('خطأ في التحميل:', error);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error-msg').style.display = 'block';
+            }
+        );
+
+        // 7. حركة الكاميرا
         function animate() {
             requestAnimationFrame(animate);
-            controls.update(); // تحديث التحكم
+            controls.update();
             renderer.render(scene, camera);
         }
-        
         animate();
 
-        // تعديل حجم الشاشة تلقائياً
+        // تعديل الأبعاد عند تغيير حجم الشاشة
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
