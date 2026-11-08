@@ -3,43 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>عرض الوحش 3D</title>
+    <title>الوحش وقاعدة الشطرنج 3D</title>
     <style>
-        body { margin: 0; overflow: hidden; background-color: #1a1a1a; font-family: sans-serif; }
+        body { margin: 0; overflow: hidden; background-color: #111; font-family: sans-serif; }
         canvas { display: block; }
-        /* شاشة التحميل */
         #loading {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            font-size: 20px;
-            z-index: 10;
-            text-align: center;
-            background: rgba(0,0,0,0.7);
-            padding: 20px;
-            border-radius: 10px;
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            color: white; font-size: 20px; z-index: 10; text-align: center;
+            background: rgba(0,0,0,0.8); padding: 20px; border-radius: 10px;
+            border: 1px solid #444;
         }
         #error-msg {
-            position: absolute;
-            top: 10px; left: 50%;
-            transform: translateX(-50%);
-            color: #ff5555;
-            background: #330000;
-            padding: 10px 20px;
-            border-radius: 5px;
-            display: none;
-            z-index: 20;
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+            color: #ff8888; background: #330000; padding: 10px 20px; border-radius: 5px;
+            display: none; z-index: 20; text-align: center; width: 80%;
         }
     </style>
 </head>
 <body>
 
-    <!-- رسائل مساعدة للمستخدم -->
-    <div id="loading">جاري تحميل الوحش... ⏳</div>
-    <div id="error-msg">❌ خطأ: لم يتم العثور على ملف monster.glb. تأكد من رفعه!</div>
+    <div id="loading">جاري تجهيز المشهد... ⏳<br><small style="color:#aaa;">(إذا لم يظهر الوحش، فملف glb غير موجود)</small></div>
+    <div id="error-msg">❌ لم يتم العثور على ملف monster.glb.<br>تم عرض مجسم مؤقت بدلاً منه.</div>
 
-    <!-- استدعاء مكتبة Three.js من سيرفر jsDelivr (أكثر استقراراً من unpkg) -->
     <script type="importmap">
         {
             "imports": {
@@ -56,47 +41,109 @@
 
         // 1. إعداد المشهد
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x1a1a1a); // خلفية داكنة
-        scene.fog = new THREE.Fog(0x1a1a1a, 10, 50); // ضباب خفيف لإعطاء جمالية
+        scene.background = new THREE.Color(0x111111);
+        scene.fog = new THREE.Fog(0x111111, 15, 60);
 
         // 2. إعداد الكاميرا
         const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 3, 8); // موقع الكاميرا (X, Y, Z)
+        camera.position.set(0, 8, 15); // رفعنا الكاميرا قليلاً لنرى الشطرنج
 
-        // 3. إعداد العارض (Renderer)
+        // 3. إعداد العارض
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(window.devicePixelRatio); // لجعل الصورة أوضح على الجوال
-        renderer.shadowMap.enabled = true; // تفعيل الظلال
-        renderer.outputColorSpace = THREE.SRGBColorSpace; // ألوان أفضل
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         document.body.appendChild(renderer.domElement);
 
-        // 4. إضافة الإضاءة
-        const ambientLight = new THREE.AmbientLight(0xffffff, 1.5); // إضاءة عامة
+        // 4. الإضاءة
+        const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
         scene.add(ambientLight);
 
-        const dirLight = new THREE.DirectionalLight(0xffffff, 2);
-        dirLight.position.set(5, 10, 5);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 2.5);
+        dirLight.position.set(10, 20, 10);
         dirLight.castShadow = true;
+        dirLight.shadow.mapSize.width = 2048;
+        dirLight.shadow.mapSize.height = 2048;
+        dirLight.shadow.camera.left = -15;
+        dirLight.shadow.camera.right = 15;
+        dirLight.shadow.camera.top = 15;
+        dirLight.shadow.camera.bottom = -15;
         scene.add(dirLight);
 
-        // 5. التحكم بالكاميرا (تحريك وتكبير)
+        // 5. التحكم بالكاميرا
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
-        controls.target.set(0, 1, 0); // نقطة التركيز (على صدر الوحش)
+        controls.target.set(0, 2, 0); // التركيز على منتصف المشهد
+        controls.maxPolarAngle = Math.PI / 2 - 0.05; // منع النزول تحت الأرض
 
-        // 6. تحميل ملف الوحش
+        // ==========================================
+        // 6. بناء قاعدة الشطرنج
+        // ==========================================
+        const boardGroup = new THREE.Group();
+        const squareSize = 2; // حجم المربع الواحد
+        const boardSize = 8;  // 8x8
+        const offset = (boardSize * squareSize) / 2 - (squareSize / 2);
+
+        const whiteMaterial = new THREE.MeshStandardMaterial({ color: 0xcccccc, roughness: 0.3, metalness: 0.1 });
+        const blackMaterial = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.8, metalness: 0.2 });
+
+        for (let i = 0; i < boardSize; i++) {
+            for (let j = 0; j < boardSize; j++) {
+                const isWhite = (i + j) % 2 === 0;
+                const geometry = new THREE.BoxGeometry(squareSize, 0.5, squareSize); // سمك القاعدة 0.5
+                const material = isWhite ? whiteMaterial : blackMaterial;
+                
+                const square = new THREE.Mesh(geometry, material);
+                square.position.set(
+                    (i * squareSize) - offset, 
+                    -0.25, // النزول قليلاً ليكون السطح العلوي عند y=0
+                    (j * squareSize) - offset
+                );
+                square.receiveShadow = true;
+                square.castShadow = true;
+                boardGroup.add(square);
+            }
+        }
+        scene.add(boardGroup);
+
+        // ==========================================
+        // 7. المجسم المؤقت (في حال لم يتحمل الوحش)
+        // ==========================================
+        const placeholderGroup = new THREE.Group();
+        // شكل مؤقت (كبسولة)
+        const placeholderGeo = new THREE.CapsuleGeometry(1, 2, 4, 16);
+        const placeholderMat = new THREE.MeshStandardMaterial({ 
+            color: 0x3b82f6, 
+            wireframe: true, 
+            emissive: 0x1e3a8a 
+        });
+        const placeholder = new THREE.Mesh(placeholderGeo, placeholderMat);
+        placeholder.position.y = 2; // ليطفو فوق الشطرنج
+        placeholder.castShadow = true;
+        placeholderGroup.add(placeholder);
+        scene.add(placeholderGroup);
+
+        // ==========================================
+        // 8. تحميل ملف الوحش
+        // ==========================================
         const loader = new GLTFLoader();
         
-        // ملاحظة: تأكد أن اسم الملف هنا يطابق تماماً اسم الملف المرفوع على GitHub
         loader.load(
             './monster.glb', 
             function (gltf) {
-                // عند النجاح
+                // 1. إخفاء المجسم المؤقت
+                scene.remove(placeholderGroup);
+                document.getElementById('loading').style.display = 'none';
+                
                 const model = gltf.scene;
                 
-                // إذا كان الوحش صغيراً أو كبيراً جداً، يمكنك تعديل الحجم من هنا:
-                // model.scale.set(1.5, 1.5, 1.5); 
+                // --- تعديل حجم وموقع الوحش ---
+                // إذا كان الوحش كبيراً جداً أو صغيراً، يمكنك تغيير الرقم هنا:
+                // model.scale.set(0.5, 0.5, 0.5); 
+                
+                // وضع الوحش فوق الشطرنج مباشرة
+                model.position.y = 0; 
 
                 model.traverse((child) => {
                     if (child.isMesh) {
@@ -106,29 +153,34 @@
                 });
 
                 scene.add(model);
-                document.getElementById('loading').style.display = 'none'; // إخفاء رسالة التحميل
             },
             function (xhr) {
-                // نسبة التحميل (تظهر في الكونسول)
                 console.log((xhr.loaded / xhr.total * 100) + '% تم التحميل');
             },
             function (error) {
-                // عند الفشل
                 console.error('خطأ في التحميل:', error);
+                // إذا فشل التحميل، نبقي المجسم المؤقت ونظهر رسالة الخطأ
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('error-msg').style.display = 'block';
             }
         );
 
-        // 7. حركة الكاميرا
+        // 9. حركة المشهد
         function animate() {
             requestAnimationFrame(animate);
+            
+            // تدوير المجسم المؤقت لجعله يبدو حياً
+            if (placeholderGroup.parent) {
+                placeholder.rotation.y += 0.01;
+                placeholder.position.y = 2 + Math.sin(Date.now() * 0.002) * 0.5;
+            }
+
             controls.update();
             renderer.render(scene, camera);
         }
         animate();
 
-        // تعديل الأبعاد عند تغيير حجم الشاشة
+        // 10. تعديل الشاشة
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
