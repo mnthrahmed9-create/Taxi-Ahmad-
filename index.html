@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>🐉 MONSTER CHESS 3D - Hellfire Edition</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+*{box-sizing:border-box}
+
+body{
+ margin:0;
+ background:radial-gradient(circle at 50% 20%, #ff7b00 0%, #d93600 15%, #4a0b00 40%, #110200 100%);
+ color:white;
+ font-family:Cairo,Arial,sans-serif;
+ text-align:center;
+ min-height:100vh;
+ overflow:hidden;
+}
+
+body::before{
+ content:"";
+ position:absolute;
+ bottom:0;left:0;right:0;
+ height:50vh;
+ background:linear-gradient(to top,#050100 0%,transparent 100%);
+ z-index:-1;
+ pointer-events:none;
+}
+
+header{
+ padding:15px 10px;
+ background:linear-gradient(180deg,rgba(0,0,0,.85),transparent);
+ position:fixed;
+ top:0;left:0;right:0;
+ z-index:15;
+ pointer-events:none;
+ transition:opacity .3s;
+}
+body.game-on header{opacity:0;pointer-events:none;}
+
+h1{
+ margin:0;
+ font-size:clamp(23px,6vw,38px);
+ color:#ffd66b;
+ text-shadow:0 0 20px #ff4500,0 0 40px #ff0000;
+}
+
+.subtitle{color:#ffb38a;font-size:13px}
+
+.section{
+ width:min(95%,850px);
+ margin:22px auto;
+ padding:20px 14px;
+ border:1px solid #ff450066;
+ border-radius:22px;
+ background:rgba(20,5,0,.85);
+ box-shadow:0 10px 35px #000,inset 0 0 20px #ff450022;
+ backdrop-filter:blur(5px);
+}
+
+.section-title{
+ color:#ffd66b;
+ font-size:18px;
+ font-weight:900;
+ margin:10px 0 18px;
+ text-shadow:0 0 10px #ff4500;
+}
+
+.buttons{
+ display:flex;
+ flex-wrap:wrap;
+ justify-content:center;
+ gap:10px;
+}
+
+.btn{
+ position:relative;
+ overflow:hidden;
+ cursor:pointer;
+ border:2px solid #f3d06e;
+ border-radius:13px;
+ min-width:135px;
+ padding:12px 18px;
+ color:white;
+ font-family:inherit;
+ font-weight:900;
+ font-size:15px;
+ text-shadow:0 2px 4px #0009;
+ box-shadow:inset 0 3px 5px #ffffff66,inset 0 -5px 8px #0007,0 6px 12px #0008;
+ transition:.15s;
+}
+.btn:active{transform:translateY(4px);box-shadow:inset 0 3px 8px #0009}
+
+.gold{background:linear-gradient(#ffe477,#c18b16,#80530a);color:#402500}
+.green{background:linear-gradient(#42e99a,#17945b,#07502f)}
+.purple{background:linear-gradient(#c37ad7,#7435a4,#38145d)}
+.blue{background:linear-gradient(#55baff,#2377b9,#12416e)}
+.red{background:linear-gradient(#ff6868,#c52727,#750c0c)}
+.orange{background:linear-gradient(#ffb34a,#ce600e,#753000)}
+
+.large{width:min(90%,340px);padding:18px;font-size:22px;border-radius:35px}
+.small{min-width:105px;font-size:13px;padding:9px}
+
+#menuScreen{position:relative;z-index:5;padding-top:100px;max-height:100vh;overflow-y:auto;padding-bottom:40px}
+
+#gameScreen{display:none;position:fixed;inset:0;z-index:20}
+
+#game{
+ width:100%;
+ height:100vh;
+ position:absolute;
+ top:0;left:0;
+ z-index:1;
+ touch-action:none;
+}
+#game canvas{display:block}
+
+.game-panel{
+ position:fixed;
+ bottom:0;left:0;right:0;
+ max-width:820px;
+ margin:0 auto;
+ padding:10px 12px 14px;
+ background:rgba(15,5,0,.9);
+ border-top:2px solid #ff4500;
+ border-radius:20px 20px 0 0;
+ box-shadow:0 -8px 30px #000;
+ z-index:10;
+ backdrop-filter:blur(8px);
+}
+
+#status{
+ color:#ffb38a;
+ font-weight:900;
+ font-size:16px;
+ margin:8px 0;
+ text-shadow:0 0 10px #ff4500;
+ min-height:24px;
+}
+
+#moves{
+ max-height:45px;
+ overflow:auto;
+ color:#ddd;
+ font-size:12px;
+ overflow-wrap:anywhere;
+ margin-top:8px;
+ padding:6px;
+ background:rgba(0,0,0,.4);
+ border-radius:8px;
+}
+
+select{
+ background:#2a0a00;
+ color:white;
+ border:1px solid #d4af37;
+ border-radius:10px;
+ padding:9px;
+ font-family:inherit;
+ font-weight:bold;
+}
+
+#promotion{
+ display:none;
+ position:fixed;
+ left:50%;
+ bottom:200px;
+ transform:translateX(-50%);
+ padding:16px;
+ background:linear-gradient(145deg,#2a0a00,#100400);
+ border:2px solid #d4af37;
+ border-radius:16px;
+ z-index:25;
+ box-shadow:0 0 40px #ff4500;
+ min-width:280px;
+}
+
+#settings{
+ display:none;
+ position:fixed;
+ inset:0;
+ z-index:30;
+ background:#000b;
+ justify-content:center;
+ align-items:center;
+ padding:15px;
+}
+
+.modal{
+ width:min(95%,400px);
+ background:linear-gradient(145deg,#3a1500,#1a0600);
+ border:2px solid #d4af37;
+ border-radius:20px;
+ padding:22px;
+ box-shadow:0 0 35px #000;
+}
+
+.setting-row{
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ padding:12px 0;
+ border-bottom:1px solid #ffffff22;
+}
+
+input[type=checkbox]{width:22px;height:22px;accent-color:#d4af37}
+
+#notice{color:#ffd66b;min-height:25px;font-size:13px;margin:8px}
+
+/* ===== شاشة الانترو KOKTON ===== */
+#splash{
+ position:fixed;inset:0;z-index:9999;
+ background:#000;
+ display:flex;flex-direction:column;
+ justify-content:center;align-items:center;
+ overflow:hidden;
+ opacity:1;
+ transition:opacity 1s ease;
+}
+#splash.hide{opacity:0;pointer-events:none}
+
+.splash-vignette{
+ position:absolute;inset:0;
+ background:radial-gradient(circle at center,#3a1200 0%,#0a0300 55%,#000 100%);
+}
+
+.splash-rays{
+ position:absolute;
+ width:150vmax;height:150vmax;
+ background:conic-gradient(from 0deg,
+   transparent 0deg,rgba(255,69,0,.15) 15deg,transparent 30deg,
+   transparent 90deg,rgba(255,69,0,.1) 105deg,transparent 120deg,
+   transparent 180deg,rgba(255,69,0,.15) 195deg,transparent 210deg,
+   transparent 270deg,rgba(255,69,0,.1) 285deg,transparent 300deg);
+ opacity:0;
+ animation:raysIn 1.6s ease .3s forwards,spin 22s linear infinite;
+}
+@keyframes raysIn{to{opacity:1}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.company-wrap{position:relative;z-index:2;display:flex;justify-content:center}
+
+.company{
+ margin:0;
+ font-size:clamp(48px,15vw,120px);
+ font-weight:900;
+ letter-spacing:16px;
+ padding:0 10px;
+ background:linear-gradient(180deg,#fff8d8 0%,#ffd66b 30%,#8a5c04 50%,#ffd66b 70%,#fff8d8 100%);
+ -webkit-background-clip:text;background-clip:text;
+ -webkit-text-fill-color:transparent;
+ color:transparent;
+ opacity:0;transform:scale(.4);
+ filter:blur(14px) drop-shadow(0 0 30px #ffba35aa) drop-shadow(0 0 60px #d4af3766);
+ animation:companyIn 1.4s cubic-bezier(.2,.9,.3,1.1) .2s forwards;
+}
+@keyframes companyIn{
+ 0%{opacity:0;transform:scale(.4);filter:blur(14px)}
+ 60%{opacity:1;transform:scale(1.08);filter:blur(0)}
+ 100%{opacity:1;transform:scale(1);filter:blur(0)}
+}
+
+.company-shine{
+ position:absolute;top:0;left:-100%;
+ width:55%;height:100%;
+ background:linear-gradient(110deg,transparent 20%,rgba(255,255,255,.9) 50%,transparent 80%);
+ mix-blend-mode:overlay;
+ pointer-events:none;
+ animation:shine 2.6s ease 1.6s infinite;
+}
+@keyframes shine{0%{left:-100%}40%{left:150%}100%{left:150%}}
+
+.tagline{
+ margin-top:22px;color:#e8d4ff;
+ font-size:clamp(11px,3vw,16px);
+ font-weight:700;letter-spacing:14px;
+ opacity:0;transform:translateY(10px);
+ z-index:2;
+ animation:tagIn .9s ease 1.4s forwards;
+}
+@keyframes tagIn{to{opacity:1;transform:translateY(0)}}
+
+.splash-loader{
+ margin-top:38px;width:180px;height:3px;
+ background:rgba(255,255,255,.1);
+ border-radius:2px;overflow:hidden;
+ z-index:2;opacity:0;
+ animation:tagIn .6s ease 1.8s forwards;
+}
+.splash-loader>div{
+ width:0;height:100%;
+ background:linear-gradient(90deg,#ffd66b,#fff8d8);
+ box-shadow:0 0 10px #ffd66b;
+ animation:load 1.4s ease 1.9s forwards;
+}
+@keyframes load{to{width:100%}}
+</style>
+</head>
+<body>
+
+<!-- شاشة الانترو -->
+<div id="splash">
+  <div class="splash-vignette"></div>
+  <div class="splash-rays"></div>
+  <div class="company-wrap">
+    <div class="company">KOKTON</div>
+    <div class="company-shine"></div>
+  </div>
+  <div class="tagline">PRESENTS</div>
+  <div class="splash-loader"><div></div></div>
+</div>
+
+<!-- الهيدر -->
+<header>
+  <h1>🐉 MONSTER CHESS 3D</h1>
+  <div class="subtitle">مَمْلَكَةُ الوُحُوشِ الأُسْطُورِيَّة ⚔️</div>
+</header>
+
+<!-- القائمة الرئيسية -->
+<div id="menuScreen">
+
+  <div class="section">
+    <div class="section-title">👑 أَهْلاً بِكَ فِي مَمْلَكَةِ الوُحُوش</div>
+    <div style="font-size:65px;margin:10px;text-shadow:0 0 20px #ff4500">🐉 ⚔️ 👹</div>
+    <p style="color:#ffb38a;font-size:13px">
+      اِسْتَعِدَّ لِلْمَعْرَكَةِ... اِخْتَرْ جَيْشَكَ وَابْدَأِ المُوَاجَهَة!
+    </p>
+    <button class="btn orange large" onclick="startGame()" style="box-shadow:0 0 30px #ff4500">
+      ⚔️ اِبْدَأِ المُوَاجَهَة
+    </button>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎮 أَوْضَاعُ اللَّعِب</div>
+    <div class="buttons">
+      <button class="btn green" onclick="startGame()">🤖 ضِدَّ الكَمْبْيُوتَر</button>
+      <button class="btn purple" onclick="comingSoon('اللَّعِبُ عَبْرَ الإِنْتَرْنِت')">🌐 اللَّعِبُ أَوْنْلاَيْن</button>
+      <button class="btn orange" onclick="comingSoon('التَّحَدِّيَاتُ الكُبْرَى')">🏆 التَّحَدِّيَاتُ الكُبْرَى</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">✨ المَمْلَكَة</div>
+    <div class="buttons">
+      <button class="btn gold small" onclick="openSettings()">⚙️ الإِعْدَادَات</button>
+      <button class="btn gold small" onclick="comingSoon('الإِنْجَازَات')">🏅 الإِنْجَازَات</button>
+      <button class="btn gold small" onclick="comingSoon('المَهَامُّ اليَوْمِيَّة')">📜 المَهَام</button>
+      <button class="btn purple small" onclick="comingSoon('المَتْجَر')">🛒 المَتْجَر</button>
+      <button class="btn blue small" onclick="comingSoon('الحِسَابُ الشَّخْصِيّ')">👤 حِسَابِي</button>
+    </div>
+    <div id="notice"></div>
+  </div>
+
+</div>
+
+<!-- شاشة اللعب -->
+<div id="gameScreen">
+  <div id="game"></div>
+
+  <div class="game-panel">
+    <div class="buttons" style="margin-bottom:8px">
+      <select id="level">
+        <option value="easy">🟢 سَهْل</option>
+        <option value="hard">🔴 صَعْب</option>
+      </select>
+      <button class="btn gold small" onclick="newGame()">🔄 لُعْبَة جَدِيدَة</button>
+      <button class="btn blue small" onclick="undoMove()">↩️ تَرَاجُع</button>
+      <button class="btn red small" onclick="backMenu()">🏠 الرَّئِيسِيَّة</button>
+    </div>
+    <div id="status">دَوْرُكَ الآن - الأَبْيَض</div>
+    <div id="moves">سِجِلُّ الحَرَكَاتِ سَيَظْهَرُ هُنَا</div>
+  </div>
+
+  <div id="promotion">
+    <strong>👑 اِخْتَرْ تَرْقِيَةَ البَيْدَق</strong>
+    <div class="buttons" style="margin-top:10px">
+      <button class="btn gold small" onclick="promote('q')">مَلِكَة 👑</button>
+      <button class="btn gold small" onclick="promote('r')">قَلْعَة 🏰</button>
+      <button class="btn gold small" onclick="promote('b')">فِيل 🔮</button>
+      <button class="btn gold small" onclick="promote('n')">حِصَان 🐴</button>
+    </div>
+  </div>
+</div>
+
+<!-- الإعدادات -->
+<div id="settings">
+  <div class="modal">
+    <h2 style="color:#ffd66b">⚙️ الإِعْدَادَات</h2>
+    <div class="setting-row">
+      <span>🔊 أَصْوَاتُ النَّقْر</span>
+      <input type="checkbox" id="soundToggle" checked>
+    </div>
+    <div class="setting-row">
+      <span>✨ المُؤَثِّرَاتُ البَصَرِيَّة</span>
+      <input type="checkbox" id="effectsToggle" checked>
+    </div>
+    <p style="color:#cdb6df;font-size:12px">
+      يُمْكِنُكَ تَغْيِيرُ الإِعْدَادَاتِ أَثْنَاءَ اللَّعِب.
+    </p>
+    <button class="btn green" onclick="closeSettings()">حِفْظٌ وَإِغْلاق</button>
+  </div>
+</div>
+
+<!-- إخفاء الانترو -->
+<script>
+setTimeout(function(){
+  var s=document.getElementById("splash");
+  if(!s)return;
+  s.classList.add("hide");
+  setTimeout(function(){s.remove();},1000);
+},3600);
+</script>
+
+<script type="importmap">
+{
+  "imports":{
+    "three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+    "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/",
+    "chess":"https://cdn.jsdelivr.net/npm/chess.js@1.4.0/+esm"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
+import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
+import { Chess } from "chess";
+
+// ==================== حالة اللعبة ====================
+const chess = new Chess();
+const holder = document.getElementById("game");
+
+let selected = null;
+let thinking = false;
+let pendingPromotion = null;
+let snapshots = [];
+let gameStarted = false;
+let initialized = false;
+
+const files = "abcdefgh";
+const squares = [];
+
+// ==================== الصوت (سياق واحد فقط) ====================
+let audioCtx = null;
+function sound(){
+  const toggle = document.getElementById("soundToggle");
+  if(toggle && !toggle.checked) return;
+  try{
+    if(!audioCtx){
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if(!AC) return;
+      audioCtx = new AC();
+    }
+    if(audioCtx.state === "suspended") audioCtx.resume();
+
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.frequency.value = 650;
+    gain.gain.setValueAtTime(0.07, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.12);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.12);
+  } catch(e){}
+}
+
+function notice(msg){
+  const n = document.getElementById("notice");
+  if(n) n.textContent = msg;
+}
+
+// ==================== إحداثيات المربعات (موحّدة وصحيحة) ====================
+// الرتبة 1 قريبة من الكاميرا (+z)، الرتبة 8 بعيدة (-z)
+function position(square){
+  const file = files.indexOf(square[0]);
+  const rank = parseInt(square[1], 10);
+  return {
+    x: file - 3.5,
+    z: 4.5 - rank
+  };
+}
+
+// ==================== المشهد ====================
+const scene = new THREE.Scene();
+scene.background = null; // نستخدم خلفية CSS البركانية
+
+const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+camera.position.set(0, 8, 10);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ReinhardToneMapping;
+holder.appendChild(renderer.domElement);
+
+const renderScene = new RenderPass(scene, camera);
+const bloomPass = new UnrealBloomPass(new THREE.Vector2(800, 600), 1.3, 0.4, 0.85);
+bloomPass.threshold = 0.2;
+bloomPass.strength = 1.1;
+bloomPass.radius = 0.5;
+
+const composer = new EffectComposer(renderer);
+composer.addPass(renderScene);
+composer.addPass(bloomPass);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 0.3, 0);
+controls.enableDamping = true;
+controls.enablePan = false;
+controls.minDistance = 7;
+controls.maxDistance = 14;
+controls.minPolarAngle = Math.PI / 6;
+controls.maxPolarAngle = Math.PI / 2.15;
+controls.autoRotate = false;
+
+// ==================== الإضاءة ====================
+scene.add(new THREE.AmbientLight(0x442200, 1.6));
+
+const lavaLight = new THREE.PointLight(0xff4500, 10, 22);
+lavaLight.position.set(0, -1.5, 0);
+scene.add(lavaLight);
+
+const topLight = new THREE.DirectionalLight(0xffaa88, 2);
+topLight.position.set(5, 12, 5);
+topLight.castShadow = true;
+topLight.shadow.mapSize.set(1024, 1024);
+topLight.shadow.camera.left = -8;
+topLight.shadow.camera.right = 8;
+topLight.shadow.camera.top = 8;
+topLight.shadow.camera.bottom = -8;
+scene.add(topLight);
+
+const backLight = new THREE.DirectionalLight(0x3355ff, 0.6);
+backLight.position.set(-5, 6, -6);
+scene.add(backLight);
+
+// ==================== القاعدة الثابتة للوحة ====================
+const boardGroup = new THREE.Group();
+scene.add(boardGroup);
+
+// قاعدة صخرية سميكة وثابتة
+const baseMat = new THREE.MeshStandardMaterial({
+  color: 0x1a0f08,
+  roughness: 0.95,
+  metalness: 0.15
+});
+const base = new THREE.Mesh(new THREE.BoxGeometry(10, 1.2, 10), baseMat);
+base.position.y = -0.6;
+base.castShadow = true;
+base.receiveShadow = true;
+boardGroup.add(base);
+
+// حواف الحمم المتوهجة (4 شرائط حول القاعدة)
+const trimMat = new THREE.MeshStandardMaterial({
+  color: 0x000000,
+  emissive: 0xff3300,
+  emissiveIntensity: 2.5,
+  roughness: 0.5
+});
+const trimSpecs = [
+  { x: 0, z: 5.05, w: 10.3, d: 0.25 },
+  { x: 0, z: -5.05, w: 10.3, d: 0.25 },
+  { x: 5.05, z: 0, w: 0.25, d: 10.3 },
+  { x: -5.05, z: 0, w: 0.25, d: 10.3 }
+];
+for(const t of trimSpecs){
+  const strip = new THREE.Mesh(new THREE.BoxGeometry(t.w, 0.15, t.d), trimMat);
+  strip.position.set(t.x, -0.05, t.z);
+  boardGroup.add(strip);
+}
+
+// أعمدة زوايا ثابتة (تعزيز الشعور بالثبات)
+const pillarMat = new THREE.MeshStandardMaterial({ color: 0x2a1508, roughness: 0.8, metalness: 0.3 });
+const pillarGlowMat = new THREE.MeshStandardMaterial({ color: 0x000000, emissive: 0xff5500, emissiveIntensity: 2 });
+const pillarPositions = [[-5.05, -5.05], [5.05, -5.05], [-5.05, 5.05], [5.05, 5.05]];
+for(const [px, pz] of pillarPositions){
+  const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.45, 0.9, 8), pillarMat);
+  pillar.position.set(px, 0.15, pz);
+  pillar.castShadow = true;
+  boardGroup.add(pillar);
+  const cap = new THREE.Mesh(new THREE.SphereGeometry(0.18, 12, 10), pillarGlowMat);
+  cap.position.set(px, 0.7, pz);
+  boardGroup.add(cap);
+}
+
+// ==================== بناء مربعات اللوحة ====================
+function makeBoard(){
+  for(let rank = 8; rank >= 1; rank--){
+    for(let f = 0; f < 8; f++){
+      const s = files[f] + rank;
+      const p = position(s);
+
+      const isDark = (rank + f) % 2 === 0; // a1 داكن
+
+      const mat = new THREE.MeshStandardMaterial({
+        color: isDark ? 0x1a1a1a : 0x4a4a4a,
+        roughness: isDark ? 0.7 : 0.5,
+        metalness: 0.35,
+        emissive: 0x000000,
+        emissiveIntensity: 0
+      });
+
+      const mesh = new THREE.Mesh(new THREE.BoxGeometry(0.98, 0.15, 0.98), mat);
+      mesh.position.set(p.x, 0.075, p.z);
+      mesh.receiveShadow = true;
+      mesh.userData.square = s;
+      mesh.userData.isDark = isDark;
+
+      boardGroup.add(mesh);
+      squares.push(mesh);
+    }
+  }
+}
+
+// ==================== هندسيات ومواد مشتركة للوحوش (لتفادي تسريب الذاكرة) ====================
+const GEO = {
+  rock: new THREE.DodecahedronGeometry(1, 0),
+  cone4: new THREE.ConeGeometry(1, 1, 4),
+  cone6: new THREE.ConeGeometry(1, 1, 6),
+  cylinder6: new THREE.CylinderGeometry(1, 1, 1, 6),
+  box: new THREE.BoxGeometry(1, 1, 1)
+};
+
+const MAT = {
+  whiteBody: new THREE.MeshStandardMaterial({
+    color: 0x5a8e9e, roughness: 0.8, flatShading: true, metalness: 0.1
+  }),
+  blackBody: new THREE.MeshStandardMaterial({
+    color: 0x332222, roughness: 0.9, flatShading: true, metalness: 0.1
+  }),
+  whiteEye: new THREE.MeshBasicMaterial({ color: 0x00ffff }),
+  blackEye: new THREE.MeshBasicMaterial({ color: 0xff3300 }),
+  crown: new THREE.MeshStandardMaterial({
+    color: 0xd4af37, roughness: 0.3, metalness: 0.8
+  })
+};
+
+// ==================== تصميم الوحش ====================
+function monster(type, color){
+  const g = new THREE.Group();
+  const isWhite = color === "w";
+  const bodyMat = isWhite ? MAT.whiteBody : MAT.blackBody;
+  const eyeMat = isWhite ? MAT.whiteEye : MAT.blackEye;
+  const crownMat = MAT.crown;
+
+  function addRock(x, y, z, sx, sy, sz){
+    const m = new THREE.Mesh(GEO.rock, bodyMat);
+    m.position.set(x, y, z);
+    m.scale.set(sx, sy, sz);
+    m.castShadow = true;
+    m.receiveShadow = true;
+    g.add(m);
+    return m;
+  }
+
+  // الجسم والرأس
+  addRock(0, 0.4, 0, 0.35, 0.45, 0.35);
+  addRock(0, 0.9, 0, 0.3, 0.35, 0.3);
+
+  // العيون
+  for(const x of [-0.12, 0.12]){
+    const eye = new THREE.Mesh(GEO.box, eyeMat);
+    eye.position.set(x, 0.95, 0.25);
+    eye.scale.set(0.08, 0.04, 0.05);
+    g.add(eye);
+  }
+
+  // الأكتاف
+  addRock(-0.35, 0.5, 0, 0.15, 0.25, 0.2);
+  addRock(0.35, 0.5, 0, 0.15, 0.25, 0.2);
+
+  // تفاصيل حسب النوع
+  if(type === "k"){
+    const c1 = new THREE.Mesh(GEO.cone4, crownMat);
+    c1.position.set(0, 1.25, 0);
+    c1.scale.set(0.1, 0.3, 0.1);
+    c1.castShadow = true;
+    g.add(c1);
+    for(const x of [-0.15, 0.15]){
+      const c = new THREE.Mesh(GEO.cone4, crownMat);
+      c.position.set(x, 1.2, 0);
+      c.scale.set(0.08, 0.2, 0.08);
+      g.add(c);
+    }
+  }
+  else if(type === "q"){
+    const crown = new THREE.Mesh(GEO.cone6, crownMat);
+    crown.position.set(0, 1.25, 0);
+    crown.scale.set(0.2, 0.3, 0.2);
+    crown.castShadow = true;
+    g.add(crown);
+  }
+  else if(type === "r"){
+    const tower = new THREE.Mesh(GEO.cylinder6, bodyMat);
+    tower.position.set(0, 1.1, 0);
+    tower.scale.set(0.27, 0.3, 0.27);
+    tower.castShadow = true;
+    g.add(tower);
+  }
+  else if(type === "b"){
+    const spike = new THREE.Mesh(GEO.cone4, bodyMat);
+    spike.position.set(0, 1.2, 0);
+    spike.scale.set(0.12, 0.4, 0.12);
+    spike.castShadow = true;
+    g.add(spike);
+  }
+  else if(type === "n"){
+    const neck = addRock(0, 1.1, 0.1, 0.15, 0.3, 0.2);
+    neck.rotation.x = 0.3;
+    const horn = new THREE.Mesh(GEO.cone4, crownMat);
+    horn.position.set(0, 1.35, 0.15);
+    horn.scale.set(0.05, 0.2, 0.05);
+    g.add(horn);
+  }
+  else if(type === "p"){
+    const spike = new THREE.Mesh(GEO.cone4, crownMat);
+    spike.position.set(0, 1.1, 0);
+    spike.scale.set(0.1, 0.25, 0.1);
+    g.add(spike);
+  }
+
+  return g;
+}
+
+const piecesGroup = new THREE.Group();
+scene.add(piecesGroup);
+
+// ==================== رسم القطع ====================
+function draw(){
+  // إزالة آمنة (بدون dispose لأن المواد والهندسيات مشتركة)
+  while(piecesGroup.children.length > 0){
+    piecesGroup.remove(piecesGroup.children[0]);
+  }
+
+  const state = chess.board();
+
+  for(let r = 0; r < 8; r++){
+    for(let f = 0; f < 8; f++){
+      const p = state[r][f];
+      if(!p) continue;
+
+      const squareName = files[f] + (8 - r);
+      const pos = position(squareName);
+
+      const obj = monster(p.type, p.color);
+      obj.position.set(pos.x, 0.15, pos.z);
+      obj.userData.square = squareName;
+      obj.userData.color = p.color;
+
+      piecesGroup.add(obj);
+    }
+  }
+  piecesGroup.updateMatrixWorld(true);
+}
+
+// ==================== إعادة ألوان المربعات ====================
+function resetColors(){
+  squares.forEach(s => {
+    const isDark = s.userData.isDark;
+    s.material.color.setHex(isDark ? 0x1a1a1a : 0x4a4a4a);
+    s.material.emissive.setHex(0x000000);
+    s.material.emissiveIntensity = 0;
+  });
+}
+
+// ==================== إظهار الحركات المتاحة ====================
+function showMoves(from){
+  resetColors();
+  if(!from) return;
+
+  const moves = chess.moves({ square: from, verbose: true });
+  moves.forEach(m => {
+    const sq = squares.find(x => x.userData.square === m.to);
+    if(sq){
+      sq.material.color.setHex(0x00aa44);
+      sq.material.emissive.setHex(0x00ff66);
+      sq.material.emissiveIntensity = 0.6;
+    }
+  });
+}
+
+// ==================== الحالة ====================
+function updateStatus(){
+  const status = document.getElementById("status");
+
+  if(chess.isCheckmate()){
+    status.textContent = "🏆 كِشْ مَات! " + (chess.turn() === "w" ? "الأَسْوَد" : "الأَبْيَض") + " فَاز!";
+    return true;
+  }
+  if(chess.isStalemate()){
+    status.textContent = "🤝 تَعَادُلٌ بِسَبَبِ الجُمُود!";
+    return true;
+  }
+  if(chess.isDraw()){
+    status.textContent = "🤝 المُبَارَاةُ انْتَهَتْ بِالتَّعَادُل";
+    return true;
+  }
+  if(chess.isCheck()){
+    status.textContent = "⚠️ كَشْ! المَلِكُ مُهَدَّد";
+    return false;
+  }
+
+  status.textContent = chess.turn() === "w"
+    ? "دَوْرُكَ الآن - الأَبْيَض (الجَلِيد)"
+    : "🤖 الكَمْبْيُوتَر (الجَحِيم) يُفَكِّر...";
+  return false;
+}
+
+// ==================== تنفيذ الحركة ====================
+function saveMove(){
+  snapshots.push({ fen: chess.fen(), history: [...chess.history()] });
+}
+
+function makeMove(from, to, promotion = "q"){
+  try{
+    const move = chess.move({ from, to, promotion });
+    if(!move) return false;
+
+    draw();
+    resetColors();
+    selected = null;
+    document.getElementById("moves").textContent = chess.history().join("  ");
+    sound();
+    return true;
+  } catch(e){
+    return false;
+  }
+}
+
+// ==================== تقييم الموضع ====================
+function evaluate(){
+  if(chess.isCheckmate()) return chess.turn() === "w" ? -100000 : 100000;
+  if(chess.isDraw()) return 0;
+
+  const values = { p: 100, n: 320, b: 330, r: 500, q: 900, k: 20000 };
+  let score = 0;
+
+  chess.board().forEach((row, r) => {
+    row.forEach((p, f) => {
+      if(!p) return;
+      let value = values[p.type];
+      if(p.type === "p") value += (p.color === "b" ? r : 7 - r) * 4;
+      const center = 7 - (Math.abs(3.5 - f) + Math.abs(3.5 - r));
+      value += center * 2;
+      score += p.color === "w" ? value : -value;
+    });
+  });
+  return score;
+}
+
+// ==================== Minimax ====================
+function minimax(depth, alpha, beta, maximizing){
+  if(depth === 0 || chess.isGameOver()) return evaluate();
+  const moves = chess.moves();
+
+  if(maximizing){
+    let best = -Infinity;
+    for(const m of moves){
+      chess.move(m);
+      best = Math.max(best, minimax(depth - 1, alpha, beta, false));
+      chess.undo();
+      alpha = Math.max(alpha, best);
+      if(beta <= alpha) break;
+    }
+    return best;
+  } else {
+    let best = Infinity;
+    for(const m of moves){
+      chess.move(m);
+      best = Math.min(best, minimax(depth - 1, alpha, beta, true));
+      chess.undo();
+      beta = Math.min(beta, best);
+      if(beta <= alpha) break;
+    }
+    return best;
+  }
+}
+
+// ==================== الكمبيوتر ====================
+function computer(){
+  if(chess.isGameOver()) return;
+  const moves = chess.moves();
+  if(!moves.length) return;
+
+  let chosen;
+
+  if(document.getElementById("level").value === "easy"){
+    const captures = moves.filter(m => m.includes("x"));
+    const pool = Math.random() < 0.5 && captures.length ? captures : moves;
+    chosen = pool[Math.floor(Math.random() * pool.length)];
+  } else {
+    let best = Infinity;
+    for(const m of moves){
+      chess.move(m);
+      const score = minimax(2, -Infinity, Infinity, true);
+      chess.undo();
+      if(score < best){
+        best = score;
+        chosen = m;
+      }
+    }
+  }
+
+  if(chosen){
+    chess.move(chosen);
+    draw();
+    document.getElementById("moves").textContent = chess.history().join("  ");
+    sound();
+    updateStatus();
+  }
+}
+
+// ==================== تنفيذ حركة اللاعب ====================
+function executePlayerMove(from, to, promotion){
+  if(!makeMove(from, to, promotion)) return;
+
+  const promo = document.getElementById("promotion");
+  if(promo) promo.style.display = "none";
+
+  if(updateStatus()) return; // انتهت اللعبة
+
+  thinking = true;
+  setTimeout(() => {
+    if(gameStarted && !chess.isGameOver()){
+      computer();
+      updateStatus();
+    }
+    thinking = false;
+  }, 400);
+}
+
+// ==================== النقر ====================
+function onClick(event){
+  if(!gameStarted || thinking || chess.isGameOver() || pendingPromotion) return;
+  if(chess.turn() !== "w") return;
+
+  const rect = renderer.domElement.getBoundingClientRect();
+  const pointer = new THREE.Vector2(
+    ((event.clientX - rect.left) / rect.width) * 2 - 1,
+    -((event.clientY - rect.top) / rect.height) * 2 + 1
+  );
+
+  const ray = new THREE.Raycaster();
+  ray.setFromCamera(pointer, camera);
+
+  // 1) محاولة اكتشاف قطعة
+  const pieceHits = ray.intersectObjects(piecesGroup.children, true);
+  let clickedSquare = null;
+
+  if(pieceHits.length > 0){
+    let obj = pieceHits[0].object;
+    while(obj && !obj.userData.square) obj = obj.parent;
+    if(obj) clickedSquare = obj.userData.square;
+  }
+
+  // 2) إن لم تُصب قطعة، تحقق من المربعات
+  if(!clickedSquare){
+    const squareHits = ray.intersectObjects(squares, false);
+    if(squareHits.length > 0){
+      clickedSquare = squareHits[0].object.userData.square;
+    }
+  }
+
+  if(!clickedSquare) return;
+
+  // 3) منطق الاختيار
+  if(selected){
+    const moves = chess.moves({ square: selected, verbose: true });
+    const move = moves.find(m => m.to === clickedSquare);
+
+    if(move){
+      if(move.promotion){
+        pendingPromotion = { from: selected, to: clickedSquare };
+        document.getElementById("promotion").style.display = "block";
+        return;
+      }
+      saveMove();
+      executePlayerMove(selected, clickedSquare);
+      return;
+    }
+
+    const targetPiece = chess.get(clickedSquare);
+    if(targetPiece && targetPiece.color === "w"){
+      selected = clickedSquare;
+      showMoves(selected);
+      sound();
+      return;
+    }
+
+    selected = null;
+    resetColors();
+    return;
+  }
+
+  const piece = chess.get(clickedSquare);
+  if(piece && piece.color === "w"){
+    selected = clickedSquare;
+    showMoves(selected);
+    sound();
+  }
+}
+
+// ==================== تحكم عام ====================
+window.comingSoon = function(name){
+  sound();
+  notice("✨ " + name + " - قَرِيباً فِي تَحْدِيثٍ جَدِيد!");
+};
+
+window.openSettings = function(){
+  sound();
+  document.getElementById("settings").style.display = "flex";
+};
+
+window.closeSettings = function(){
+  sound();
+  document.getElementById("settings").style.display = "none";
+};
+
+window.startGame = function(){
+  sound();
+  document.getElementById("menuScreen").style.display = "none";
+  document.getElementById("gameScreen").style.display = "block";
+  document.body.classList.add("game-on");
+  gameStarted = true;
+
+  if(!initialized){
+    makeBoard();
+    initialized = true;
+  }
+
+  window.newGame();
+  setTimeout(onResize, 100);
+};
+
+window.backMenu = function(){
+  sound();
+  gameStarted = false;
+  thinking = false;
+  pendingPromotion = null;
+  selected = null;
+  document.getElementById("promotion").style.display = "none";
+  document.getElementById("gameScreen").style.display = "none";
+  document.getElementById("menuScreen").style.display = "block";
+  document.body.classList.remove("game-on");
+};
+
+window.newGame = function(){
+  sound();
+  chess.reset();
+  snapshots = [];
+  selected = null;
+  pendingPromotion = null;
+  thinking = false;
+
+  document.getElementById("promotion").style.display = "none";
+  document.getElementById("moves").textContent = "سِجِلُّ الحَرَكَاتِ سَيَظْهَرُ هُنَا";
+
+  resetColors();
+  draw();
+  updateStatus();
+};
+
+window.undoMove = function(){
+  if(!gameStarted || thinking || pendingPromotion) return;
+  if(snapshots.length === 0){
+    notice("لاَ تُوجَدُ حَرَكَاتٌ لِلتَّرَاجُع");
+    return;
+  }
+
+  const snap = snapshots.pop();
+  try{ chess.load(snap.fen); } catch(e){ return; }
+
+  selected = null;
+  pendingPromotion = null;
+  document.getElementById("promotion").style.display = "none";
+
+  resetColors();
+  draw();
+
+  document.getElementById("moves").textContent =
+    snap.history.length ? snap.history.join("  ") : "سِجِلُّ الحَرَكَاتِ سَيَظْهَرُ هُنَا";
+
+  updateStatus();
+  sound();
+};
+
+window.promote = function(piece){
+  if(!pendingPromotion) return;
+  sound();
+
+  const { from, to } = pendingPromotion;
+  pendingPromotion = null;
+
+  document.getElementById("promotion").style.display = "none";
+
+  saveMove();
+  executePlayerMove(from, to, piece);
+};
+
+// ==================== الحجم ====================
+function onResize(){
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+  renderer.setSize(w, h);
+  composer.setSize(w, h);
+}
+
+// ==================== حلقة العرض ====================
+let time = 0;
+function animate(){
+  requestAnimationFrame(animate);
+  controls.update();
+
+  time += 0.05;
+
+  // نبض ضوء الحمم
+  lavaLight.intensity = 8 + Math.sin(time) * 3;
+  trimMat.emissiveIntensity = 2 + Math.sin(time * 1.5) * 0.6;
+  pillarGlowMat.emissiveIntensity = 1.8 + Math.sin(time * 1.8 + 1) * 0.5;
+
+  const fx = document.getElementById("effectsToggle");
+  if(!fx || fx.checked){
+    composer.render();
+  } else {
+    renderer.render(scene, camera);
+  }
+}
+
+// ==================== التهيئة ====================
+renderer.setSize(window.innerWidth, window.innerHeight);
+window.addEventListener("resize", onResize);
+onResize();
+
+// اكتشاف النقر مع دعم السحب (للكاميرا)
+let downX = 0, downY = 0;
+renderer.domElement.addEventListener("pointerdown", (e) => {
+  downX = e.clientX;
+  downY = e.clientY;
+});
+renderer.domElement.addEventListener("pointerup", (e) => {
+  const dx = e.clientX - downX;
+  const dy = e.clientY - downY;
+  if(Math.sqrt(dx * dx + dy * dy) < 10){
+    onClick(e);
+  }
+});
+
+animate();
+</script>
+
+</body>
+</html>
