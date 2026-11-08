@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Monster Chess 3D - Hellfire Edition</title>
+<title>Monster Chess 3D - Mariduk's Wrath</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800;900&display=swap" rel="stylesheet">
 
@@ -12,16 +12,14 @@
 
 body{
  margin:0;
- /* خلفية تحاكي سماء البركان والجحيم في الصورة */
- background: radial-gradient(circle at 50% 20%, #ff7b00 0%, #d93600 15%, #4a0b00 40%, #110200 100%);
+ background:radial-gradient(circle at 50% 20%, #ff7b00 0%, #d93600 15%, #4a0b00 40%, #110200 100%);
  color:white;
  font-family:Cairo,Arial,sans-serif;
  text-align:center;
  min-height:100vh;
- overflow: hidden; /* لمنع التمرير أثناء اللعب */
+ overflow: hidden;
 }
 
-/* إضافة جبال في الخلفية لتعزيز العمق */
 body::before {
  content: "";
  position: absolute;
@@ -113,10 +111,10 @@ h1{
 
 #game{
  width:100%;
- height: 100vh; /* ملء الشاشة للخلفية الملحمية */
+ height: 100vh;
  position: absolute;
  top: 0; left: 0;
- z-index: 1; /* خلف واجهة التحكم */
+ z-index: 1;
  touch-action:none;
 }
 
@@ -129,9 +127,11 @@ h1{
  background:rgba(15, 5, 0, 0.85);
  border:1px solid #ff450077;
  border-radius:18px;
- position: relative;
+ position: absolute;
+ bottom: 0; left: 0; right: 0;
  z-index: 10;
  backdrop-filter: blur(4px);
+ border-radius: 20px 20px 0 0;
 }
 
 #status{
@@ -192,19 +192,19 @@ select{
 
 <div id="splash">
  <div class="company">KOKTON</div>
- <div class="tagline">PRESENTS</div>
+ <div class="tagline">MARIDUK'S WRATH</div>
 </div>
 
 <header>
-<h1>🐉 MONSTER CHESS 3D</h1>
-<div class="subtitle">مملكة الوحوش الأسطورية ⚔️</div>
+<h1>⚔️ MONSTER CHESS 3D</h1>
+<div class="subtitle">أسطورة ماريدك القاطع ⚔️</div>
 </header>
 
 <div id="menuScreen">
 <div class="section">
 <div class="section-title">👑 أهلاً بك في الجحيم</div>
 <div style="font-size:65px;margin:10px; text-shadow: 0 0 20px #ff4500;">🐉 ⚔️ 👹</div>
-<p style="color:#ffb38a;font-size:14px">استعد للمعركة... الوحوش الصخرية بانتظارك!</p>
+<p style="color:#ffb38a;font-size:14px">ماريدك بانتظارك... استعد للقطع!</p>
 <button class="btn orange large" onclick="startGame()" style="box-shadow: 0 0 30px #ff4500;">
 ⚔️ ابدأ المواجهة
 </button>
@@ -212,7 +212,7 @@ select{
 </div>
 
 <div id="gameScreen">
-<div class="game-panel" style="position: absolute; bottom: 0; left: 0; right: 0; margin: 0 auto; border-radius: 20px 20px 0 0;">
+<div class="game-panel">
 <div class="buttons" style="margin-bottom: 10px;">
 <select id="level">
 <option value="easy">🟢 سهل</option>
@@ -222,11 +222,11 @@ select{
 <button class="btn blue small" onclick="undoMove()">↩️ تراجع</button>
 <button class="btn red small" onclick="backMenu()">🏠 الرئيسية</button>
 </div>
-<div id="status">دورك الآن - الجيش الأزرق (الجليد)</div>
+<div id="status">دورك الآن - الجيش الأزرق (ماريدك)</div>
 <div id="promotion">
 <strong>👑 اختر ترقية البيدق</strong>
 <div class="buttons" style="margin-top:10px">
-<button class="btn gold small" onclick="promote('q')">ملكة 👑</button>
+<button class="btn gold small" onclick="promote('q')">ماريدك ⚔️</button>
 <button class="btn gold small" onclick="promote('r')">قلعة 🏰</button>
 <button class="btn gold small" onclick="promote('b')">فيل 🔮</button>
 <button class="btn gold small" onclick="promote('n')">حصان 🐴</button>
@@ -271,6 +271,7 @@ let pendingPromotion = null;
 let snapshots = [];
 let gameStarted = false;
 let initialized = false;
+let slashEffects = [];
 
 const files = "abcdefgh";
 const squares = [];
@@ -279,11 +280,10 @@ const squares = [];
 // إعداد المشهد والمحرك (Three.js)
 // ==========================================
 const scene = new THREE.Scene();
-// جعل الخلفية شفافة لكي تظهر خلفية CSS البركانية
 scene.background = null; 
 
 const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-camera.position.set(0, 8, 10); // زاوية رؤية قريبة من الصورة
+camera.position.set(0, 8, 10);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
@@ -292,7 +292,6 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ReinhardToneMapping;
 holder.appendChild(renderer.domElement);
 
-// إعدادات ما بعد المعالجة (تأثير التوهج Bloom)
 const renderScene = new RenderPass(scene, camera);
 const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
 bloomPass.threshold = 0.2;
@@ -312,52 +311,39 @@ controls.maxDistance = 14;
 controls.maxPolarAngle = Math.PI / 2.1;
 
 // ==========================================
-// الإضاءة (إضاءة جحيمية)
+// الإضاءة
 // ==========================================
 const ambientLight = new THREE.AmbientLight(0x442200, 1.5);
 scene.add(ambientLight);
 
-// ضوء برتقالي من الأسفل (يحاكي الحمم)
 const lavaLight = new THREE.PointLight(0xff4500, 10, 20);
 lavaLight.position.set(0, -2, 0);
 scene.add(lavaLight);
 
-// ضوء علوي خافت
 const topLight = new THREE.DirectionalLight(0xffaa88, 1.5);
 topLight.position.set(5, 10, 5);
 topLight.castShadow = true;
 scene.add(topLight);
 
 // ==========================================
-// بناء بيئة اللوحة الصخرية
+// بناء بيئة اللوحة
 // ==========================================
 const boardGroup = new THREE.Group();
 scene.add(boardGroup);
 
-// 1. الصخرة الأساسية التي تحمل اللوحة
 const baseGeo = new THREE.BoxGeometry(9.5, 0.8, 9.5);
-const baseMat = new THREE.MeshStandardMaterial({ 
-    color: 0x1a1a1a, 
-    roughness: 0.9, 
-    metalness: 0.2 
-});
+const baseMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.9, metalness: 0.2 });
 const base = new THREE.Mesh(baseGeo, baseMat);
 base.position.y = -0.45;
 base.receiveShadow = true;
 boardGroup.add(base);
 
-// 2. حواف متوهجة (تشبه شقوق الحمم)
 const borderGeo = new THREE.BoxGeometry(9.8, 0.85, 9.8);
-const borderMat = new THREE.MeshStandardMaterial({ 
-    color: 0x000000, 
-    emissive: 0xff3300, 
-    emissiveIntensity: 2 
-});
+const borderMat = new THREE.MeshStandardMaterial({ color: 0x000000, emissive: 0xff3300, emissiveIntensity: 2 });
 const border = new THREE.Mesh(borderGeo, borderMat);
 border.position.y = -0.45;
 boardGroup.add(border);
 
-// 3. مربعات اللوحة (حجر داكن وجليد)
 function makeBoard() {
     for (let rank = 8; rank >= 1; rank--) {
         for (let f = 0; f < 8; f++) {
@@ -366,8 +352,6 @@ function makeBoard() {
             const z = (8 - rank) - 3.5;
 
             const isDark = (rank + f) % 2 === 0;
-            
-            // الحجر الداكن للأسود، والرمادي الفاتح للأبيض
             const mat = new THREE.MeshStandardMaterial({
                 color: isDark ? 0x111111 : 0x444444,
                 roughness: isDark ? 0.7 : 0.5,
@@ -385,33 +369,22 @@ function makeBoard() {
 }
 
 // ==========================================
-// تصميم الوحوش الصخرية والجليدية
+// تصميم الوحوش وشخصية ماريدك
 // ==========================================
 function monster(type, color) {
     const g = new THREE.Group();
     const isWhite = color === "w";
 
-    // مواد الوحوش (صخر للأسود، جليد للابيض)
     const bodyMat = new THREE.MeshStandardMaterial({
         color: isWhite ? 0x5a8e9e : 0x332222,
         roughness: 0.8,
-        flatShading: true, // يعطي مظهر الصخر المنحوت
+        flatShading: true,
         metalness: 0.1
     });
 
-    // عيون متوهجة
-    const eyeMat = new THREE.MeshBasicMaterial({ 
-        color: isWhite ? 0x00ffff : 0xff3300 
-    });
+    const eyeMat = new THREE.MeshBasicMaterial({ color: isWhite ? 0x00ffff : 0xff3300 });
+    const crownMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, roughness: 0.3, metalness: 0.8 });
 
-    // مادة التاج/القرون
-    const crownMat = new THREE.MeshStandardMaterial({ 
-        color: 0xd4af37, 
-        roughness: 0.3, 
-        metalness: 0.8 
-    });
-
-    // دالة مساعدة لصنع صخور غير منتظمة
     function addRock(x, y, z, sx, sy, sz, mat) {
         const geo = new THREE.DodecahedronGeometry(1, 0);
         const m = new THREE.Mesh(geo, mat);
@@ -423,24 +396,52 @@ function monster(type, color) {
         return m;
     }
 
-    // الجسم الأساسي
+    // إذا كانت القطعة هي "ماريدك" (الملكة)
+    if (type === "q" && isWhite) {
+        // جسم ماريدك الداكن
+        const darkMat = new THREE.MeshStandardMaterial({ color: 0x110000, metalness: 0.8, roughness: 0.2 });
+        // سيف ماريدك المتوهج
+        const swordMat = new THREE.MeshBasicMaterial({ color: 0x00ffff });
+
+        addRock(0, 0.5, 0, 0.35, 0.5, 0.35, darkMat); // الجسم
+        addRock(0, 1.0, 0, 0.28, 0.3, 0.28, darkMat); // الرأس
+        
+        // عيون ماريدك
+        for (const x of [-0.1, 0.1]) {
+            const eye = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.04, 0.05), swordMat);
+            eye.position.set(x, 1.05, 0.25);
+            g.add(eye);
+        }
+        
+        // السيف الملحمي
+        const sword = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.8, 0.08), swordMat);
+        sword.position.set(0.4, 0.8, 0.2);
+        sword.rotation.z = -Math.PI / 6;
+        g.add(sword);
+        
+        // هالة ماريدك
+        const aura = new THREE.Mesh(new THREE.TorusGeometry(0.3, 0.02, 16, 100), swordMat);
+        aura.position.set(0, 1.2, 0);
+        aura.rotation.x = Math.PI / 2;
+        g.add(aura);
+
+        return g;
+    }
+
+    // تصميم باقي الوحوش العادية
     addRock(0, 0.4, 0, 0.35, 0.45, 0.35, bodyMat);
-    // الرأس
     addRock(0, 0.9, 0, 0.3, 0.35, 0.3, bodyMat);
 
-    // العيون
     for (const x of [-0.12, 0.12]) {
         const eye = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.04, 0.05), eyeMat);
         eye.position.set(x, 0.95, 0.25);
         g.add(eye);
     }
 
-    // الأكتاف
     addRock(-0.35, 0.5, 0, 0.15, 0.25, 0.2, bodyMat);
     addRock(0.35, 0.5, 0, 0.15, 0.25, 0.2, bodyMat);
 
-    // تفاصيل حسب نوع القطعة
-    if (type === "k") { // الملك
+    if (type === "k") {
         const c1 = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.3, 4), crownMat);
         c1.position.set(0, 1.25, 0); g.add(c1);
         const c2 = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.2, 4), crownMat);
@@ -448,25 +449,25 @@ function monster(type, color) {
         const c3 = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.2, 4), crownMat);
         c3.position.set(0.15, 1.2, 0); g.add(c3);
     } 
-    else if (type === "q") { // الملكة
+    else if (type === "q") {
         const crown = new THREE.Mesh(new THREE.ConeGeometry(0.2, 0.3, 6), crownMat);
         crown.position.set(0, 1.25, 0); g.add(crown);
     }
-    else if (type === "r") { // القلعة
+    else if (type === "r") {
         const tower = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.3, 0.3, 6), bodyMat);
         tower.position.set(0, 1.1, 0); g.add(tower);
     }
-    else if (type === "b") { // الفيل
+    else if (type === "b") {
         const spike = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.4, 4), bodyMat);
         spike.position.set(0, 1.2, 0); g.add(spike);
     }
-    else if (type === "n") { // الحصان
+    else if (type === "n") {
         const neck = addRock(0, 1.1, 0.1, 0.15, 0.3, 0.2, bodyMat);
         neck.rotation.x = 0.3;
         const horn = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.2, 4), crownMat);
         horn.position.set(0, 1.35, 0.15); g.add(horn);
     }
-    else if (type === "p") { // البيدق
+    else if (type === "p") {
         const spike = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.25, 4), crownMat);
         spike.position.set(0, 1.1, 0); g.add(spike);
     }
@@ -488,7 +489,7 @@ function draw() {
 
             const s = files[f] + (8 - r);
             const x = f - 3.5;
-            const z = (8 - r) - 4.5 + 1; // ضبط إحداثيات Z لتطابق اللوحة
+            const z = (8 - r) - 4.5 + 1; 
 
             const obj = monster(p.type, p.color);
             obj.position.set(x, 0.05, z);
@@ -501,8 +502,30 @@ function draw() {
     piecesGroup.updateMatrixWorld(true);
 }
 
+// تأثير القطع (Slash Effect) لماريدك
+function triggerSlashEffect(position) {
+    const slashGeo = new THREE.PlaneGeometry(2, 2);
+    const slashMat = new THREE.MeshBasicMaterial({ 
+        color: 0x00ffff, 
+        transparent: true, 
+        opacity: 1, 
+        side: THREE.DoubleSide,
+        blending: THREE.AdditiveBlending
+    });
+    const slash = new THREE.Mesh(slashGeo, slashMat);
+    slash.position.copy(position);
+    slash.position.y += 0.5;
+    slash.rotation.z = Math.PI / 4;
+    scene.add(slash);
+    
+    slashEffects.push({
+        mesh: slash,
+        life: 1.0
+    });
+}
+
 // ==========================================
-// منطق اللعبة (نفس الكود السابق مع تحسينات)
+// منطق اللعبة
 // ==========================================
 function resetColors() {
     squares.forEach(s => {
@@ -522,7 +545,7 @@ function showMoves(from) {
     moves.forEach(m => {
         const sq = squares.find(x => x.userData.square === m.to);
         if (sq) {
-            sq.material.emissive.setHex(0x004400); // توهج أخضر للمربعات المتاحة
+            sq.material.emissive.setHex(0x004400);
             sq.material.color.setHex(0x00ff00);
         }
     });
@@ -531,7 +554,7 @@ function showMoves(from) {
 function updateStatus() {
     const status = document.getElementById("status");
     if (chess.isCheckmate()) {
-        status.textContent = "🏆 كش مات! " + (chess.turn() === "w" ? "وحوش الجحيم" : "وحوش الجليد") + " فازوا!";
+        status.textContent = "🏆 كش مات! " + (chess.turn() === "w" ? "ماريدك والجيش الأزرق" : "وحوش الجحيم") + " فازوا!";
         return true;
     }
     if (chess.isDraw() || chess.isStalemate()) {
@@ -542,7 +565,7 @@ function updateStatus() {
         status.textContent = "⚠️ كش! الملك مهدد";
         return false;
     }
-    status.textContent = chess.turn() === "w" ? "دورك الآن - الجيش الأزرق (الجليد)" : "🤖 الكمبيوتر (الجحيم) يفكر...";
+    status.textContent = chess.turn() === "w" ? "دورك الآن - جيش ماريدك" : "🤖 الكمبيوتر (الجحيم) يفكر...";
     return false;
 }
 
@@ -550,6 +573,15 @@ function makeMove(from, to, promotion = "q") {
     try {
         const move = chess.move({ from, to, promotion });
         if (!move) return false;
+        
+        // إذا كانت الحركة هي أكل قطعة بواسطة ماريدك
+        if (move.captured && from[0] === 'd' && from[1] === '1' && chess.get(to)?.type === 'q') {
+             // التحقق مما إذا كانت القطعة التي هاجمت هي ماريدك
+             const x = files.indexOf(to[0]) - 3.5;
+             const z = Number(to[1]) - 4.5;
+             triggerSlashEffect(new THREE.Vector3(x, 0, z));
+        }
+
         draw();
         resetColors();
         selected = null;
@@ -567,6 +599,8 @@ function evaluate() {
         row.forEach((p, f) => {
             if (!p) return;
             let value = values[p.type] + (p.type === "p" ? (p.color === "b" ? r : 7 - r) * 4 : 0);
+            // تعزيز قيمة ماريدك
+            if (p.type === "q" && p.color === "w") value += 200; 
             score += p.color === "w" ? value : -value;
         });
     });
@@ -782,17 +816,26 @@ function animate() {
     requestAnimationFrame(animate);
     controls.update();
     
-    // تأثير نبض ضوء الحمم
     time += 0.05;
     lavaLight.intensity = 8 + Math.sin(time) * 3;
 
-    // تدوير بطيء جداً للوحة لإعطاء شعور بالحياة
-    // boardGroup.rotation.y = Math.sin(time * 0.1) * 0.05;
+    // تحديث تأثيرات القطع
+    for (let i = slashEffects.length - 1; i >= 0; i--) {
+        let effect = slashEffects[i];
+        effect.life -= 0.05;
+        effect.mesh.material.opacity = effect.life;
+        effect.mesh.scale.setScalar(1 + (1 - effect.life) * 2);
+        effect.mesh.rotation.z += 0.1;
+        
+        if (effect.life <= 0) {
+            scene.remove(effect.mesh);
+            slashEffects.splice(i, 1);
+        }
+    }
 
-    composer.render(); // استخدام composer بدلاً من renderer لتفعيل التوهج
+    composer.render();
 }
 
-// التهيئة النهائية
 window.addEventListener("resize", onResize);
 onResize();
 
