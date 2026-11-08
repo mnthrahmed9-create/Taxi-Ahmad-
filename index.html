@@ -3,27 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الوحش وقاعدة الشطرنج 3D</title>
+    <title>الوحش الصخري الضخم</title>
     <style>
         body { margin: 0; overflow: hidden; background-color: #111; font-family: sans-serif; }
         canvas { display: block; }
-        #loading {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            color: white; font-size: 20px; z-index: 10; text-align: center;
-            background: rgba(0,0,0,0.8); padding: 20px; border-radius: 10px;
-            border: 1px solid #444;
-        }
-        #error-msg {
-            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
-            color: #ff8888; background: #330000; padding: 10px 20px; border-radius: 5px;
-            display: none; z-index: 20; text-align: center; width: 80%;
+        #info {
+            position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+            color: #00aaff; background: rgba(0,0,0,0.7); padding: 10px 20px;
+            border-radius: 8px; border: 1px solid #00aaff; z-index: 10; text-align: center;
+            pointer-events: none;
         }
     </style>
 </head>
 <body>
-
-    <div id="loading">جاري تجهيز المشهد... ⏳<br><small style="color:#aaa;">(إذا لم يظهر الوحش، فملف glb غير موجود)</small></div>
-    <div id="error-msg">❌ لم يتم العثور على ملف monster.glb.<br>تم عرض مجسم مؤقت بدلاً منه.</div>
+    <div id="info">👾 الوحش الصخري جاهز (بدون ملفات خارجية)</div>
 
     <script type="importmap">
         {
@@ -36,19 +29,16 @@
 
     <script type="module">
         import * as THREE from 'three';
-        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-        // 1. إعداد المشهد
+        // 1. إعداد المشهد والكاميرا
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x111111);
-        scene.fog = new THREE.Fog(0x111111, 15, 60);
+        scene.background = new THREE.Color(0x151515);
+        scene.fog = new THREE.Fog(0x151515, 20, 60);
 
-        // 2. إعداد الكاميرا
         const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 8, 15); // رفعنا الكاميرا قليلاً لنرى الشطرنج
+        camera.position.set(0, 8, 18); // كاميرا ترى الوحش كاملاً
 
-        // 3. إعداد العارض
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(window.devicePixelRatio);
@@ -56,11 +46,16 @@
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         document.body.appendChild(renderer.domElement);
 
-        // 4. الإضاءة
-        const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.set(0, 3, 0);
+        controls.maxPolarAngle = Math.PI / 2 - 0.05;
+
+        // 2. الإضاءة
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
         scene.add(ambientLight);
 
-        const dirLight = new THREE.DirectionalLight(0xffffff, 2.5);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 2);
         dirLight.position.set(10, 20, 10);
         dirLight.castShadow = true;
         dirLight.shadow.mapSize.width = 2048;
@@ -71,116 +66,154 @@
         dirLight.shadow.camera.bottom = -15;
         scene.add(dirLight);
 
-        // 5. التحكم بالكاميرا
-        const controls = new OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.target.set(0, 2, 0); // التركيز على منتصف المشهد
-        controls.maxPolarAngle = Math.PI / 2 - 0.05; // منع النزول تحت الأرض
+        // إضاءة زرقاء خفية للوحش
+        const blueLight = new THREE.PointLight(0x0088ff, 20, 15);
+        blueLight.position.set(0, 5, 2);
+        scene.add(blueLight);
 
-        // ==========================================
-        // 6. بناء قاعدة الشطرنج
-        // ==========================================
+        // 3. بناء رقعة الشطرنج
         const boardGroup = new THREE.Group();
-        const squareSize = 2; // حجم المربع الواحد
-        const boardSize = 8;  // 8x8
+        const squareSize = 2;
+        const boardSize = 8;
         const offset = (boardSize * squareSize) / 2 - (squareSize / 2);
 
-        const whiteMaterial = new THREE.MeshStandardMaterial({ color: 0xcccccc, roughness: 0.3, metalness: 0.1 });
-        const blackMaterial = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.8, metalness: 0.2 });
+        const whiteMat = new THREE.MeshStandardMaterial({ color: 0x888888, roughness: 0.7 });
+        const blackMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.9 });
 
         for (let i = 0; i < boardSize; i++) {
             for (let j = 0; j < boardSize; j++) {
                 const isWhite = (i + j) % 2 === 0;
-                const geometry = new THREE.BoxGeometry(squareSize, 0.5, squareSize); // سمك القاعدة 0.5
-                const material = isWhite ? whiteMaterial : blackMaterial;
-                
-                const square = new THREE.Mesh(geometry, material);
-                square.position.set(
-                    (i * squareSize) - offset, 
-                    -0.25, // النزول قليلاً ليكون السطح العلوي عند y=0
-                    (j * squareSize) - offset
-                );
-                square.receiveShadow = true;
-                square.castShadow = true;
-                boardGroup.add(square);
+                const geo = new THREE.BoxGeometry(squareSize, 0.5, squareSize);
+                const mesh = new THREE.Mesh(geo, isWhite ? whiteMat : blackMat);
+                mesh.position.set((i * squareSize) - offset, -0.25, (j * squareSize) - offset);
+                mesh.receiveShadow = true;
+                boardGroup.add(mesh);
             }
         }
         scene.add(boardGroup);
 
         // ==========================================
-        // 7. المجسم المؤقت (في حال لم يتحمل الوحش)
+        // 4. برمجة الوحش الصخري (من الصفر)
         // ==========================================
-        const placeholderGroup = new THREE.Group();
-        // شكل مؤقت (كبسولة)
-        const placeholderGeo = new THREE.CapsuleGeometry(1, 2, 4, 16);
-        const placeholderMat = new THREE.MeshStandardMaterial({ 
-            color: 0x3b82f6, 
-            wireframe: true, 
-            emissive: 0x1e3a8a 
+        const monster = new THREE.Group();
+
+        // خامات الوحش
+        const rockMat = new THREE.MeshStandardMaterial({ 
+            color: 0x556677, 
+            roughness: 0.9, 
+            flatShading: true // هذا يجعل شكله حاد وصخري
         });
-        const placeholder = new THREE.Mesh(placeholderGeo, placeholderMat);
-        placeholder.position.y = 2; // ليطفو فوق الشطرنج
-        placeholder.castShadow = true;
-        placeholderGroup.add(placeholder);
-        scene.add(placeholderGroup);
-
-        // ==========================================
-        // 8. تحميل ملف الوحش
-        // ==========================================
-        const loader = new GLTFLoader();
         
-        loader.load(
-            './monster.glb', 
-            function (gltf) {
-                // 1. إخفاء المجسم المؤقت
-                scene.remove(placeholderGroup);
-                document.getElementById('loading').style.display = 'none';
-                
-                const model = gltf.scene;
-                
-                // --- تعديل حجم وموقع الوحش ---
-                // إذا كان الوحش كبيراً جداً أو صغيراً، يمكنك تغيير الرقم هنا:
-                // model.scale.set(0.5, 0.5, 0.5); 
-                
-                // وضع الوحش فوق الشطرنج مباشرة
-                model.position.y = 0; 
+        const darkRockMat = new THREE.MeshStandardMaterial({ 
+            color: 0x334455, 
+            roughness: 1.0, 
+            flatShading: true 
+        });
 
-                model.traverse((child) => {
-                    if (child.isMesh) {
-                        child.castShadow = true;
-                        child.receiveShadow = true;
-                    }
-                });
+        const crystalMat = new THREE.MeshStandardMaterial({ 
+            color: 0x00aaff, 
+            emissive: 0x0055aa,
+            roughness: 0.2,
+            flatShading: true 
+        });
 
-                scene.add(model);
-            },
-            function (xhr) {
-                console.log((xhr.loaded / xhr.total * 100) + '% تم التحميل');
-            },
-            function (error) {
-                console.error('خطأ في التحميل:', error);
-                // إذا فشل التحميل، نبقي المجسم المؤقت ونظهر رسالة الخطأ
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('error-msg').style.display = 'block';
-            }
-        );
+        const eyeMat = new THREE.MeshBasicMaterial({ color: 0x00ffff });
 
-        // 9. حركة المشهد
+        // دالة مساعدة لصنع الصخور
+        function createRock(radius, colorMat, detail = 0) {
+            const geo = new THREE.DodecahedronGeometry(radius, detail);
+            const rock = new THREE.Mesh(geo, colorMat);
+            rock.castShadow = true;
+            rock.receiveShadow = true;
+            return rock;
+        }
+
+        // --- الجسم (ضخم وعريض) ---
+        const torso = createRock(2.5, rockMat);
+        torso.scale.set(1.2, 1, 0.9);
+        torso.position.y = 3;
+        monster.add(torso);
+
+        // --- الرأس ---
+        const head = createRock(1.2, darkRockMat);
+        head.position.set(0, 5.5, 0.5);
+        monster.add(head);
+
+        // --- العيون المتوهجة ---
+        const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.2, 8, 8), eyeMat);
+        eyeL.position.set(-0.5, 5.7, 1.6);
+        monster.add(eyeL);
+
+        const eyeR = new THREE.Mesh(new THREE.SphereGeometry(0.2, 8, 8), eyeMat);
+        eyeR.position.set(0.5, 5.7, 1.6);
+        monster.add(eyeR);
+
+        // --- الأكتاف والأذرع ---
+        // الكتف الأيسر
+        const shoulderL = createRock(1.2, rockMat);
+        shoulderL.position.set(-2.5, 4.5, 0);
+        monster.add(shoulderL);
+
+        const armL = createRock(1.0, darkRockMat);
+        armL.position.set(-3.0, 2.5, 0.5);
+        armL.scale.set(1, 1.5, 1);
+        monster.add(armL);
+
+        // الكتف الأيمن
+        const shoulderR = createRock(1.2, rockMat);
+        shoulderR.position.set(2.5, 4.5, 0);
+        monster.add(shoulderR);
+
+        const armR = createRock(1.0, darkRockMat);
+        armR.position.set(3.0, 2.5, 0.5);
+        armR.scale.set(1, 1.5, 1);
+        monster.add(armR);
+
+        // --- الأشواك الزرقاء (البلورات) على الظهر والرأس ---
+        const spikeGeo = new THREE.ConeGeometry(0.4, 1.5, 4); // شكل هرمي حاد
+        
+        const spikePositions = [
+            { x: 0, y: 7, z: -0.5, rotX: -0.2 }, // فوق الرأس
+            { x: -1, y: 6.5, z: -0.5, rotX: -0.5 },
+            { x: 1, y: 6.5, z: -0.5, rotX: -0.5 },
+            { x: -1.5, y: 5.5, z: -1, rotX: -0.8 },
+            { x: 1.5, y: 5.5, z: -1, rotX: -0.8 },
+            { x: 0, y: 5, z: -2, rotX: -1.2 } // على الظهر
+        ];
+
+        spikePositions.forEach(pos => {
+            const spike = new THREE.Mesh(spikeGeo, crystalMat);
+            spike.position.set(pos.x, pos.y, pos.z);
+            spike.rotation.x = pos.rotX;
+            spike.castShadow = true;
+            monster.add(spike);
+        });
+
+        // إضافة الوحش للمشهد
+        scene.add(monster);
+
+        // ==========================================
+        // 5. الحركة (أنيميشن)
+        // ==========================================
+        const clock = new THREE.Clock();
+
         function animate() {
             requestAnimationFrame(animate);
+            const time = clock.getElapsedTime();
+
+            // تنفس الوحش (صعود ونزول خفيف)
+            monster.position.y = Math.sin(time * 1.5) * 0.1;
             
-            // تدوير المجسم المؤقت لجعله يبدو حياً
-            if (placeholderGroup.parent) {
-                placeholder.rotation.y += 0.01;
-                placeholder.position.y = 2 + Math.sin(Date.now() * 0.002) * 0.5;
-            }
+            // اهتزاز الأشواك الزرقاء (توهج)
+            blueLight.intensity = 15 + Math.sin(time * 5) * 5;
 
             controls.update();
             renderer.render(scene, camera);
         }
+        
         animate();
 
-        // 10. تعديل الشاشة
+        // تعديل الأبعاد
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
