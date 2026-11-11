@@ -4,12 +4,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#050507">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>KOKTON — تكسي العاصمة v2.3</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<!-- استدعاء مكتبة سوبابيس -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- نظام التقاط الأخطاء (عشان يطلعلك تنبيه إذا صار خطأ) -->
+<script>
+  window.onerror = function(msg, url, line) {
+    alert("⚠️ حدث خطأ برمجي:\n" + msg + "\nفي السطر: " + line);
+    return false;
+  };
+</script>
+
+<!-- تغيير رابط مكتبة سوبابيس إلى unpkg -->
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0}
@@ -701,6 +709,17 @@ label:first-child{margin-top:0}
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
+// شبكة أمان: إذا لم يشتغل الجافاسكربت، هذه الدالة تخفي السبلاش وتظهر واجهة اختيار الدور
+setTimeout(function() {
+    var splash = document.getElementById('splash');
+    var rolePicker = document.getElementById('rolePicker');
+    if (splash && !splash.classList.contains('done')) {
+        splash.classList.add('done');
+        if(rolePicker) rolePicker.classList.remove('hidden');
+        alert("تم تخطي شاشة التحميل بسبب بطء الاتصال أو خطأ برمجي.");
+    }
+}, 4500); // 4.5 ثانية
+
 /* =========================================================
    KOKTON — v2.3.1 (SUPABASE INTEGRATED)
    ========================================================= */
@@ -709,7 +728,17 @@ console.log('💰 KOKTON v2.3.1 — متصل بالسحابة');
 // ⚠️ إعدادات سوبابيس ⚠️
 const supabaseUrl = 'https://vvyqsimhvxnfxethwqvi.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2eXFzaW1odnhuZnhldGh3cXZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQzOTE5MzYsImV4cCI6MjEwOTk2NzkzNn0._5qizYY5lAfFWqPG5LggqzCDFJyfH2Xyy7obTsTS5_8';
-const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+let supabaseClient;
+try {
+    if (typeof supabase !== 'undefined') {
+        supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+    } else {
+        throw new Error("مكتبة سوبابيس غير محملة.");
+    }
+} catch(e) {
+    alert("فشل الاتصال بقاعدة البيانات. يرجى تحديث الصفحة أو استخدام VPN.");
+}
 
 const $ = (id) => document.getElementById(id);
 const fmt = (n) => Number(n).toLocaleString('en-US');
@@ -923,6 +952,7 @@ function getActiveRole() { try { return sessionStorage.getItem('kokton_active_ro
 function getSessionPhone(role) { try { return sessionStorage.getItem('kokton_phone_' + role); } catch(e) { return null; } }
 
 async function doLogin() {
+  if (!supabaseClient) { alert("لا يوجد اتصال بقاعدة البيانات."); return; }
   const phone = $('loginPhone').value.trim();
   const password = $('loginPassword').value;
   const role = state.pendingRole;
@@ -930,7 +960,7 @@ async function doLogin() {
   if (!password) { toast('اكتب كلمة السر', 'error'); return; }
 
   toast('جاري التحقق...', 'info');
-  const { data, error } = await supabase.from('accounts').select('*').eq('phone', phone).eq('role', role).single();
+  const { data, error } = await supabaseClient.from('accounts').select('*').eq('phone', phone).eq('role', role).single();
 
   if (error || !data) { toast('رقم الهاتف غير مسجل كـ ' + (role === 'customer' ? 'زبون' : 'سائق'), 'error'); return; }
   if (data.password !== hashPwd(password)) { toast('كلمة السر غير صحيحة', 'error'); return; }
@@ -943,6 +973,7 @@ async function doLogin() {
 }
 
 async function doRegister() {
+  if (!supabaseClient) { alert("لا يوجد اتصال بقاعدة البيانات."); return; }
   const name = $('regName').value.trim();
   const phone = $('regPhone').value.trim();
   const password = $('regPassword').value;
@@ -955,7 +986,7 @@ async function doRegister() {
   if (password !== password2) { toast('كلمتا السر غير متطابقتين', 'error'); return; }
 
   toast('جاري إنشاء الحساب...', 'info');
-  const { error } = await supabase.from('accounts').insert([{ phone: phone, name: name, password: hashPwd(password), role: role, car: '' }]);
+  const { error } = await supabaseClient.from('accounts').insert([{ phone: phone, name: name, password: hashPwd(password), role: role, car: '' }]);
 
   if (error) { console.error(error); toast('هذا الرقم مسجل مسبقاً أو حدث خطأ', 'error'); return; }
 
@@ -976,7 +1007,8 @@ function logout() {
 }
 
 async function syncProfileFromDB(role, phone) {
-  const { data, error } = await supabase.from('accounts').select('*').eq('phone', phone).eq('role', role).single();
+  if (!supabaseClient) return;
+  const { data, error } = await supabaseClient.from('accounts').select('*').eq('phone', phone).eq('role', role).single();
   if (data) {
     state.user = data;
     if (role === 'customer') {
@@ -1210,6 +1242,7 @@ function locateMe() {
 }
 
 async function submitOrder() {
+  if (!supabaseClient) { alert("لا يوجد اتصال بقاعدة البيانات."); return; }
   if (!state.pickupCoords) { toast('حدد موقع الانطلاق أولاً', 'error'); return; }
   if (!state.destCoords) { toast('حدد الوجهة أولاً', 'error'); return; }
   const km = haversine(state.pickupCoords, state.destCoords);
@@ -1235,7 +1268,7 @@ async function submitOrder() {
     status: 'pending'
   };
 
-  const { error } = await supabase.from('orders').insert([newOrder]);
+  const { error } = await supabaseClient.from('orders').insert([newOrder]);
 
   if (error) { console.error(error); toast('خطأ في إرسال الطلب', 'error'); return; }
 
@@ -1285,17 +1318,19 @@ function renderOrderItem(o, viewer) {
 }
 
 async function renderCustomerOrders() {
+  if (!supabaseClient) return;
   const el = $('customerOrdersList'); if (!el) return;
   el.innerHTML = '<div class="empty-state"><div class="ttl">جاري التحميل...</div></div>';
-  const { data, error } = await supabase.from('orders').select('*').eq('customer_phone', state.user.phone).order('created_at', { ascending: false });
+  const { data, error } = await supabaseClient.from('orders').select('*').eq('customer_phone', state.user.phone).order('created_at', { ascending: false });
   if (error || !data) { el.innerHTML = '<div class="empty-state"><div class="ttl">حدث خطأ</div></div>'; return; }
   if (data.length === 0) el.innerHTML = `<div class="empty-state"><div class="big">📭</div><div class="ttl">لا توجد طلبات</div><div class="muted" style="font-size:12px;margin-top:6px">اطلب رحلتك من الرئيسية</div></div>`;
   else el.innerHTML = data.map(o => renderOrderItem(o, 'customer')).join('');
 }
 
 async function cancelOrder(id) {
+  if (!supabaseClient) return;
   if (!confirm('إلغاء هذا الطلب؟')) return;
-  const { error } = await supabase.from('orders').update({ status: 'cancelled' }).eq('id', id).eq('status', 'pending');
+  const { error } = await supabaseClient.from('orders').update({ status: 'cancelled' }).eq('id', id).eq('status', 'pending');
   if (error) { toast('لا يمكن إلغاء الطلب', 'error'); return; }
   toast('تم إلغاء الطلب', 'info'); renderCustomerOrders();
 }
@@ -1312,10 +1347,10 @@ function initDriverMap() {
 }
 
 async function updateDriverMapMarkers() {
-  if (!driverMap) return;
+  if (!driverMap || !supabaseClient) return;
   dOrderMarkers.forEach(m => { try { driverMap.removeLayer(m); } catch(e){} });
   dOrderMarkers = [];
-  const { data } = await supabase.from('orders').select('*').eq('status', 'pending');
+  const { data } = await supabaseClient.from('orders').select('*').eq('status', 'pending');
   if (data) {
     data.forEach(o => {
       const m = L.marker([o.pickup_lat, o.pickup_lng], { icon: makeIcon('#ffd24a', '🚕') }).addTo(driverMap);
@@ -1326,14 +1361,15 @@ async function updateDriverMapMarkers() {
 }
 
 async function renderDriverHome() {
+  if (!supabaseClient) return;
   const el = $('driverCurrentOrder'); if (!el) return;
   el.innerHTML = '<div class="empty-state"><div class="ttl">جاري التحميل...</div></div>';
-  const { data, error } = await supabase.from('orders').select('*').eq('driver_phone', state.user.phone).in('status', ['accepted', 'arrived', 'ongoing']).order('created_at', { ascending: false });
+  const { data, error } = await supabaseClient.from('orders').select('*').eq('driver_phone', state.user.phone).in('status', ['accepted', 'arrived', 'ongoing']).order('created_at', { ascending: false });
 
   if (error || !data || data.length === 0) el.innerHTML = `<div class="empty-state"><div class="big">🚕</div><div class="ttl">لا توجد رحلة حالية</div><div class="muted" style="font-size:12px;margin-top:6px">${state.online ? 'انتظر طلبات جديدة' : 'فعّل الاتصال لاستقبال الطلبات'}</div></div>`;
   else el.innerHTML = renderOrderItem(data[0], 'driver');
 
-  const { data: history } = await supabase.from('orders').select('price').eq('driver_phone', state.user.phone).eq('status', 'completed');
+  const { data: history } = await supabaseClient.from('orders').select('price').eq('driver_phone', state.user.phone).eq('status', 'completed');
   if (history) {
     $('statTrips').textContent = history.length;
     $('statEarnings').textContent = fmt(history.reduce((s, o) => s + o.price, 0));
@@ -1342,26 +1378,28 @@ async function renderDriverHome() {
 }
 
 async function renderDriverOrders() {
+  if (!supabaseClient) return;
   const availEl = $('driverAvailableOrders'); if (!availEl) return;
   availEl.innerHTML = '<div class="empty-state"><div class="ttl">جاري التحميل...</div></div>';
 
   if (!state.online) {
     availEl.innerHTML = `<div class="empty-state"><div class="big">📴</div><div class="ttl">أنت غير متصل</div></div>`;
   } else {
-    const { data } = await supabase.from('orders').select('*').eq('status', 'pending').order('created_at', { ascending: false });
+    const { data } = await supabaseClient.from('orders').select('*').eq('status', 'pending').order('created_at', { ascending: false });
     if (!data || data.length === 0) availEl.innerHTML = `<div class="empty-state"><div class="big">⏳</div><div class="ttl">لا توجد طلبات حالياً</div></div>`;
     else availEl.innerHTML = data.map(o => renderOrderItem(o, 'driver')).join('');
   }
 
   const histEl = $('driverHistory'); if (!histEl) return;
-  const { data: hist } = await supabase.from('orders').select('*').eq('driver_phone', state.user.phone).eq('status', 'completed').order('created_at', { ascending: false }).limit(10);
+  const { data: hist } = await supabaseClient.from('orders').select('*').eq('driver_phone', state.user.phone).eq('status', 'completed').order('created_at', { ascending: false }).limit(10);
   if (!hist || hist.length === 0) histEl.innerHTML = `<div class="empty-state"><div class="big">📋</div><div class="ttl">لا يوجد سجل</div></div>`;
   else histEl.innerHTML = hist.map(o => renderOrderItem(o, 'driver')).join('');
 }
 
 async function acceptOrder(id) {
+  if (!supabaseClient) return;
   toast('جاري القبول...', 'info');
-  const { error } = await supabase.from('orders').update({
+  const { error } = await supabaseClient.from('orders').update({
     status: 'accepted', driver_phone: state.user.phone, driver_name: state.user.name, driver_car: state.user.car || ''
   }).eq('id', id).eq('status', 'pending');
 
@@ -1370,14 +1408,16 @@ async function acceptOrder(id) {
 }
 
 async function advanceOrder(id, newStatus) {
-  const { error } = await supabase.from('orders').update({ status: newStatus }).eq('id', id).eq('driver_phone', state.user.phone);
+  if (!supabaseClient) return;
+  const { error } = await supabaseClient.from('orders').update({ status: newStatus }).eq('id', id).eq('driver_phone', state.user.phone);
   if (error) return;
   haptic(); const labels = { arrived: '✅ وصلت لموقع الزبون', ongoing: '🚀 بدأت الرحلة', completed: '🎉 انتهت الرحلة' };
   toast(labels[newStatus] || 'تم التحديث', 'success'); renderDriverHome(); renderDriverOrders();
 }
 
 async function renderEarnings() {
-  const { data: mine } = await supabase.from('orders').select('*').eq('driver_phone', state.user.phone).eq('status', 'completed');
+  if (!supabaseClient) return;
+  const { data: mine } = await supabaseClient.from('orders').select('*').eq('driver_phone', state.user.phone).eq('status', 'completed');
   if (!mine) return;
   const total = mine.reduce((s, o) => s + o.price, 0);
   const today = new Date(); today.setHours(0, 0, 0, 0);
@@ -1410,17 +1450,19 @@ function updateOnlineUI() {
    PROFILES
    ========================================================= */
 async function saveCustomerProfile() {
+  if (!supabaseClient) return;
   const name = $('customerName').value.trim();
   if (name) {
-    await supabase.from('accounts').update({ name: name }).eq('phone', state.user.phone).eq('role', 'customer');
+    await supabaseClient.from('accounts').update({ name: name }).eq('phone', state.user.phone).eq('role', 'customer');
     state.user.name = name;
     toast('✅ تم الحفظ في قاعدة البيانات', 'success');
   }
 }
 async function saveDriverProfile() {
+  if (!supabaseClient) return;
   const name = $('driverName').value.trim(); const car = $('driverCar').value.trim();
   if (name) {
-    await supabase.from('accounts').update({ name: name, car: car }).eq('phone', state.user.phone).eq('role', 'driver');
+    await supabaseClient.from('accounts').update({ name: name, car: car }).eq('phone', state.user.phone).eq('role', 'driver');
     state.user.name = name; state.user.car = car;
     toast('✅ تم الحفظ في قاعدة البيانات', 'success');
   }
@@ -1440,12 +1482,18 @@ function buildParticles() {
   }
 }
 function initSplash() {
-  buildParticles();
+  try { buildParticles(); } catch(e){}
   setTimeout(() => {
-    $('splash').classList.add('done');
-    const activeRole = getActiveRole();
-    if (activeRole && getSessionPhone(activeRole)) enterApp(activeRole);
-    else showRolePicker();
+    try {
+      const splash = $('splash');
+      if(splash) splash.classList.add('done');
+      const activeRole = getActiveRole();
+      if (activeRole && getSessionPhone(activeRole)) enterApp(activeRole);
+      else showRolePicker();
+    } catch(err) {
+      alert("خطأ في التشغيل: " + err.message);
+      const rp = $('rolePicker'); if(rp) rp.classList.remove('hidden');
+    }
   }, 3400);
 }
 function showRolePicker() {
@@ -1476,18 +1524,23 @@ function toast(msg, type = 'info') {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-  applyTheme(getStoredTheme());
-  initSplash();
-  
-  setInterval(() => {
-    if (state.role === 'driver' && state.online) {
-      if (state.screen === 'd-home') renderDriverHome();
-      if (state.screen === 'd-orders') renderDriverOrders();
-    }
-    if (state.role === 'customer' && state.screen === 'c-orders') {
-      renderCustomerOrders();
-    }
-  }, 5000);
+  try {
+    applyTheme(getStoredTheme());
+    initSplash();
+    
+    setInterval(() => {
+      if (state.role === 'driver' && state.online) {
+        if (state.screen === 'd-home') renderDriverHome();
+        if (state.screen === 'd-orders') renderDriverOrders();
+      }
+      if (state.role === 'customer' && state.screen === 'c-orders') {
+        renderCustomerOrders();
+      }
+    }, 5000);
+  } catch(e) {
+    alert("خطأ أثناء بدء التشغيل: " + e.message);
+    console.error(e);
+  }
 });
 </script>
 </body>
