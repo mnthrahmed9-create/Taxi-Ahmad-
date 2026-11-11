@@ -8,292 +8,140 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>KOKTON — تكسي العاصمة v2.3.2</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<!-- استدعاء مكتبة سوبابيس -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
+/* ... (نفس التنسيقات السابقة، اختصاراً للوقت) ... */
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0}
-body{
-  background:#050507;color:#fff;
-  font-family:-apple-system,'SF Arabic','Segoe UI',Tahoma,Arial,sans-serif;
-  min-height:100vh;overflow-x:hidden;user-select:none;
-  transition:background .3s, color .3s;
-}
+body{background:#050507;color:#fff;font-family:-apple-system,'SF Arabic','Segoe UI',Tahoma,Arial,sans-serif;min-height:100vh;overflow-x:hidden;user-select:none;transition:background .3s,color .3s}
 input,textarea{user-select:text;font-family:inherit}
 button{font-family:inherit;cursor:pointer;border:0;background:none;color:inherit}
-
-:root{
-  --gold:#ffd24a;--gold-2:#ffb800;--gold-3:#8a6200;
-  --border:rgba(255,196,0,0.18);
-  --radius:22px;
-  --success:#00d4a0;--danger:#ff4d6d;
-}
+:root{--gold:#ffd24a;--gold-2:#ffb800;--gold-3:#8a6200;--border:rgba(255,196,0,0.18);--radius:22px;--success:#00d4a0;--danger:#ff4d6d}
 .hidden{display:none!important}
-
-#splash{
-  position:fixed;inset:0;z-index:9999;
-  background:radial-gradient(circle at 50% 45%, rgba(255,196,0,0.18) 0%, transparent 55%),
-    radial-gradient(circle at 50% 50%, #14110a 0%, #050507 70%);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  overflow:hidden;transition:opacity .8s ease, visibility .8s ease;
-}
+#splash{position:fixed;inset:0;z-index:9999;background:radial-gradient(circle at 50% 45%,rgba(255,196,0,0.18) 0%,transparent 55%),radial-gradient(circle at 50% 50%,#14110a 0%,#050507 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;transition:opacity .8s ease,visibility .8s ease}
 #splash.done{opacity:0;visibility:hidden}
-.splash-orb{position:absolute;width:340px;height:340px;border-radius:50%;
-  background:radial-gradient(circle,rgba(255,196,0,0.22) 0%,transparent 65%);
-  filter:blur(30px);animation:orbPulse 3s ease-in-out infinite;}
+.splash-orb{position:absolute;width:340px;height:340px;border-radius:50%;background:radial-gradient(circle,rgba(255,196,0,0.22) 0%,transparent 65%);filter:blur(30px);animation:orbPulse 3s ease-in-out infinite}
 @keyframes orbPulse{0%,100%{transform:scale(1);opacity:.7}50%{transform:scale(1.2);opacity:1}}
 .splash-particles{position:absolute;inset:0;overflow:hidden;pointer-events:none}
-.particle{position:absolute;bottom:-10px;border-radius:50%;
-  background:radial-gradient(circle,#ffd24a 0%,transparent 70%);
-  animation:floatUp linear infinite;opacity:0;}
+.particle{position:absolute;bottom:-10px;border-radius:50%;background:radial-gradient(circle,#ffd24a 0%,transparent 70%);animation:floatUp linear infinite;opacity:0}
 @keyframes floatUp{0%{transform:translateY(0) scale(.5);opacity:0}10%{opacity:.9}100%{transform:translateY(-110vh) scale(1.4);opacity:0}}
-.splash-logo{position:relative;z-index:2;font-size:clamp(48px,15vw,72px);font-weight:900;letter-spacing:8px;
-  background:linear-gradient(90deg,#8a6200,#ffd24a,#fff3b0,#ffd24a,#8a6200);background-size:220% 100%;
-  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;
-  filter:drop-shadow(0 0 30px rgba(255,196,0,0.6));
-  animation:logoReveal 1.6s cubic-bezier(.2,.9,.2,1) forwards, shimmer 3s linear 1s infinite;
-  transform:scale(.3) rotateX(40deg);opacity:0;}
+.splash-logo{position:relative;z-index:2;font-size:clamp(48px,15vw,72px);font-weight:900;letter-spacing:8px;background:linear-gradient(90deg,#8a6200,#ffd24a,#fff3b0,#ffd24a,#8a6200);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;filter:drop-shadow(0 0 30px rgba(255,196,0,0.6));animation:logoReveal 1.6s cubic-bezier(.2,.9,.2,1) forwards,shimmer 3s linear 1s infinite;transform:scale(.3) rotateX(40deg);opacity:0}
 @keyframes logoReveal{to{transform:scale(1) rotateX(0);opacity:1}}
 @keyframes shimmer{from{background-position:200% 0}to{background-position:-200% 0}}
-.splash-sub{position:relative;z-index:2;margin-top:6px;font-size:15px;letter-spacing:4px;color:#ffd24a;font-weight:700;
-  animation:fadeInUp .8s ease 1.4s forwards;opacity:0;}
-.splash-line{position:relative;z-index:2;margin-top:24px;width:120px;height:2px;border-radius:2px;
-  background:linear-gradient(90deg,transparent,#ffd24a,transparent);
-  animation:lineGrow 1.2s ease 1.8s forwards;opacity:0;transform:scaleX(0);}
+.splash-sub{position:relative;z-index:2;margin-top:6px;font-size:15px;letter-spacing:4px;color:#ffd24a;font-weight:700;animation:fadeInUp .8s ease 1.4s forwards;opacity:0}
+.splash-line{position:relative;z-index:2;margin-top:24px;width:120px;height:2px;border-radius:2px;background:linear-gradient(90deg,transparent,#ffd24a,transparent);animation:lineGrow 1.2s ease 1.8s forwards;opacity:0;transform:scaleX(0)}
 @keyframes lineGrow{to{transform:scaleX(1);opacity:1}}
-.splash-tag{position:relative;z-index:2;margin-top:18px;font-size:12px;color:#a09a8a;letter-spacing:2px;
-  animation:fadeInUp .8s ease 2.2s forwards;opacity:0;}
+.splash-tag{position:relative;z-index:2;margin-top:18px;font-size:12px;color:#a09a8a;letter-spacing:2px;animation:fadeInUp .8s ease 2.2s forwards;opacity:0}
 @keyframes fadeInUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-.splash-progress{position:absolute;bottom:60px;left:50%;transform:translateX(-50%);
-  width:160px;height:3px;border-radius:3px;background:rgba(255,196,0,0.12);overflow:hidden;
-  animation:fadeInUp .6s ease 1s forwards;opacity:0;}
-.splash-progress::after{content:'';position:absolute;inset:0;
-  background:linear-gradient(90deg,#8a6200,#ffd24a,#fff3b0);border-radius:3px;
-  animation:progressFill 2.4s cubic-bezier(.6,.05,.3,.95) forwards;transform-origin:right;transform:scaleX(0);}
+.splash-progress{position:absolute;bottom:60px;left:50%;transform:translateX(-50%);width:160px;height:3px;border-radius:3px;background:rgba(255,196,0,0.12);overflow:hidden;animation:fadeInUp .6s ease 1s forwards;opacity:0}
+.splash-progress::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,#8a6200,#ffd24a,#fff3b0);border-radius:3px;animation:progressFill 2.4s cubic-bezier(.6,.05,.3,.95) forwards;transform-origin:right;transform:scaleX(0)}
 @keyframes progressFill{to{transform:scaleX(1)}}
-
-#rolePicker{position:fixed;inset:0;z-index:9000;
-  background:radial-gradient(circle at 50% 30%, rgba(255,196,0,0.10) 0%, transparent 60%),#050507;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:24px;transition:opacity .5s ease, visibility .5s ease;}
+#rolePicker{position:fixed;inset:0;z-index:9000;background:radial-gradient(circle at 50% 30%,rgba(255,196,0,0.10) 0%,transparent 60%),#050507;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;transition:opacity .5s ease,visibility .5s ease}
 #rolePicker.done{opacity:0;visibility:hidden}
 .role-brand{text-align:center;margin-bottom:8px}
 .brand-crown{font-size:44px;color:var(--gold);filter:drop-shadow(0 0 20px rgba(255,196,0,0.6));animation:floatY 3s ease-in-out infinite}
 @keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-.brand-name{font-size:52px;font-weight:900;letter-spacing:6px;
-  background:linear-gradient(90deg,#8a6200,#ffd24a,#fff3b0,#ffd24a,#8a6200);background-size:220% 100%;
-  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;
-  animation:shimmer 4s linear infinite;line-height:1.1;}
+.brand-name{font-size:52px;font-weight:900;letter-spacing:6px;background:linear-gradient(90deg,#8a6200,#ffd24a,#fff3b0,#ffd24a,#8a6200);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;animation:shimmer 4s linear infinite;line-height:1.1}
 .brand-sub{font-size:14px;color:#ffd24a;letter-spacing:4px;margin-top:4px;font-weight:700}
 .role-title{margin:32px 0 16px;font-size:15px;color:#a09a8a;letter-spacing:2px}
 .role-cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;width:100%;max-width:420px}
-.role-card{padding:24px 14px;
-  background:linear-gradient(160deg,#1a1820 0%,#0c0b10 100%);
-  border:1px solid var(--border);border-radius:var(--radius);
-  text-align:center;color:#fff;
-  box-shadow:0 20px 40px -20px rgba(0,0,0,0.95);
-  transition:transform .25s, border-color .25s;}
+.role-card{padding:24px 14px;background:linear-gradient(160deg,#1a1820 0%,#0c0b10 100%);border:1px solid var(--border);border-radius:var(--radius);text-align:center;color:#fff;box-shadow:0 20px 40px -20px rgba(0,0,0,0.95);transition:transform .25s,border-color .25s}
 .role-card:active{transform:scale(.97)}
 .role-card.driver{background:linear-gradient(160deg,#22190a 0%,#0f0c05 100%);border-color:rgba(255,196,0,0.32)}
 .role-emoji{font-size:48px;margin-bottom:10px;display:block}
 .role-name{font-size:18px;font-weight:900;color:var(--gold);margin-bottom:4px}
 .role-desc{font-size:11px;color:#a09a8a;line-height:1.5}
 .role-footer{position:absolute;bottom:20px;font-size:10px;color:#5a554a;letter-spacing:1px}
-.version-badge{position:absolute;top:20px;right:20px;font-size:10px;padding:4px 10px;border-radius:20px;
-  background:rgba(0,212,160,0.15);color:#00d4a0;border:1px solid rgba(0,212,160,0.3);font-weight:700;}
-
-#authScreen{position:fixed;inset:0;z-index:9100;
-  background:radial-gradient(circle at 50% 20%, rgba(255,196,0,0.10) 0%, transparent 60%),#050507;
-  display:flex;flex-direction:column;align-items:center;
-  padding:32px 20px 40px;overflow-y:auto;}
+.version-badge{position:absolute;top:20px;right:20px;font-size:10px;padding:4px 10px;border-radius:20px;background:rgba(0,212,160,0.15);color:#00d4a0;border:1px solid rgba(0,212,160,0.3);font-weight:700}
+#authScreen{position:fixed;inset:0;z-index:9100;background:radial-gradient(circle at 50% 20%,rgba(255,196,0,0.10) 0%,transparent 60%),#050507;display:flex;flex-direction:column;align-items:center;padding:32px 20px 40px;overflow-y:auto}
 .auth-wrap{width:100%;max-width:420px}
-.auth-tabs{display:flex;gap:6px;margin:24px 0 16px;padding:4px;
-  background:#0c0b10;border:1px solid rgba(255,255,255,0.08);border-radius:16px;}
+.auth-tabs{display:flex;gap:6px;margin:24px 0 16px;padding:4px;background:#0c0b10;border:1px solid rgba(255,255,255,0.08);border-radius:16px}
 .auth-tab{flex:1;padding:12px;border-radius:12px;color:#a09a8a;font-size:13px;font-weight:900;transition:all .2s}
 .auth-tab.active{background:linear-gradient(180deg,rgba(255,196,0,0.18),rgba(255,196,0,0.04));color:var(--gold)}
-
-#app{max-width:520px;min-height:100vh;margin:0 auto;position:relative;
-  background:radial-gradient(circle at 50% 0%, rgba(255,196,0,0.06) 0%, transparent 40%),#050507;
-  overflow:hidden;transition:background .3s;}
-.top{position:sticky;top:0;z-index:100;height:auto;min-height:64px;
-  display:flex;align-items:center;justify-content:space-between;padding:10px 12px;gap:8px;
-  background:linear-gradient(180deg,#0a0a0f 0%,rgba(10,10,15,0.92) 100%);
-  backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,196,0,0.10);
-  transition:background .3s, border-color .3s;}
-.switch-role-btn{display:flex;align-items:center;gap:6px;padding:10px 14px;border-radius:16px;
-  background:linear-gradient(180deg,#ffe36b 0%,#ffc400 45%,#d99a00 100%);
-  color:#17120a;font-weight:900;font-size:12px;border:2px solid #fff3b0;
-  box-shadow:0 0 20px rgba(255,196,0,0.6), 0 4px 12px rgba(0,0,0,0.5);
-  animation:switchGlow 2s ease-in-out infinite;transition:transform .1s;white-space:nowrap;}
+#app{max-width:520px;min-height:100vh;margin:0 auto;position:relative;background:radial-gradient(circle at 50% 0%,rgba(255,196,0,0.06) 0%,transparent 40%),#050507;overflow:hidden;transition:background .3s}
+.top{position:sticky;top:0;z-index:100;height:auto;min-height:64px;display:flex;align-items:center;justify-content:space-between;padding:10px 12px;gap:8px;background:linear-gradient(180deg,#0a0a0f 0%,rgba(10,10,15,0.92) 100%);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,196,0,0.10);transition:background .3s,border-color .3s}
+.switch-role-btn{display:flex;align-items:center;gap:6px;padding:10px 14px;border-radius:16px;background:linear-gradient(180deg,#ffe36b 0%,#ffc400 45%,#d99a00 100%);color:#17120a;font-weight:900;font-size:12px;border:2px solid #fff3b0;box-shadow:0 0 20px rgba(255,196,0,0.6),0 4px 12px rgba(0,0,0,0.5);animation:switchGlow 2s ease-in-out infinite;transition:transform .1s;white-space:nowrap}
 .switch-role-btn:active{transform:scale(.94)}
-@keyframes switchGlow{0%,100%{box-shadow:0 0 20px rgba(255,196,0,0.5), 0 4px 12px rgba(0,0,0,0.5)}50%{box-shadow:0 0 35px rgba(255,196,0,0.9), 0 4px 12px rgba(0,0,0,0.5)}}
+@keyframes switchGlow{0%,100%{box-shadow:0 0 20px rgba(255,196,0,0.5),0 4px 12px rgba(0,0,0,0.5)}50%{box-shadow:0 0 35px rgba(255,196,0,0.9),0 4px 12px rgba(0,0,0,0.5)}}
 .switch-role-btn .sw-icon{font-size:16px;line-height:1}
 .switch-role-btn .sw-label{font-size:11px;line-height:1.1;text-align:center}
 .switch-role-btn .sw-label small{display:block;font-size:9px;opacity:.7;font-weight:700}
 .top-right-group{display:flex;gap:6px;align-items:center}
-.iconbtn{width:42px;height:42px;border-radius:13px;
-  background:linear-gradient(160deg,#1a1820,#0c0b10);
-  border:1px solid rgba(255,255,255,0.10);color:#ffd24a;font-size:20px;
-  display:flex;align-items:center;justify-content:center;
-  transition:transform .2s, background .3s, border-color .3s;}
+.iconbtn{width:42px;height:42px;border-radius:13px;background:linear-gradient(160deg,#1a1820,#0c0b10);border:1px solid rgba(255,255,255,0.10);color:#ffd24a;font-size:20px;display:flex;align-items:center;justify-content:center;transition:transform .2s,background .3s,border-color .3s}
 .iconbtn:active{transform:scale(.92)}
-.theme-btn{width:42px;height:42px;border-radius:13px;
-  background:linear-gradient(160deg,#1a1820,#0c0b10);
-  border:1px solid rgba(255,255,255,0.10);font-size:20px;
-  display:flex;align-items:center;justify-content:center;
-  transition:transform .2s, background .3s, border-color .3s, box-shadow .3s;
-  box-shadow:0 0 15px rgba(255,196,0,0.2);}
+.theme-btn{width:42px;height:42px;border-radius:13px;background:linear-gradient(160deg,#1a1820,#0c0b10);border:1px solid rgba(255,255,255,0.10);font-size:20px;display:flex;align-items:center;justify-content:center;transition:transform .2s,background .3s,border-color .3s,box-shadow .3s;box-shadow:0 0 15px rgba(255,196,0,0.2)}
 .theme-btn:active{transform:scale(.92) rotate(20deg);box-shadow:0 0 25px rgba(255,196,0,0.6)}
 .brand-small{display:flex;align-items:center;gap:6px;flex:1;justify-content:center;min-width:0}
-.brand-mini{font-size:16px;font-weight:900;letter-spacing:2px;
-  background:linear-gradient(90deg,#8a6200,#ffd24a,#fff3b0,#ffd24a,#8a6200);background-size:220% 100%;
-  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;
-  animation:shimmer 3s linear infinite;}
-.role-tag{font-size:10px;padding:4px 8px;border-radius:20px;
-  background:rgba(255,196,0,0.12);color:#ffd24a;font-weight:700;
-  border:1px solid rgba(255,196,0,0.25);white-space:nowrap;}
+.brand-mini{font-size:16px;font-weight:900;letter-spacing:2px;background:linear-gradient(90deg,#8a6200,#ffd24a,#fff3b0,#ffd24a,#8a6200);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;animation:shimmer 3s linear infinite}
+.role-tag{font-size:10px;padding:4px 8px;border-radius:20px;background:rgba(255,196,0,0.12);color:#ffd24a;font-weight:700;border:1px solid rgba(255,196,0,0.25);white-space:nowrap}
 .screen{display:none;padding:16px 16px 100px;animation:screenIn .35s}
 .screen.active{display:block}
 @keyframes screenIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 .section-title{font-size:19px;font-weight:900;margin:14px 0 10px;display:flex;align-items:center;gap:8px}
 .section-title::before{content:'';width:4px;height:18px;border-radius:4px;background:linear-gradient(180deg,#ffd24a,#8a6200)}
 .muted{color:#a09a8a;font-size:13px;line-height:1.7}
-.bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%);
-  width:min(520px,100%);height:74px;z-index:500;
-  background:linear-gradient(0deg,#0a0a0f 0%,rgba(10,10,15,0.96) 100%);
-  backdrop-filter:blur(20px);border-top:1px solid rgba(255,196,0,0.10);
-  display:flex;justify-content:space-around;align-items:center;padding:0 6px;
-  transition:background .3s, border-color .3s;}
-.nav{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
-  color:#6a6659;font-size:10px;font-weight:700;padding:8px 4px;border-radius:14px;
-  transition:color .2s, background .2s;position:relative;}
+.bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(520px,100%);height:74px;z-index:500;background:linear-gradient(0deg,#0a0a0f 0%,rgba(10,10,15,0.96) 100%);backdrop-filter:blur(20px);border-top:1px solid rgba(255,196,0,0.10);display:flex;justify-content:space-around;align-items:center;padding:0 6px;transition:background .3s,border-color .3s}
+.nav{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;color:#6a6659;font-size:10px;font-weight:700;padding:8px 4px;border-radius:14px;transition:color .2s,background .2s;position:relative}
 .nav b{font-size:20px;line-height:1;font-weight:400}
 .nav.active{color:var(--gold);background:rgba(255,196,0,0.06)}
-.nav.active::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);
-  width:24px;height:2px;border-radius:2px;background:var(--gold);box-shadow:0 0 10px var(--gold);}
-.cta-primary{width:100%;padding:16px;margin-top:16px;border-radius:18px;
-  font-size:17px;font-weight:900;
-  background:linear-gradient(180deg,#ffe36b 0%,#ffc400 45%,#d99a00 100%);
-  color:#17120a;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,0.5),0 6px 0 #8a6200,0 16px 30px -10px rgba(255,196,0,0.45);
-  transition:transform .1s;}
+.nav.active::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:24px;height:2px;border-radius:2px;background:var(--gold);box-shadow:0 0 10px var(--gold)}
+.cta-primary{width:100%;padding:16px;margin-top:16px;border-radius:18px;font-size:17px;font-weight:900;background:linear-gradient(180deg,#ffe36b 0%,#ffc400 45%,#d99a00 100%);color:#17120a;box-shadow:inset 0 1px 0 rgba(255,255,255,0.5),0 6px 0 #8a6200,0 16px 30px -10px rgba(255,196,0,0.45);transition:transform .1s}
 .cta-primary:active{transform:translateY(4px);box-shadow:inset 0 1px 0 rgba(255,255,255,0.4),0 2px 0 #8a6200}
-.cta-ghost{width:100%;padding:14px;margin-top:10px;
-  background:linear-gradient(160deg,#1a1820,#0c0b10);
-  border:1px solid rgba(255,255,255,0.10);
-  color:#e8e3d4;font-weight:700;font-size:14px;border-radius:16px;
-  transition:transform .1s, background .3s, border-color .3s;}
+.cta-ghost{width:100%;padding:14px;margin-top:10px;background:linear-gradient(160deg,#1a1820,#0c0b10);border:1px solid rgba(255,255,255,0.10);color:#e8e3d4;font-weight:700;font-size:14px;border-radius:16px;transition:transform .1s,background .3s,border-color .3s}
 .cta-ghost:active{transform:scale(.97)}
-.field{width:100%;padding:14px 16px;margin-top:8px;
-  background:#0c0b10;border:1px solid rgba(255,255,255,0.09);
-  border-radius:14px;color:#fff;font-size:14px;outline:none;
-  transition:border-color .2s, background .3s, color .3s;}
+.field{width:100%;padding:14px 16px;margin-top:8px;background:#0c0b10;border:1px solid rgba(255,255,255,0.09);border-radius:14px;color:#fff;font-size:14px;outline:none;transition:border-color .2s,background .3s,color .3s}
 .field::placeholder{color:#5a554a}
 .field:focus{border-color:rgba(255,196,0,0.55);box-shadow:0 0 0 3px rgba(255,196,0,0.10)}
 .field[readonly]{opacity:.65}
 label{display:block;font-size:12px;color:#a09a8a;font-weight:700;margin-top:12px}
 label:first-child{margin-top:0}
-.formbox{background:linear-gradient(160deg,#14121a 0%,#0a090f 100%);
-  border:1px solid var(--border);border-radius:var(--radius);padding:16px;
-  transition:background .3s, border-color .3s;}
-.scene-3d{position:relative;height:200px;margin:4px 0 16px;
-  border-radius:var(--radius);overflow:hidden;
-  background:radial-gradient(circle at 50% 100%, rgba(255,196,0,0.18) 0%, transparent 60%),
-    linear-gradient(180deg,#15131c 0%,#08070b 100%);
-  border:1px solid rgba(255,196,0,0.18);
-  transition:background .3s, border-color .3s;}
-.scene-road{position:absolute;bottom:0;left:0;right:0;height:70px;
-  background:linear-gradient(180deg,#1a1a22 0%,#050507 100%);
-  border-top:2px solid rgba(255,196,0,0.22);transition:background .3s;}
-.scene-road::after{content:'';position:absolute;top:50%;left:0;right:0;height:3px;
-  background:repeating-linear-gradient(90deg,#ffd24a 0 30px,transparent 30px 60px);opacity:.5;}
-.scene-taxi{position:absolute;bottom:18px;left:50%;transform:translateX(-50%) scaleX(-1);font-size:82px;z-index:2;
-  filter:drop-shadow(0 12px 20px rgba(255,196,0,0.35));
-  animation:taxiFloat 3s ease-in-out infinite;}
+.formbox{background:linear-gradient(160deg,#14121a 0%,#0a090f 100%);border:1px solid var(--border);border-radius:var(--radius);padding:16px;transition:background .3s,border-color .3s}
+.scene-3d{position:relative;height:200px;margin:4px 0 16px;border-radius:var(--radius);overflow:hidden;background:radial-gradient(circle at 50% 100%,rgba(255,196,0,0.18) 0%,transparent 60%),linear-gradient(180deg,#15131c 0%,#08070b 100%);border:1px solid rgba(255,196,0,0.18);transition:background .3s,border-color .3s}
+.scene-road{position:absolute;bottom:0;left:0;right:0;height:70px;background:linear-gradient(180deg,#1a1a22 0%,#050507 100%);border-top:2px solid rgba(255,196,0,0.22);transition:background .3s}
+.scene-road::after{content:'';position:absolute;top:50%;left:0;right:0;height:3px;background:repeating-linear-gradient(90deg,#ffd24a 0 30px,transparent 30px 60px);opacity:.5}
+.scene-taxi{position:absolute;bottom:18px;left:50%;transform:translateX(-50%) scaleX(-1);font-size:82px;z-index:2;filter:drop-shadow(0 12px 20px rgba(255,196,0,0.35));animation:taxiFloat 3s ease-in-out infinite}
 @keyframes taxiFloat{0%,100%{transform:translateX(-50%) scaleX(-1) translateY(0)}50%{transform:translateX(-50%) scaleX(-1) translateY(-6px)}}
 .hero-text{text-align:center;margin-bottom:8px}
 .hero-title{font-size:30px;font-weight:900;line-height:1.2}
 .hero-title span{color:var(--gold)}
 .hero-tag{font-size:12px;color:#a09a8a;letter-spacing:2px;margin-top:4px}
 .services-3d{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
-.service-3d{padding:16px 6px 14px;
-  background:linear-gradient(160deg,#1a1820 0%,#0c0b10 100%);
-  border:1px solid rgba(255,196,0,0.22);border-radius:18px;
-  text-align:center;color:#fff;transition:transform .2s, border-color .2s, background .3s;}
+.service-3d{padding:16px 6px 14px;background:linear-gradient(160deg,#1a1820 0%,#0c0b10 100%);border:1px solid rgba(255,196,0,0.22);border-radius:18px;text-align:center;color:#fff;transition:transform .2s,border-color .2s,background .3s}
 .service-3d:active{transform:scale(.96);border-color:rgba(255,196,0,0.6)}
 .service-3d .emoji{display:block;font-size:42px;margin-bottom:8px}
 .service-3d strong{display:block;font-size:13px;color:var(--gold);font-weight:900}
 .service-3d small{display:block;font-size:9.5px;color:#a09a8a;margin-top:4px}
-
-.fare-notice{display:flex;align-items:center;gap:10px;
-  margin-top:10px;padding:12px 14px;border-radius:14px;
-  background:linear-gradient(160deg,rgba(0,212,160,0.15),rgba(0,212,160,0.03));
-  border:1px solid rgba(0,212,160,0.4);
-  color:#00d4a0;font-weight:900;font-size:13px;
-  box-shadow:0 0 20px -5px rgba(0,212,160,0.4);
-  transition:background .3s, border-color .3s, color .3s;}
+.fare-notice{display:flex;align-items:center;gap:10px;margin-top:10px;padding:12px 14px;border-radius:14px;background:linear-gradient(160deg,rgba(0,212,160,0.15),rgba(0,212,160,0.03));border:1px solid rgba(0,212,160,0.4);color:#00d4a0;font-weight:900;font-size:13px;box-shadow:0 0 20px -5px rgba(0,212,160,0.4);transition:background .3s,border-color .3s,color .3s}
 .fare-notice .big{font-size:24px;line-height:1}
-
-.region-picker{margin-top:12px;padding:14px;border-radius:16px;
-  background:linear-gradient(160deg,#14121a 0%,#0a090f 100%);
-  border:1px solid var(--border);
-  transition:background .3s, border-color .3s;}
+.region-picker{margin-top:12px;padding:14px;border-radius:16px;background:linear-gradient(160deg,#14121a 0%,#0a090f 100%);border:1px solid var(--border);transition:background .3s,border-color .3s}
 .region-row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}
 .region-label-text{font-size:12.5px;color:#ffd24a;font-weight:900;display:flex;align-items:center;gap:6px}
-.region-detect-btn{padding:6px 12px;border-radius:10px;
-  background:linear-gradient(180deg,rgba(0,212,160,0.2),rgba(0,212,160,0.06));
-  border:1px solid rgba(0,212,160,0.45);color:#00d4a0;
-  font-size:11px;font-weight:900;transition:transform .15s, background .2s;}
+.region-detect-btn{padding:6px 12px;border-radius:10px;background:linear-gradient(180deg,rgba(0,212,160,0.2),rgba(0,212,160,0.06));border:1px solid rgba(0,212,160,0.45);color:#00d4a0;font-size:11px;font-weight:900;transition:transform .15s,background .2s}
 .region-detect-btn:active{transform:scale(.94)}
-.region-chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;
-  scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+.region-chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .region-chips::-webkit-scrollbar{display:none}
-.region-chip{flex-shrink:0;padding:8px 12px;border-radius:11px;
-  background:#0c0b10;border:1px solid rgba(255,255,255,0.08);
-  color:#a09a8a;font-size:11.5px;font-weight:700;white-space:nowrap;
-  transition:all .2s;display:flex;align-items:center;gap:4px;}
+.region-chip{flex-shrink:0;padding:8px 12px;border-radius:11px;background:#0c0b10;border:1px solid rgba(255,255,255,0.08);color:#a09a8a;font-size:11.5px;font-weight:700;white-space:nowrap;transition:all .2s;display:flex;align-items:center;gap:4px}
 .region-chip:active{transform:scale(.95)}
-.region-chip.active{background:linear-gradient(180deg,rgba(255,196,0,0.22),rgba(255,196,0,0.06));
-  border-color:rgba(255,196,0,0.65);color:#ffd24a;
-  box-shadow:0 0 15px -3px rgba(255,196,0,0.5);}
-.region-info-line{margin-top:10px;font-size:11px;color:#a09a8a;
-  padding:8px 10px;border-radius:10px;background:rgba(255,196,0,0.05);
-  border:1px dashed rgba(255,196,0,0.2);line-height:1.6;}
+.region-chip.active{background:linear-gradient(180deg,rgba(255,196,0,0.22),rgba(255,196,0,0.06));border-color:rgba(255,196,0,0.65);color:#ffd24a;box-shadow:0 0 15px -3px rgba(255,196,0,0.5)}
+.region-info-line{margin-top:10px;font-size:11px;color:#a09a8a;padding:8px 10px;border-radius:10px;background:rgba(255,196,0,0.05);border:1px dashed rgba(255,196,0,0.2);line-height:1.6}
 .region-info-line b{color:#ffd24a}
-
 .map-tabs{display:flex;gap:8px;margin-bottom:10px;margin-top:12px}
-.map-tab{flex:1;padding:11px;border-radius:14px;
-  background:linear-gradient(160deg,#1a1820,#0c0b10);
-  border:1px solid rgba(255,255,255,0.09);
-  color:#a09a8a;font-size:12px;font-weight:700;transition:all .2s;}
-.map-tab.active{border-color:rgba(255,196,0,0.6);color:var(--gold);
-  background:linear-gradient(160deg,rgba(255,196,0,0.12),rgba(255,196,0,0.02));}
-#customerMap,#driverMap{height:38vh;min-height:240px;border-radius:var(--radius);
-  border:1px solid rgba(255,196,0,0.2);overflow:hidden;z-index:1;}
+.map-tab{flex:1;padding:11px;border-radius:14px;background:linear-gradient(160deg,#1a1820,#0c0b10);border:1px solid rgba(255,255,255,0.09);color:#a09a8a;font-size:12px;font-weight:700;transition:all .2s}
+.map-tab.active{border-color:rgba(255,196,0,0.6);color:var(--gold);background:linear-gradient(160deg,rgba(255,196,0,0.12),rgba(255,196,0,0.02))}
+#customerMap,#driverMap{height:38vh;min-height:240px;border-radius:var(--radius);border:1px solid rgba(255,196,0,0.2);overflow:hidden;z-index:1}
 .leaflet-container{background:#0a0a0f!important;font-family:inherit!important;transition:background .3s}
 .leaflet-tile{filter:brightness(.85) contrast(1.05) saturate(.9)}
 .leaflet-control-attribution{background:rgba(0,0,0,0.5)!important;color:#a09a8a!important;font-size:9px!important}
 .leaflet-control-attribution a{color:#ffd24a!important}
 .leaflet-control-zoom a{background:#1a1820!important;color:#ffd24a!important;border-color:rgba(255,196,0,0.2)!important}
-.order-card-3d{margin-top:12px;padding:16px;
-  background:linear-gradient(160deg,#1a1820 0%,#0c0b10 100%);
-  border:1px solid var(--border);border-radius:var(--radius);
-  transition:background .3s, border-color .3s;}
+.order-card-3d{margin-top:12px;padding:16px;background:linear-gradient(160deg,#1a1820 0%,#0c0b10 100%);border:1px solid var(--border);border-radius:var(--radius);transition:background .3s,border-color .3s}
 .row{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
 .price{color:var(--gold);font-size:24px;font-weight:900;text-shadow:0 0 20px rgba(255,196,0,0.4)}
-.surge-badge{margin-top:4px;font-size:10.5px;font-weight:900;padding:3px 8px;border-radius:8px;
-  background:rgba(255,140,0,0.15);color:#ffaa33;
-  border:1px solid rgba(255,140,0,0.4);display:inline-block;white-space:nowrap;}
-
-.order-item{padding:14px;margin-top:12px;
-  background:linear-gradient(160deg,#14121a 0%,#0a090f 100%);
-  border:1px solid rgba(255,255,255,0.08);border-radius:18px;
-  transition:background .3s, border-color .3s;}
+.surge-badge{margin-top:4px;font-size:10.5px;font-weight:900;padding:3px 8px;border-radius:8px;background:rgba(255,140,0,0.15);color:#ffaa33;border:1px solid rgba(255,140,0,0.4);display:inline-block;white-space:nowrap}
+.order-item{padding:14px;margin-top:12px;background:linear-gradient(160deg,#14121a 0%,#0a090f 100%);border:1px solid rgba(255,255,255,0.08);border-radius:18px;transition:background .3s,border-color .3s}
 .order-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
 .order-service{font-size:14px;font-weight:900;color:#fff}
-.status-badge{font-size:10px;font-weight:900;padding:5px 10px;border-radius:20px;
-  background:rgba(255,196,0,0.12);color:#ffd24a;
-  border:1px solid rgba(255,196,0,0.25);white-space:nowrap;}
+.status-badge{font-size:10px;font-weight:900;padding:5px 10px;border-radius:20px;background:rgba(255,196,0,0.12);color:#ffd24a;border:1px solid rgba(255,196,0,0.25);white-space:nowrap}
 .status-badge.accepted{background:rgba(78,161,255,0.15);color:#4ea1ff;border-color:rgba(78,161,255,0.3)}
 .status-badge.arrived{background:rgba(124,92,255,0.15);color:#7c5cff;border-color:rgba(124,92,255,0.3)}
 .status-badge.ongoing{background:rgba(0,212,160,0.15);color:#00d4a0;border-color:rgba(0,212,160,0.3)}
@@ -303,62 +151,34 @@ label:first-child{margin-top:0}
 .order-meta b{color:#e8e3d4;font-weight:700}
 .order-price{color:var(--gold);font-weight:900;font-size:14px;margin-top:8px;display:inline-block}
 .order-actions{display:flex;gap:8px;margin-top:12px}
-.btn-accept{flex:1;padding:12px;border-radius:13px;
-  background:linear-gradient(180deg,#ffe36b,#ffc400);color:#17120a;
-  font-weight:900;font-size:14px;box-shadow:0 4px 0 #8a6200;}
+.btn-accept{flex:1;padding:12px;border-radius:13px;background:linear-gradient(180deg,#ffe36b,#ffc400);color:#17120a;font-weight:900;font-size:14px;box-shadow:0 4px 0 #8a6200}
 .btn-accept:active{transform:translateY(3px);box-shadow:0 1px 0 #8a6200}
-.btn-cancel{flex:1;padding:12px;border-radius:13px;
-  background:rgba(255,77,109,0.12);color:#ff4d6d;font-weight:700;font-size:13px;
-  border:1px solid rgba(255,77,109,0.3);}
-.btn-next{flex:1;padding:12px;border-radius:13px;
-  background:linear-gradient(180deg,#4ea1ff,#1e6fd9);color:#fff;
-  font-weight:900;font-size:14px;box-shadow:0 4px 0 #0d4a99;}
-.driver-status{display:flex;justify-content:space-between;align-items:center;
-  padding:16px;margin-bottom:12px;
-  background:linear-gradient(160deg,#1a1820 0%,#0c0b10 100%);
-  border:1px solid var(--border);border-radius:var(--radius);
-  transition:background .3s, border-color .3s;}
+.btn-cancel{flex:1;padding:12px;border-radius:13px;background:rgba(255,77,109,0.12);color:#ff4d6d;font-weight:700;font-size:13px;border:1px solid rgba(255,77,109,0.3)}
+.btn-next{flex:1;padding:12px;border-radius:13px;background:linear-gradient(180deg,#4ea1ff,#1e6fd9);color:#fff;font-weight:900;font-size:14px;box-shadow:0 4px 0 #0d4a99}
+.driver-status{display:flex;justify-content:space-between;align-items:center;padding:16px;margin-bottom:12px;background:linear-gradient(160deg,#1a1820 0%,#0c0b10 100%);border:1px solid var(--border);border-radius:var(--radius);transition:background .3s,border-color .3s}
 .driver-status .label{font-size:13px;color:#a09a8a;font-weight:700}
 .driver-status .sub{font-size:11px;color:#5a554a;margin-top:2px}
-.toggle{display:flex;align-items:center;gap:8px;
-  padding:8px 14px;border-radius:20px;
-  background:#0c0b10;border:1px solid rgba(255,255,255,0.1);
-  color:#a09a8a;font-size:12px;font-weight:900;transition:all .3s;}
-.toggle.on{background:linear-gradient(180deg,rgba(0,212,160,0.2),rgba(0,212,160,0.05));
-  border-color:rgba(0,212,160,0.5);color:#00d4a0;
-  box-shadow:0 0 20px -5px rgba(0,212,160,0.5);}
+.toggle{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:20px;background:#0c0b10;border:1px solid rgba(255,255,255,0.1);color:#a09a8a;font-size:12px;font-weight:900;transition:all .3s}
+.toggle.on{background:linear-gradient(180deg,rgba(0,212,160,0.2),rgba(0,212,160,0.05));border-color:rgba(0,212,160,0.5);color:#00d4a0;box-shadow:0 0 20px -5px rgba(0,212,160,0.5)}
 .toggle-dot{width:8px;height:8px;border-radius:50%;background:#5a554a}
 .toggle.on .toggle-dot{background:#00d4a0;box-shadow:0 0 8px #00d4a0}
 .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
-.stat-card{padding:16px 12px;text-align:center;
-  background:linear-gradient(160deg,#1a1820 0%,#0c0b10 100%);
-  border:1px solid var(--border);border-radius:var(--radius);
-  transition:background .3s, border-color .3s;}
+.stat-card{padding:16px 12px;text-align:center;background:linear-gradient(160deg,#1a1820 0%,#0c0b10 100%);border:1px solid var(--border);border-radius:var(--radius);transition:background .3s,border-color .3s}
 .stat-icon{font-size:24px;margin-bottom:6px}
 .stat-value{font-size:22px;font-weight:900;color:var(--gold);line-height:1.1}
 .stat-label{font-size:10.5px;color:#a09a8a;margin-top:4px;font-weight:700}
 .empty-state{text-align:center;padding:40px 16px;color:#6a6659}
 .empty-state .big{font-size:48px;margin-bottom:12px;opacity:.6}
 .empty-state .ttl{font-size:14px;font-weight:900;color:#a09a8a;margin-bottom:6px}
-.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);
-  background:linear-gradient(160deg,#1a1820,#0c0b10);
-  border:1px solid rgba(255,196,0,0.4);color:#fff;font-size:13px;font-weight:700;
-  padding:12px 20px;border-radius:14px;
-  box-shadow:0 20px 40px -10px rgba(0,0,0,0.9);
-  z-index:9999;opacity:0;pointer-events:none;
-  transition:opacity .3s, transform .3s;max-width:88vw;text-align:center;}
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:linear-gradient(160deg,#1a1820,#0c0b10);border:1px solid rgba(255,196,0,0.4);color:#fff;font-size:13px;font-weight:700;padding:12px 20px;border-radius:14px;box-shadow:0 20px 40px -10px rgba(0,0,0,0.9);z-index:9999;opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;max-width:88vw;text-align:center}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .toast.success{border-color:rgba(0,212,160,0.5)}
 .toast.error{border-color:rgba(255,77,109,0.5)}
-.kokton-marker{display:flex;align-items:center;justify-content:center;
-  width:36px;height:36px;border-radius:50%;
-  border:3px solid #fff;font-size:16px;font-weight:900;
-  box-shadow:0 0 20px currentColor, 0 4px 12px rgba(0,0,0,0.6);}
+.kokton-marker{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;border:3px solid #fff;font-size:16px;font-weight:900;box-shadow:0 0 20px currentColor,0 4px 12px rgba(0,0,0,0.6)}
 .phone-link{color:#ffd24a}
-
 [data-theme="light"]{color-scheme:light}
 [data-theme="light"] body{background:#f5f3ee;color:#17120a}
-[data-theme="light"] #app{background:radial-gradient(circle at 50% 0%, rgba(255,196,0,0.12) 0%, transparent 40%),#f5f3ee}
+[data-theme="light"] #app{background:radial-gradient(circle at 50% 0%,rgba(255,196,0,0.12) 0%,transparent 40%),#f5f3ee}
 [data-theme="light"] .top{background:linear-gradient(180deg,#ffffff 0%,rgba(255,255,255,0.94) 100%);border-bottom-color:rgba(255,196,0,0.25)}
 [data-theme="light"] .bottom{background:linear-gradient(0deg,#ffffff 0%,rgba(255,255,255,0.96) 100%);border-top-color:rgba(255,196,0,0.25)}
 [data-theme="light"] .iconbtn{background:linear-gradient(160deg,#faf7f0,#ede9e0);border-color:rgba(0,0,0,0.10);color:#8a6200}
@@ -383,17 +203,7 @@ label:first-child{margin-top:0}
 [data-theme="light"] .field{background:#faf7f0;border-color:rgba(0,0,0,0.10);color:#17120a}
 [data-theme="light"] .field::placeholder{color:#a8a296}
 [data-theme="light"] .field:focus{background:#ffffff;border-color:rgba(255,196,0,0.7)}
-[data-theme="light"] .formbox,
-[data-theme="light"] .order-card-3d,
-[data-theme="light"] .driver-status,
-[data-theme="light"] .stat-card,
-[data-theme="light"] .order-item,
-[data-theme="light"] .service-3d,
-[data-theme="light"] .region-picker{
-  background:linear-gradient(160deg,#ffffff 0%,#faf7f0 100%);
-  border-color:rgba(0,0,0,0.08);
-  box-shadow:0 10px 30px -15px rgba(0,0,0,0.15);
-}
+[data-theme="light"] .formbox,[data-theme="light"] .order-card-3d,[data-theme="light"] .driver-status,[data-theme="light"] .stat-card,[data-theme="light"] .order-item,[data-theme="light"] .service-3d,[data-theme="light"] .region-picker{background:linear-gradient(160deg,#ffffff 0%,#faf7f0 100%);border-color:rgba(0,0,0,0.08);box-shadow:0 10px 30px -15px rgba(0,0,0,0.15)}
 [data-theme="light"] .region-chip{background:#faf7f0;border-color:rgba(0,0,0,0.10);color:#6a6659}
 [data-theme="light"] .region-chip.active{background:linear-gradient(180deg,rgba(255,196,0,0.35),rgba(255,196,0,0.12));border-color:rgba(255,196,0,0.7);color:#8a6200}
 [data-theme="light"] .region-label-text{color:#8a6200}
@@ -402,7 +212,7 @@ label:first-child{margin-top:0}
 [data-theme="light"] .cta-ghost{background:linear-gradient(160deg,#faf7f0,#ede9e0);border-color:rgba(0,0,0,0.10);color:#17120a}
 [data-theme="light"] .toggle{background:#faf7f0;border-color:rgba(0,0,0,0.10);color:#6a6659}
 [data-theme="light"] .toggle.on{background:linear-gradient(180deg,rgba(0,212,160,0.25),rgba(0,212,160,0.10));border-color:rgba(0,212,160,0.55);color:#009968}
-[data-theme="light"] .scene-3d{background:radial-gradient(circle at 50% 100%, rgba(255,196,0,0.30) 0%, transparent 60%),linear-gradient(180deg,#e6dcf0 0%,#f5f0e6 100%);border-color:rgba(255,196,0,0.35)}
+[data-theme="light"] .scene-3d{background:radial-gradient(circle at 50% 100%,rgba(255,196,0,0.30) 0%,transparent 60%),linear-gradient(180deg,#e6dcf0 0%,#f5f0e6 100%);border-color:rgba(255,196,0,0.35)}
 [data-theme="light"] .scene-road{background:linear-gradient(180deg,#d4cfc5 0%,#a8a196 100%);border-top-color:rgba(255,196,0,0.4)}
 [data-theme="light"] .map-tab{background:linear-gradient(160deg,#faf7f0,#ede9e0);border-color:rgba(0,0,0,0.08);color:#6a6659}
 [data-theme="light"] .map-tab.active{border-color:rgba(255,196,0,0.6);color:#8a6200;background:linear-gradient(160deg,rgba(255,196,0,0.2),rgba(255,196,0,0.05))}
@@ -414,28 +224,26 @@ label:first-child{margin-top:0}
 [data-theme="light"] .toast{background:linear-gradient(160deg,#ffffff,#faf7f0);color:#17120a;border-color:rgba(255,196,0,0.5);box-shadow:0 20px 40px -10px rgba(0,0,0,0.2),0 0 30px -10px rgba(255,196,0,0.4)}
 [data-theme="light"] .fare-notice{background:linear-gradient(160deg,rgba(0,212,160,0.18),rgba(0,212,160,0.05));border-color:rgba(0,212,160,0.5);color:#009968}
 [data-theme="light"] .surge-badge{background:rgba(255,140,0,0.20);border-color:rgba(255,140,0,0.5);color:#cc6600}
-[data-theme="light"] #splash{background:radial-gradient(circle at 50% 45%, rgba(255,196,0,0.30) 0%, transparent 55%),radial-gradient(circle at 50% 50%, #fff8e6 0%, #f5f3ee 70%)}
+[data-theme="light"] #splash{background:radial-gradient(circle at 50% 45%,rgba(255,196,0,0.30) 0%,transparent 55%),radial-gradient(circle at 50% 50%,#fff8e6 0%,#f5f3ee 70%)}
 [data-theme="light"] .splash-sub{color:#8a6200}
 [data-theme="light"] .splash-tag{color:#6a6659}
 [data-theme="light"] .splash-line{background:linear-gradient(90deg,transparent,#d99a00,transparent)}
 [data-theme="light"] .splash-orb{background:radial-gradient(circle,rgba(255,196,0,0.30) 0%,transparent 65%)}
-[data-theme="light"] #rolePicker{background:radial-gradient(circle at 50% 30%, rgba(255,196,0,0.18) 0%, transparent 60%),#f5f3ee}
+[data-theme="light"] #rolePicker{background:radial-gradient(circle at 50% 30%,rgba(255,196,0,0.18) 0%,transparent 60%),#f5f3ee}
 [data-theme="light"] .role-card{background:linear-gradient(160deg,#ffffff,#faf7f0);border-color:rgba(255,196,0,0.3)}
 [data-theme="light"] .role-card.driver{background:linear-gradient(160deg,#fff4d6,#faf0dd)}
 [data-theme="light"] .role-name{color:#8a6200}
 [data-theme="light"] .role-desc{color:#6a6659}
 [data-theme="light"] .role-title{color:#6a6659}
 [data-theme="light"] .role-footer{color:#a8a296}
-[data-theme="light"] #authScreen{background:radial-gradient(circle at 50% 20%, rgba(255,196,0,0.18) 0%, transparent 60%),#f5f3ee}
+[data-theme="light"] #authScreen{background:radial-gradient(circle at 50% 20%,rgba(255,196,0,0.18) 0%,transparent 60%),#f5f3ee}
 [data-theme="light"] .auth-tabs{background:#ede9e0;border-color:rgba(0,0,0,0.08)}
 [data-theme="light"] .auth-tab{color:#6a6659}
 [data-theme="light"] .auth-tab.active{background:linear-gradient(180deg,rgba(255,196,0,0.3),rgba(255,196,0,0.1));color:#8a6200}
 [data-theme="light"] .brand-sub{color:#8a6200}
 [data-theme="light"] .version-badge{background:rgba(0,212,160,0.2);border-color:rgba(0,212,160,0.5);color:#009968}
 [data-theme="light"] .phone-link{color:#b8860b}
-[data-theme="light"] .price,
-[data-theme="light"] .order-price,
-[data-theme="light"] .stat-value{color:#b8860b;text-shadow:none}
+[data-theme="light"] .price,[data-theme="light"] .order-price,[data-theme="light"] .stat-value{color:#b8860b;text-shadow:none}
 </style>
 </head>
 <body>
@@ -480,22 +288,18 @@ label:first-child{margin-top:0}
       <div class="brand-name">KOKTON</div>
       <div class="brand-sub" id="authRoleLabel">زبون</div>
     </div>
-
     <div class="auth-tabs">
       <button class="auth-tab active" data-tab="login" onclick="switchAuthTab('login')">دخول</button>
       <button class="auth-tab" data-tab="register" onclick="switchAuthTab('register')">حساب جديد</button>
     </div>
-
     <div id="authLogin" class="auth-form">
       <label>رقم الهاتف</label>
       <input id="loginPhone" class="field" type="tel" inputmode="numeric" placeholder="07XXXXXXXXX" maxlength="11">
       <label>كلمة السر</label>
-      <input id="loginPassword" class="field" type="password" placeholder="••••••"
-             onkeydown="if(event.key==='Enter')doLogin()">
+      <input id="loginPassword" class="field" type="password" placeholder="••••••" onkeydown="if(event.key==='Enter')doLogin()">
       <button class="cta-primary" onclick="doLogin()">دخول</button>
       <button class="cta-ghost" onclick="switchAuthTab('register')">ما عندك حساب؟ سجل جديد</button>
     </div>
-
     <div id="authRegister" class="auth-form hidden">
       <label>الاسم الكامل</label>
       <input id="regName" class="field" placeholder="اسمك">
@@ -504,12 +308,10 @@ label:first-child{margin-top:0}
       <label>كلمة السر</label>
       <input id="regPassword" class="field" type="password" placeholder="4 أحرف على الأقل">
       <label>تأكيد كلمة السر</label>
-      <input id="regPassword2" class="field" type="password" placeholder="أعد كلمة السر"
-             onkeydown="if(event.key==='Enter')doRegister()">
+      <input id="regPassword2" class="field" type="password" placeholder="أعد كلمة السر" onkeydown="if(event.key==='Enter')doRegister()">
       <button class="cta-primary" onclick="doRegister()">إنشاء الحساب</button>
       <button class="cta-ghost" onclick="switchAuthTab('login')">عندك حساب؟ سجل دخول</button>
     </div>
-
     <button class="cta-ghost" onclick="backToRolePicker()" style="margin-top:14px">← رجوع</button>
   </div>
 </div>
@@ -532,46 +334,25 @@ label:first-child{margin-top:0}
 
   <main>
     <section id="c-home" class="screen active">
-      <div class="scene-3d">
-        <div class="scene-road"></div>
-        <div class="scene-taxi">🚕</div>
-      </div>
-      <div class="hero-text">
-        <div class="hero-title">تكسي <span>العراق</span></div>
-        <div class="hero-tag">KOKTON • التميز في كل رحلة</div>
-      </div>
+      <div class="scene-3d"><div class="scene-road"></div><div class="scene-taxi">🚕</div></div>
+      <div class="hero-text"><div class="hero-title">تكسي <span>العراق</span></div><div class="hero-tag">KOKTON • التميز في كل رحلة</div></div>
       <div class="section-title">اختر الخدمة</div>
       <div class="services-3d">
-        <button class="service-3d" onclick="selectService('delivery')">
-          <span class="emoji">🛵</span><strong>مندوب توصيل</strong><small>توصيل طلباتك</small>
-        </button>
-        <button class="service-3d" onclick="selectService('tuktuk')">
-          <span class="emoji">🛺</span><strong>تكتك</strong><small>مشوار سريع</small>
-        </button>
-        <button class="service-3d" onclick="selectService('taxi')">
-          <span class="emoji">🚕</span><strong>تكسي</strong><small>تسعيرة لكل منطقة</small>
-        </button>
+        <button class="service-3d" onclick="selectService('delivery')"><span class="emoji">🛵</span><strong>مندوب توصيل</strong><small>توصيل طلباتك</small></button>
+        <button class="service-3d" onclick="selectService('tuktuk')"><span class="emoji">🛺</span><strong>تكتك</strong><small>مشوار سريع</small></button>
+        <button class="service-3d" onclick="selectService('taxi')"><span class="emoji">🚕</span><strong>تكسي</strong><small>تسعيرة لكل منطقة</small></button>
       </div>
       <button class="cta-primary" onclick="selectService('taxi')">ابدأ الآن ➜</button>
     </section>
 
     <section id="c-booking" class="screen">
       <div class="section-title" id="bookingTitle">🚕 اطلب تكسي</div>
-
-      <div class="fare-notice">
-        <span class="big">💰</span>
-        <span id="fareText">بغداد: 1000 دينار لكل 3 كم</span>
-      </div>
-
+      <div class="fare-notice"><span class="big">💰</span><span id="fareText">بغداد: 1000 دينار لكل 3 كم</span></div>
       <div class="region-picker">
-        <div class="region-row">
-          <span class="region-label-text">📍 منطقة التسعير</span>
-          <button class="region-detect-btn" onclick="detectMyRegion()">🎯 تحديد تلقائي</button>
-        </div>
+        <div class="region-row"><span class="region-label-text">📍 منطقة التسعير</span><button class="region-detect-btn" onclick="detectMyRegion()">🎯 تحديد تلقائي</button></div>
         <div class="region-chips" id="regionChips"></div>
         <div class="region-info-line" id="regionInfoLine">—</div>
       </div>
-
       <div class="map-tabs">
         <button class="map-tab active" data-mode="pickup" onclick="setMapMode('pickup')">📍 الانطلاق</button>
         <button class="map-tab" data-mode="dest" onclick="setMapMode('dest')">🎯 الوجهة</button>
@@ -586,16 +367,8 @@ label:first-child{margin-top:0}
       </div>
       <div class="order-card-3d">
         <div class="row">
-          <div>
-            <div class="muted">الخدمة المختارة</div>
-            <strong id="chosenService">تكسي 🚕</strong>
-            <div class="muted" id="regionInfo" style="margin-top:4px;font-size:11px">بغداد</div>
-          </div>
-          <div style="text-align:left">
-            <div class="muted">السعر التقديري</div>
-            <div class="price" id="price">—</div>
-            <div class="surge-badge hidden" id="surgeBadge"></div>
-          </div>
+          <div><div class="muted">الخدمة المختارة</div><strong id="chosenService">تكسي 🚕</strong><div class="muted" id="regionInfo" style="margin-top:4px;font-size:11px">بغداد</div></div>
+          <div style="text-align:left"><div class="muted">السعر التقديري</div><div class="price" id="price">—</div><div class="surge-badge hidden" id="surgeBadge"></div></div>
         </div>
         <button class="cta-primary" onclick="submitOrder()">تأكيد الطلب</button>
       </div>
@@ -611,10 +384,8 @@ label:first-child{margin-top:0}
       <div class="section-title">حسابي</div>
       <div class="formbox">
         <div style="font-size:52px;text-align:center;margin-bottom:8px">👤</div>
-        <label>الاسم</label>
-        <input id="customerName" class="field" placeholder="اكتب اسمك">
-        <label>رقم الهاتف</label>
-        <input id="customerPhone" class="field" type="tel" readonly>
+        <label>الاسم</label><input id="customerName" class="field" placeholder="اكتب اسمك">
+        <label>رقم الهاتف</label><input id="customerPhone" class="field" type="tel" readonly>
         <button class="cta-primary" onclick="saveCustomerProfile()">حفظ البيانات</button>
       </div>
       <button class="cta-ghost" onclick="switchRole()">⇄ تبديل إلى واجهة السائق</button>
@@ -624,26 +395,12 @@ label:first-child{margin-top:0}
 
     <section id="d-home" class="screen">
       <div class="driver-status">
-        <div>
-          <div class="label">حالة السائق</div>
-          <div class="sub" id="onlineSub">أنت غير متصل حالياً</div>
-        </div>
-        <button id="onlineToggle" class="toggle" onclick="toggleOnline()">
-          <span class="toggle-dot"></span>
-          <span id="onlineLabel">غير متصل</span>
-        </button>
+        <div><div class="label">حالة السائق</div><div class="sub" id="onlineSub">أنت غير متصل حالياً</div></div>
+        <button id="onlineToggle" class="toggle" onclick="toggleOnline()"><span class="toggle-dot"></span><span id="onlineLabel">غير متصل</span></button>
       </div>
       <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-icon">🚕</div>
-          <div class="stat-value" id="statTrips">0</div>
-          <div class="stat-label">رحلة مكتملة</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon">💰</div>
-          <div class="stat-value" id="statEarnings">0</div>
-          <div class="stat-label">الأرباح (د.ع)</div>
-        </div>
+        <div class="stat-card"><div class="stat-icon">🚕</div><div class="stat-value" id="statTrips">0</div><div class="stat-label">رحلة مكتملة</div></div>
+        <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-value" id="statEarnings">0</div><div class="stat-label">الأرباح (د.ع)</div></div>
       </div>
       <div id="driverMap"></div>
       <div class="section-title">الطلب الحالي</div>
@@ -673,12 +430,9 @@ label:first-child{margin-top:0}
       <div class="section-title">حساب السائق</div>
       <div class="formbox">
         <div style="font-size:52px;text-align:center;margin-bottom:8px">🚕</div>
-        <label>اسم السائق</label>
-        <input id="driverName" class="field" placeholder="اكتب اسمك">
-        <label>رقم الهاتف</label>
-        <input id="driverPhone" class="field" type="tel" readonly>
-        <label>نوع السيارة / اللوحة</label>
-        <input id="driverCar" class="field" placeholder="مثلاً: كيا — 12345">
+        <label>اسم السائق</label><input id="driverName" class="field" placeholder="اكتب اسمك">
+        <label>رقم الهاتف</label><input id="driverPhone" class="field" type="tel" readonly>
+        <label>نوع السيارة / اللوحة</label><input id="driverCar" class="field" placeholder="مثلاً: كيا — 12345">
         <button class="cta-primary" onclick="saveDriverProfile()">حفظ بيانات السائق</button>
       </div>
       <button class="cta-ghost" onclick="switchRole()">⇄ تبديل إلى واجهة الزبون</button>
@@ -691,12 +445,8 @@ label:first-child{margin-top:0}
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-/* =========================================================
-   KOKTON — v2.3.2 (متصل بـ Supabase)
-   ========================================================= */
 console.log('💰 KOKTON v2.3.2 — متصل بقاعدة البيانات');
 
-// ⚠️ إعدادات سوبابيس ⚠️
 const supabaseUrl = 'https://vvyqsimhvxnfxethwqvi.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2eXFzaW1odnhuZnhldGh3cXZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQzOTE5MzYsImV4cCI6MjEwOTk2NzkzNn0._5qizYY5lAfFWqPG5LggqzCDFJyfH2Xyy7obTsTS5_8';
 const supabase = supabase.createClient(supabaseUrl, supabaseKey);
@@ -714,442 +464,163 @@ const THEME_KEY = 'kokton_theme';
 function getStoredTheme() { try { return localStorage.getItem(THEME_KEY) || 'dark'; } catch(e) { return 'dark'; } }
 function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
-  const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.content = theme === 'dark' ? '#050507' : '#f5f3ee';
-  const btn = $('themeBtn');
-  if (btn) {
-    btn.textContent = theme === 'dark' ? '☀️' : '🌙';
-    btn.title = theme === 'dark' ? 'التبديل إلى الوضع النهاري' : 'التبديل إلى الوضع الليلي';
-  }
+  const meta = document.querySelector('meta[name="theme-color"]'); if (meta) meta.content = theme === 'dark' ? '#050507' : '#f5f3ee';
+  const btn = $('themeBtn'); if (btn) { btn.textContent = theme === 'dark' ? '☀️' : '🌙'; btn.title = theme === 'dark' ? 'التبديل إلى الوضع النهاري' : 'التبديل إلى الوضع الليلي'; }
   try { localStorage.setItem(THEME_KEY, theme); } catch(e){}
 }
-function toggleTheme() {
-  const current = document.documentElement.getAttribute('data-theme') || 'dark';
-  const next = current === 'dark' ? 'light' : 'dark';
-  applyTheme(next); haptic();
-  toast(next === 'light' ? '☀️ الوضع النهاري' : '🌙 الوضع الليلي', 'success');
-}
+function toggleTheme() { const current = document.documentElement.getAttribute('data-theme') || 'dark'; applyTheme(current === 'dark' ? 'light' : 'dark'); haptic(); toast(current === 'dark' ? '☀️ الوضع النهاري' : '🌙 الوضع الليلي', 'success'); }
 
-const SERVICES = {
-  taxi:     { label: 'تكسي 🚕',       icon: '🚕' },
-  tuktuk:   { label: 'تكتك 🛺',       icon: '🛺' },
-  delivery: { label: 'مندوب توصيل 🛵', icon: '🛵' }
-};
-const BASE_RATES = {
-  taxi:     { perKm: 1000 / 3, min: 1000 },
-  tuktuk:   { perKm: 1000,     min: 2000 },
-  delivery: { perKm: 2000,     min: 4000 }
-};
-
+const SERVICES = { taxi: { label: 'تكسي 🚕', icon: '🚕' }, tuktuk: { label: 'تكتك 🛺', icon: '🛺' }, delivery: { label: 'مندوب توصيل 🛵', icon: '🛵' } };
+const BASE_RATES = { taxi: { perKm: 1000 / 3, min: 1000 }, tuktuk: { perKm: 1000, min: 2000 }, delivery: { perKm: 2000, min: 4000 } };
 const REGIONS = {
-  baghdad:      { name: 'بغداد',       emoji: '🏛️', level: 1.00, center: [33.3152, 44.3661] },
-  basra:        { name: 'البصرة',       emoji: '🛢️', level: 1.10, center: [30.5085, 47.7804] },
-  nineveh:      { name: 'الموصل',       emoji: '🕌', level: 0.90, center: [36.3350, 43.1189] },
-  erbil:        { name: 'أربيل',        emoji: '⛰️', level: 1.15, center: [36.1911, 44.0092] },
-  najaf:        { name: 'النجف',        emoji: '🕌', level: 1.00, center: [32.0000, 44.3333] },
-  karbala:      { name: 'كربلاء',       emoji: '🕌', level: 1.00, center: [32.6167, 44.0333] },
-  sulaymaniyah: { name: 'السليمانية',   emoji: '🏔️', level: 1.10, center: [35.5613, 45.4408] },
-  kirkuk:       { name: 'كركوك',        emoji: '🛢️', level: 1.00, center: [35.4681, 44.3922] },
-  anbar:        { name: 'الأنبار',       emoji: '🏜️', level: 0.95, center: [33.4206, 43.3000] },
-  babil:        { name: 'بابل',         emoji: '🏛️', level: 0.95, center: [32.4833, 44.4333] },
-  diyala:       { name: 'ديالى',        emoji: '🌾', level: 0.90, center: [33.7500, 44.6500] },
-  dhi_qar:      { name: 'ذي قار',       emoji: '🏺', level: 0.95, center: [31.0500, 46.2500] },
-  wasit:        { name: 'واسط',         emoji: '🌾', level: 0.90, center: [32.5167, 45.8167] },
-  maysan:       { name: 'ميسان',        emoji: '🌾', level: 0.90, center: [31.8333, 47.1500] },
-  muthanna:     { name: 'المثنى',       emoji: '🏜️', level: 0.90, center: [30.5000, 45.2833] },
-  qadisiyyah:   { name: 'القادسية',     emoji: '🌾', level: 0.95, center: [31.9900, 44.9200] },
-  duhok:        { name: 'دهوك',         emoji: '🏔️', level: 1.05, center: [36.8669, 42.9503] },
-  saladdin:     { name: 'صلاح الدين',   emoji: '🏞️', level: 0.90, center: [34.6000, 43.6833] }
+  baghdad: { name: 'بغداد', emoji: '🏛️', level: 1.00, center: [33.3152, 44.3661] }, basra: { name: 'البصرة', emoji: '🛢️', level: 1.10, center: [30.5085, 47.7804] },
+  nineveh: { name: 'الموصل', emoji: '🕌', level: 0.90, center: [36.3350, 43.1189] }, erbil: { name: 'أربيل', emoji: '⛰️', level: 1.15, center: [36.1911, 44.0092] },
+  najaf: { name: 'النجف', emoji: '🕌', level: 1.00, center: [32.0000, 44.3333] }, karbala: { name: 'كربلاء', emoji: '🕌', level: 1.00, center: [32.6167, 44.0333] },
+  sulaymaniyah: { name: 'السليمانية', emoji: '🏔️', level: 1.10, center: [35.5613, 45.4408] }, kirkuk: { name: 'كركوك', emoji: '🛢️', level: 1.00, center: [35.4681, 44.3922] },
+  anbar: { name: 'الأنبار', emoji: '🏜️', level: 0.95, center: [33.4206, 43.3000] }, babil: { name: 'بابل', emoji: '🏛️', level: 0.95, center: [32.4833, 44.4333] },
+  diyala: { name: 'ديالى', emoji: '🌾', level: 0.90, center: [33.7500, 44.6500] }, dhi_qar: { name: 'ذي قار', emoji: '🏺', level: 0.95, center: [31.0500, 46.2500] },
+  wasit: { name: 'واسط', emoji: '🌾', level: 0.90, center: [32.5167, 45.8167] }, maysan: { name: 'ميسان', emoji: '🌾', level: 0.90, center: [31.8333, 47.1500] },
+  muthanna: { name: 'المثنى', emoji: '🏜️', level: 0.90, center: [30.5000, 45.2833] }, qadisiyyah: { name: 'القادسية', emoji: '🌾', level: 0.95, center: [31.9900, 44.9200] },
+  duhok: { name: 'دهوك', emoji: '🏔️', level: 1.05, center: [36.8669, 42.9503] }, saladdin: { name: 'صلاح الدين', emoji: '🏞️', level: 0.90, center: [34.6000, 43.6833] }
 };
-
 const REGION_SAMPLES = {
-  baghdad:      [[33.3152,44.3661],[33.2000,44.3600],[33.4000,44.3500],[33.2800,44.4000]],
-  basra:        [[30.5085,47.7804],[30.5000,47.8000],[30.5300,47.7500]],
-  nineveh:      [[36.3350,43.1189],[36.3400,43.1300]],
-  erbil:        [[36.1911,44.0092],[36.1900,44.0100]],
-  najaf:        [[32.0000,44.3333],[32.0000,44.3200]],
-  karbala:      [[32.6167,44.0333],[32.6000,44.0200]],
-  sulaymaniyah: [[35.5613,45.4408],[35.5600,45.4400]],
-  kirkuk:       [[35.4681,44.3922],[35.4600,44.3900]],
-  anbar:        [[33.4206,43.3000],[33.4200,43.3000],[33.3000,43.0000],[33.5000,43.5000]],
-  babil:        [[32.4833,44.4333],[32.4800,44.4300]],
-  diyala:       [[33.7500,44.6500],[33.7800,44.6000]],
-  dhi_qar:      [[31.0500,46.2500],[31.4100,46.1700],[31.7200,46.1100],[30.9500,47.0200],[31.0000,46.5000]],
-  wasit:        [[32.5167,45.8167],[32.1700,46.0000],[32.9000,45.0700],[32.4000,45.5000]],
-  maysan:       [[31.8333,47.1500],[31.8300,47.1500]],
-  muthanna:     [[30.5000,45.2833],[30.5000,45.2800]],
-  qadisiyyah:   [[31.9900,44.9200],[31.9800,44.9100]],
-  duhok:        [[36.8669,42.9503],[36.8600,42.9500]],
-  saladdin:     [[34.6000,43.6833],[34.6000,43.6800],[34.2000,43.8000]]
+  baghdad: [[33.3152,44.3661],[33.2000,44.3600],[33.4000,44.3500],[33.2800,44.4000]], basra: [[30.5085,47.7804],[30.5000,47.8000],[30.5300,47.7500]],
+  nineveh: [[36.3350,43.1189],[36.3400,43.1300]], erbil: [[36.1911,44.0092],[36.1900,44.0100]], najaf: [[32.0000,44.3333],[32.0000,44.3200]],
+  karbala: [[32.6167,44.0333],[32.6000,44.0200]], sulaymaniyah: [[35.5613,45.4408],[35.5600,45.4400]], kirkuk: [[35.4681,44.3922],[35.4600,44.3900]],
+  anbar: [[33.4206,43.3000],[33.4200,43.3000],[33.3000,43.0000],[33.5000,43.5000]], babil: [[32.4833,44.4333],[32.4800,44.4300]],
+  diyala: [[33.7500,44.6500],[33.7800,44.6000]], dhi_qar: [[31.0500,46.2500],[31.4100,46.1700],[31.7200,46.1100],[30.9500,47.0200],[31.0000,46.5000]],
+  wasit: [[32.5167,45.8167],[32.1700,46.0000],[32.9000,45.0700],[32.4000,45.5000]], maysan: [[31.8333,47.1500],[31.8300,47.1500]],
+  muthanna: [[30.5000,45.2833],[30.5000,45.2800]], qadisiyyah: [[31.9900,44.9200],[31.9800,44.9100]],
+  duhok: [[36.8669,42.9503],[36.8600,42.9500]], saladdin: [[34.6000,43.6833],[34.6000,43.6800],[34.2000,43.8000]]
 };
-
 const REGION_KEY = 'kokton_region';
-function getSavedRegion() {
-  try { const r = localStorage.getItem(REGION_KEY); if (r && REGIONS[r]) return r; } catch(e){}
-  return 'baghdad';
-}
+function getSavedRegion() { try { const r = localStorage.getItem(REGION_KEY); if (r && REGIONS[r]) return r; } catch(e){} return 'baghdad'; }
 function setSavedRegion(key) { try { localStorage.setItem(REGION_KEY, key); } catch(e){} }
 
-const STATUS = {
-  pending:   { label: 'بانتظار سائق',       cls: '' },
-  accepted:  { label: 'السائق في الطريق',    cls: 'accepted' },
-  arrived:   { label: 'السائق وصل',          cls: 'arrived' },
-  ongoing:   { label: 'الرحلة جارية',        cls: 'ongoing' },
-  completed: { label: 'مكتملة',              cls: 'completed' },
-  cancelled: { label: 'ملغاة',              cls: 'cancelled' }
-};
+const STATUS = { pending: { label: 'بانتظار سائق', cls: '' }, accepted: { label: 'السائق في الطريق', cls: 'accepted' }, arrived: { label: 'السائق وصل', cls: 'arrived' }, ongoing: { label: 'الرحلة جارية', cls: 'ongoing' }, completed: { label: 'مكتملة', cls: 'completed' }, cancelled: { label: 'ملغاة', cls: 'cancelled' } };
+const ROLE_NAV = { customer: [{ id: 'c-home', icon: '⌂', label: 'الرئيسية' }, { id: 'c-orders', icon: '◷', label: 'طلباتي' }, { id: 'c-account', icon: '♙', label: 'حسابي' }], driver: [{ id: 'd-home', icon: '⌂', label: 'الرئيسية' }, { id: 'd-orders', icon: '📋', label: 'الطلبات' }, { id: 'd-earnings', icon: '💰', label: 'الأرباح' }, { id: 'd-account', icon: '♙', label: 'حسابي' }] };
 
-const ROLE_NAV = {
-  customer: [
-    { id: 'c-home',    icon: '⌂', label: 'الرئيسية' },
-    { id: 'c-orders',  icon: '◷', label: 'طلباتي' },
-    { id: 'c-account', icon: '♙', label: 'حسابي' }
-  ],
-  driver: [
-    { id: 'd-home',     icon: '⌂',  label: 'الرئيسية' },
-    { id: 'd-orders',   icon: '📋', label: 'الطلبات' },
-    { id: 'd-earnings', icon: '💰', label: 'الأرباح' },
-    { id: 'd-account',  icon: '♙',  label: 'حسابي' }
-  ]
-};
+const state = { role: null, pendingRole: null, screen: null, service: 'taxi', mapMode: 'pickup', pickupCoords: null, destCoords: null, driverId: null, online: false, region: getSavedRegion(), user: null };
 
-// تم إزالة LS (localStorage) للحسابات والطلبات، وبقي فقط للجلسة والثيم
-const state = {
-  role: null, pendingRole: null, screen: null,
-  service: 'taxi', mapMode: 'pickup',
-  pickupCoords: null, destCoords: null,
-  driverId: null, online: false,
-  region: getSavedRegion(),
-  user: null // سيحفظ بيانات المستخدم الحالي
-};
-
-/* ---------- محرك حساب السعر ---------- */
-function haversine(a, b) {
-  if (!a || !b) return null;
-  const R = 6371, toRad = d => d * Math.PI / 180;
-  const dLat = toRad(b.lat - a.lat), dLng = toRad(b.lng - a.lng);
-  const lat1 = toRad(a.lat), lat2 = toRad(b.lat);
-  const h = Math.sin(dLat/2)**2 + Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLng/2)**2;
-  return 2 * R * Math.asin(Math.min(1, Math.sqrt(h)));
-}
-
+function haversine(a, b) { if (!a || !b) return null; const R = 6371, toRad = d => d * Math.PI / 180; const dLat = toRad(b.lat - a.lat), dLng = toRad(b.lng - a.lng); const lat1 = toRad(a.lat), lat2 = toRad(b.lat); const h = Math.sin(dLat/2)**2 + Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLng/2)**2; return 2 * R * Math.asin(Math.min(1, Math.sqrt(h))); }
 function calcPriceDetailed(service, km, regionKey) {
-  if (!km || km <= 0) return { total: null, surge: 0, surgeLabel: '' };
-  const region = REGIONS[regionKey] || REGIONS.baghdad;
-  const base = BASE_RATES[service];
-  if (!base) return { total: null, surge: 0, surgeLabel: '' };
-
-  const level = region.level;
-  const perKm = base.perKm * level;
-  const minFare = base.min * level;
-  const distanceFare = km * perKm;
-
-  const hour = new Date().getHours();
-  let timeMult = 1, timeSurge = 0, timeLabel = '';
-  if (hour >= 23 || hour < 5) { timeMult = 1.25; timeSurge = 0.25; timeLabel = '🌙 ليلي +25%'; }
-  else if ((hour >= 7 && hour < 10) || (hour >= 16 && hour < 19)) { timeMult = 1.15; timeSurge = 0.15; timeLabel = '⏰ ذروة +15%'; }
-
-  let distMult = 1, distSurge = 0, distLabel = '';
-  if (km > 30) { distMult = 1.10; distSurge = 0.10; distLabel = '🛣️ مسافة طويلة +10%'; }
-
-  let total = distanceFare * timeMult * distMult;
-  if (total < minFare) total = minFare;
-  total = Math.round(total / 250) * 250;
-
-  const labels = [];
-  if (timeSurge > 0) labels.push(timeLabel);
-  if (distSurge > 0) labels.push(distLabel);
-
+  if (!km || km <= 0) return { total: null, surge: 0, surgeLabel: '' }; const region = REGIONS[regionKey] || REGIONS.baghdad; const base = BASE_RATES[service]; if (!base) return { total: null, surge: 0, surgeLabel: '' };
+  const level = region.level, perKm = base.perKm * level, minFare = base.min * level, distanceFare = km * perKm;
+  const hour = new Date().getHours(); let timeMult = 1, timeSurge = 0, timeLabel = '';
+  if (hour >= 23 || hour < 5) { timeMult = 1.25; timeSurge = 0.25; timeLabel = '🌙 ليلي +25%'; } else if ((hour >= 7 && hour < 10) || (hour >= 16 && hour < 19)) { timeMult = 1.15; timeSurge = 0.15; timeLabel = '⏰ ذروة +15%'; }
+  let distMult = 1, distSurge = 0, distLabel = ''; if (km > 30) { distMult = 1.10; distSurge = 0.10; distLabel = '🛣️ مسافة طويلة +10%'; }
+  let total = distanceFare * timeMult * distMult; if (total < minFare) total = minFare; total = Math.round(total / 250) * 250;
+  const labels = []; if (timeSurge > 0) labels.push(timeLabel); if (distSurge > 0) labels.push(distLabel);
   return { total, surge: timeSurge + distSurge, surgeLabel: labels.join(' • ') };
 }
+function detectRegionFromCoords(lat, lng) { let best = 'baghdad', bestDist = Infinity; for (const [key, samples] of Object.entries(REGION_SAMPLES)) { for (const s of samples) { const d = haversine({ lat, lng }, { lat: s[0], lng: s[1] }); if (d < bestDist) { bestDist = d; best = key; } } } return best; }
+function getRegionRateText(key) { const r = REGIONS[key]; if (!r) return ''; const taxiPer3km = Math.round(BASE_RATES.taxi.perKm * r.level * 3 / 100) * 100; return `التكسي ≈ ${fmt(taxiPer3km)} د.ع / 3 كم`; }
 
-function detectRegionFromCoords(lat, lng) {
-  let best = 'baghdad', bestDist = Infinity;
-  for (const [key, samples] of Object.entries(REGION_SAMPLES)) {
-    for (const s of samples) {
-      const d = haversine({ lat, lng }, { lat: s[0], lng: s[1] });
-      if (d < bestDist) { bestDist = d; best = key; }
-    }
-  }
-  return best;
-}
-
-function getRegionRateText(key) {
-  const r = REGIONS[key]; if (!r) return '';
-  const taxiPer3km = Math.round(BASE_RATES.taxi.perKm * r.level * 3 / 100) * 100;
-  return `التكسي ≈ ${fmt(taxiPer3km)} د.ع / 3 كم`;
-}
-
-/* ---------- المصادقة (متصل بسوبابيس) ---------- */
-function hashPwd(p) {
-  let h = 0;
-  for (let i = 0; i < p.length; i++) h = ((h << 5) - h + p.charCodeAt(i)) | 0;
-  return 'h' + Math.abs(h).toString(36);
-}
-
-function setSession(role, phone) {
-  try {
-    sessionStorage.setItem('kokton_phone_' + role, phone);
-    sessionStorage.setItem('kokton_active_role', role);
-  } catch(e){}
-}
-function clearSession(role) {
-  try {
-    if (role) sessionStorage.removeItem('kokton_phone_' + role);
-    else {
-      sessionStorage.removeItem('kokton_phone_customer');
-      sessionStorage.removeItem('kokton_phone_driver');
-    }
-    sessionStorage.removeItem('kokton_active_role');
-  } catch(e){}
-}
+function hashPwd(p) { let h = 0; for (let i = 0; i < p.length; i++) h = ((h << 5) - h + p.charCodeAt(i)) | 0; return 'h' + Math.abs(h).toString(36); }
+function setSession(role, phone) { try { sessionStorage.setItem('kokton_phone_' + role, phone); sessionStorage.setItem('kokton_active_role', role); } catch(e){} }
+function clearSession(role) { try { if (role) sessionStorage.removeItem('kokton_phone_' + role); else { sessionStorage.removeItem('kokton_phone_customer'); sessionStorage.removeItem('kokton_phone_driver'); } sessionStorage.removeItem('kokton_active_role'); } catch(e){} }
 function getActiveRole() { try { return sessionStorage.getItem('kokton_active_role'); } catch(e) { return null; } }
 function getSessionPhone(role) { try { return sessionStorage.getItem('kokton_phone_' + role); } catch(e) { return null; } }
 
 async function doLogin() {
-  const phone = $('loginPhone').value.trim();
-  const password = $('loginPassword').value;
-  const role = state.pendingRole;
-  if (!phone) { toast('اكتب رقم الهاتف', 'error'); return; }
-  if (!password) { toast('اكتب كلمة السر', 'error'); return; }
-
+  const phone = $('loginPhone').value.trim(), password = $('loginPassword').value, role = state.pendingRole;
+  if (!phone) { toast('اكتب رقم الهاتف', 'error'); return; } if (!password) { toast('اكتب كلمة السر', 'error'); return; }
   toast('جاري التحقق...', 'info');
   const { data, error } = await supabase.from('accounts').select('*').eq('phone', phone).eq('role', role).single();
-
-  if (error || !data) { toast('رقم الهاتف غير مسجل كـ ' + (role === 'customer' ? 'زبون' : 'سائق'), 'error'); return; }
+  if (error || !data) { console.error(error); toast('رقم الهاتف غير مسجل كـ ' + (role === 'customer' ? 'زبون' : 'سائق'), 'error'); return; }
   if (data.password !== hashPwd(password)) { toast('كلمة السر غير صحيحة', 'error'); return; }
-
-  setSession(role, phone);
-  state.user = data; // حفظ بيانات المستخدم
-  haptic();
-  toast('✅ مرحباً ' + data.name, 'success');
-  setTimeout(() => enterApp(role), 400);
+  setSession(role, phone); state.user = data; haptic(); toast('✅ مرحباً ' + data.name, 'success'); setTimeout(() => enterApp(role), 400);
 }
 
 async function doRegister() {
-  const name = $('regName').value.trim();
-  const phone = $('regPhone').value.trim();
-  const password = $('regPassword').value;
-  const password2 = $('regPassword2').value;
-  const role = state.pendingRole;
-
-  if (!name) { toast('اكتب اسمك', 'error'); return; }
-  if (!/^07\d{9}$/.test(phone)) { toast('رقم الهاتف لازم يبدأ بـ 07 و 11 رقم', 'error'); return; }
-  if (password.length < 4) { toast('كلمة السر لازم 4 أحرف على الأقل', 'error'); return; }
-  if (password !== password2) { toast('كلمتا السر غير متطابقتين', 'error'); return; }
-
+  const name = $('regName').value.trim(), phone = $('regPhone').value.trim(), password = $('regPassword').value, password2 = $('regPassword2').value, role = state.pendingRole;
+  if (!name) { toast('اكتب اسمك', 'error'); return; } if (!/^07\d{9}$/.test(phone)) { toast('رقم الهاتف لازم يبدأ بـ 07 و 11 رقم', 'error'); return; }
+  if (password.length < 4) { toast('كلمة السر لازم 4 أحرف على الأقل', 'error'); return; } if (password !== password2) { toast('كلمتا السر غير متطابقتين', 'error'); return; }
   toast('جاري إنشاء الحساب...', 'info');
-  const { error } = await supabase.from('accounts').insert([{
-    phone: phone, name: name, password: hashPwd(password), role: role, car: ''
-  }]);
-
-  if (error) { toast('هذا الرقم مسجل مسبقاً أو حدث خطأ', 'error'); return; }
-
-  setSession(role, phone);
-  state.user = { phone, name, role, car: '' };
-  haptic();
-  toast('✅ تم إنشاء الحساب', 'success');
-  setTimeout(() => enterApp(role), 400);
+  const { error } = await supabase.from('accounts').insert([{ phone: phone, name: name, password: hashPwd(password), role: role, car: '' }]);
+  if (error) { console.error(error); toast('هذا الرقم مسجل مسبقاً أو حدث خطأ', 'error'); return; }
+  setSession(role, phone); state.user = { phone, name, role, car: '' }; haptic(); toast('✅ تم إنشاء الحساب', 'success'); setTimeout(() => enterApp(role), 400);
 }
 
-function logout() {
-  if (!confirm('هل تريد تسجيل الخروج؟')) return;
-  clearSession(state.role);
-  state.role = null; state.user = null;
-  $('app').classList.add('hidden');
-  showRolePicker();
-  toast('تم تسجيل الخروج', 'info');
-}
+function logout() { if (!confirm('هل تريد تسجيل الخروج؟')) return; clearSession(state.role); state.role = null; state.user = null; $('app').classList.add('hidden'); showRolePicker(); toast('تم تسجيل الخروج', 'info'); }
 
 async function syncProfileFromDB(role, phone) {
-  const { data } = await supabase.from('accounts').select('*').eq('phone', phone).eq('role', role).single();
+  const { data, error } = await supabase.from('accounts').select('*').eq('phone', phone).eq('role', role).single();
   if (data) {
     state.user = data;
-    if (role === 'customer') {
-      $('customerName').value = data.name || '';
-      $('customerPhone').value = data.phone || '';
-    } else {
-      $('driverName').value = data.name || '';
-      $('driverPhone').value = data.phone || '';
-      $('driverCar').value = data.car || '';
-      state.driverId = 'driver_' + phone;
-    }
-  }
+    if (role === 'customer') { $('customerName').value = data.name || ''; $('customerPhone').value = data.phone || ''; }
+    else { $('driverName').value = data.name || ''; $('driverPhone').value = data.phone || ''; $('driverCar').value = data.car || ''; state.driverId = 'driver_' + phone; }
+  } else { state.user = null; }
 }
 
 async function enterApp(role) {
-  state.role = role;
-  state.pendingRole = null;
-  hideRolePicker();
-  $('authScreen').classList.add('hidden');
-  $('app').classList.remove('hidden');
+  state.role = role; state.pendingRole = null; hideRolePicker(); $('authScreen').classList.add('hidden'); $('app').classList.remove('hidden');
+  const phone = getSessionPhone(role); await syncProfileFromDB(role, phone);
+  if (!state.user) { toast('يجب تسجيل الدخول أولاً', 'error'); clearSession(role); $('app').classList.add('hidden'); showRolePicker(); return; }
+  
   $('roleTag').textContent = role === 'customer' ? 'زبون' : 'سائق';
   $('switchLabel').innerHTML = (role === 'customer' ? 'سائق' : 'زبون') + '<small>تبديل</small>';
-
-  const phone = getSessionPhone(role);
-  await syncProfileFromDB(role, phone);
-
-  renderNav();
-  const first = role === 'customer' ? 'c-home' : 'd-home';
-  goScreen(first);
-
-  if (role === 'driver') {
-    state.online = localStorage.getItem('kokton_online') === '1';
-    setTimeout(() => { updateOnlineUI(); renderDriverHome(); }, 250);
-  }
+  renderNav(); const first = role === 'customer' ? 'c-home' : 'd-home'; goScreen(first);
+  if (role === 'driver') { state.online = localStorage.getItem('kokton_online') === '1'; setTimeout(() => { updateOnlineUI(); renderDriverHome(); }, 250); }
 }
 
 function switchRole() {
-  haptic();
-  const newRole = state.role === 'customer' ? 'driver' : 'customer';
-  const curPhone = getSessionPhone(state.role);
-
-  if (curPhone) {
-    setSession(newRole, curPhone);
-    enterApp(newRole);
-    toast('✅ تم التبديل إلى واجهة ' + (newRole === 'customer' ? 'الزبون' : 'السائق'), 'success');
-    return;
-  }
-  state.pendingRole = newRole;
-  $('app').classList.add('hidden');
-  showAuth(newRole);
+  haptic(); const newRole = state.role === 'customer' ? 'driver' : 'customer';
+  clearSession(newRole); // نمسح الجلسة للدور الجديد لضمان عدم وجود أخطاء
+  state.pendingRole = newRole; $('app').classList.add('hidden'); showAuth(newRole);
+  toast('سجل دخولك أو أنشئ حساب كـ ' + (newRole === 'customer' ? 'زبون' : 'سائق'), 'info');
 }
 
-function renderNav() {
-  const nav = $('bottomNav');
-  const items = ROLE_NAV[state.role] || [];
-  nav.innerHTML = items.map(it =>
-    `<button class="nav" data-screen="${it.id}" onclick="goScreen('${it.id}')">
-      <b>${it.icon}</b><span>${it.label}</span>
-    </button>`
-  ).join('');
-}
-function updateNavActive() {
-  document.querySelectorAll('.nav').forEach(n => n.classList.toggle('active', n.dataset.screen === state.screen));
-}
-
+function renderNav() { const nav = $('bottomNav'); const items = ROLE_NAV[state.role] || []; nav.innerHTML = items.map(it => `<button class="nav" data-screen="${it.id}" onclick="goScreen('${it.id}')"><b>${it.icon}</b><span>${it.label}</span></button>`).join(''); }
+function updateNavActive() { document.querySelectorAll('.nav').forEach(n => n.classList.toggle('active', n.dataset.screen === state.screen)); }
 function goScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === id));
-  state.screen = id;
-  updateNavActive();
-  if (id === 'c-booking') setTimeout(() => {
-    initCustomerMap(); if (customerMap) customerMap.invalidateSize();
-    renderRegionChips(); updateRegionInfo(); updateFareNotice(); updatePricePreview();
-  }, 200);
-  if (id === 'd-home')    setTimeout(() => { initDriverMap(); if (driverMap) driverMap.invalidateSize(); renderDriverHome(); }, 200);
-  if (id === 'c-orders')  renderCustomerOrders();
-  if (id === 'd-orders')  renderDriverOrders();
-  if (id === 'd-earnings') renderEarnings();
+  document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === id)); state.screen = id; updateNavActive();
+  if (id === 'c-booking') setTimeout(() => { initCustomerMap(); if (customerMap) customerMap.invalidateSize(); renderRegionChips(); updateRegionInfo(); updateFareNotice(); updatePricePreview(); }, 200);
+  if (id === 'd-home') setTimeout(() => { initDriverMap(); if (driverMap) driverMap.invalidateSize(); renderDriverHome(); }, 200);
+  if (id === 'c-orders') renderCustomerOrders(); if (id === 'd-orders') renderDriverOrders(); if (id === 'd-earnings') renderEarnings();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-/* ---------- واجهة المناطق ---------- */
-function renderRegionChips() {
-  const el = $('regionChips');
-  if (!el) return;
-  el.innerHTML = Object.entries(REGIONS).map(([key, r]) =>
-    `<button class="region-chip ${key === state.region ? 'active' : ''}" onclick="selectRegion('${key}')">
-      ${r.emoji} ${r.name}
-    </button>`
-  ).join('');
-}
+function renderRegionChips() { const el = $('regionChips'); if (!el) return; el.innerHTML = Object.entries(REGIONS).map(([key, r]) => `<button class="region-chip ${key === state.region ? 'active' : ''}" onclick="selectRegion('${key}')">${r.emoji} ${r.name}</button>`).join(''); }
 function selectRegion(key, silent) {
-  if (!REGIONS[key]) return;
-  const changed = state.region !== key;
-  state.region = key; setSavedRegion(key);
+  if (!REGIONS[key]) return; const changed = state.region !== key; state.region = key; setSavedRegion(key);
   renderRegionChips(); updateRegionInfo(); updateFareNotice(); updatePricePreview();
-  if (!silent && changed) {
-    haptic(); const r = REGIONS[key];
-    toast(`📍 ${r.name} — ${getRegionRateText(key)}`, 'success');
-    if (customerMap && !state.pickupCoords && !state.destCoords) customerMap.setView(r.center, 13);
-  }
+  if (!silent && changed) { haptic(); const r = REGIONS[key]; toast(`📍 ${r.name} — ${getRegionRateText(key)}`, 'success'); if (customerMap && !state.pickupCoords && !state.destCoords) customerMap.setView(r.center, 13); }
 }
 function updateRegionInfo() {
-  const r = REGIONS[state.region]; if (!r) return;
-  const el = $('regionInfo'); if (el) el.textContent = `${r.emoji} ${r.name}`;
-  const line = $('regionInfoLine');
-  if (line) {
-    const taxiPerKm = Math.round(BASE_RATES.taxi.perKm * r.level * 10) / 10;
-    const taxiMin = Math.round(BASE_RATES.taxi.min * r.level);
-    line.innerHTML = `<b>${r.name}</b> — التكسي: <b>${taxiPerKm} د.ع/كم</b> • الحد الأدنى: <b>${fmt(taxiMin)} د.ع</b>`;
-  }
+  const r = REGIONS[state.region]; if (!r) return; const el = $('regionInfo'); if (el) el.textContent = `${r.emoji} ${r.name}`;
+  const line = $('regionInfoLine'); if (line) { const taxiPerKm = Math.round(BASE_RATES.taxi.perKm * r.level * 10) / 10; const taxiMin = Math.round(BASE_RATES.taxi.min * r.level); line.innerHTML = `<b>${r.name}</b> — التكسي: <b>${taxiPerKm} د.ع/كم</b> • الحد الأدنى: <b>${fmt(taxiMin)} د.ع</b>`; }
 }
-function updateFareNotice() {
-  const el = $('fareText'); if (!el) return;
-  const r = REGIONS[state.region]; if (!r) return;
-  if (state.service === 'taxi') {
-    const per3km = Math.round(BASE_RATES.taxi.perKm * r.level * 3 / 100) * 100;
-    el.textContent = `${r.emoji} ${r.name}: ${fmt(per3km)} دينار لكل 3 كم`;
-  } else {
-    const perKm = Math.round(BASE_RATES[state.service].perKm * r.level / 100) * 100;
-    el.textContent = `${r.emoji} ${r.name}: ${fmt(perKm)} دينار لكل كم`;
-  }
-}
+function updateFareNotice() { const el = $('fareText'); if (!el) return; const r = REGIONS[state.region]; if (!r) return; if (state.service === 'taxi') { const per3km = Math.round(BASE_RATES.taxi.perKm * r.level * 3 / 100) * 100; el.textContent = `${r.emoji} ${r.name}: ${fmt(per3km)} دينار لكل 3 كم`; } else { const perKm = Math.round(BASE_RATES[state.service].perKm * r.level / 100) * 100; el.textContent = `${r.emoji} ${r.name}: ${fmt(perKm)} دينار لكل كم`; } }
 function detectMyRegion() {
-  if (!navigator.geolocation) { toast('المتصفح لا يدعم تحديد الموقع', 'error'); return; }
-  toast('🛰️ جاري تحديد منطقتك...', 'info');
+  if (!navigator.geolocation) { toast('المتصفح لا يدعم تحديد الموقع', 'error'); return; } toast('🛰️ جاري تحديد منطقتك...', 'info');
   navigator.geolocation.getCurrentPosition(
     (pos) => {
-      const lat = pos.coords.latitude, lng = pos.coords.longitude;
-      const key = detectRegionFromCoords(lat, lng);
-      const r = REGIONS[key];
-      if (key !== state.region) {
-        if (confirm(`📍 موقعك يقع ضمن: ${r.name}\n\nهل تريد تحويل التسعير إلى ${r.name}؟`)) selectRegion(key, false);
-      } else { toast(`✅ أنت بالفعل في ${r.name}`, 'success'); }
-      const latlng = { lat, lng };
-      state.pickupCoords = latlng;
-      $('pickup').value = '📍 موقعي الحالي (' + lat.toFixed(4) + ', ' + lng.toFixed(4) + ')';
-      if (!customerMap) initCustomerMap();
-      if (customerMap) customerMap.setView([lat, lng], 15);
-      if (cPickupMarker) cPickupMarker.setLatLng(latlng);
-      else if (customerMap) cPickupMarker = L.marker(latlng, { icon: makeIcon('#00d4a0', 'A') }).addTo(customerMap);
+      const lat = pos.coords.latitude, lng = pos.coords.longitude; const key = detectRegionFromCoords(lat, lng); const r = REGIONS[key];
+      if (key !== state.region) { if (confirm(`📍 موقعك يقع ضمن: ${r.name}\n\nهل تريد تحويل التسعير إلى ${r.name}؟`)) selectRegion(key, false); } else { toast(`✅ أنت بالفعل في ${r.name}`, 'success'); }
+      const latlng = { lat, lng }; state.pickupCoords = latlng; $('pickup').value = '📍 موقعي الحالي (' + lat.toFixed(4) + ', ' + lng.toFixed(4) + ')';
+      if (!customerMap) initCustomerMap(); if (customerMap) customerMap.setView([lat, lng], 15);
+      if (cPickupMarker) cPickupMarker.setLatLng(latlng); else if (customerMap) cPickupMarker = L.marker(latlng, { icon: makeIcon('#00d4a0', 'A') }).addTo(customerMap);
       updateRouteLine(); updatePricePreview();
-    },
-    () => toast('لم نتمكن من تحديد موقعك', 'error'), { enableHighAccuracy: true, timeout: 12000 }
+    }, () => toast('لم نتمكن من تحديد موقعك', 'error'), { enableHighAccuracy: true, timeout: 12000 }
   );
 }
 
-/* ---------- خدمة الزبون ---------- */
-function selectService(s) {
-  haptic(); state.service = s;
-  $('bookingTitle').textContent = SERVICES[s].label + ' — تحديد الرحلة';
-  $('chosenService').textContent = SERVICES[s].label;
-  updateFareNotice(); updatePricePreview(); goScreen('c-booking');
-}
-function makeIcon(color, text) {
-  return L.divIcon({
-    className: '', html: `<div class="kokton-marker" style="background:${color};color:${color};">${text}</div>`,
-    iconSize: [36, 36], iconAnchor: [18, 18]
-  });
-}
+function selectService(s) { haptic(); state.service = s; $('bookingTitle').textContent = SERVICES[s].label + ' — تحديد الرحلة'; $('chosenService').textContent = SERVICES[s].label; updateFareNotice(); updatePricePreview(); goScreen('c-booking'); }
+function makeIcon(color, text) { return L.divIcon({ className: '', html: `<div class="kokton-marker" style="background:${color};color:${color};">${text}</div>`, iconSize: [36, 36], iconAnchor: [18, 18] }); }
 function initCustomerMap() {
-  if (customerMap) return;
-  const el = $('customerMap'); if (!el) return;
-  const region = REGIONS[state.region] || REGIONS.baghdad;
-  customerMap = L.map('customerMap').setView(region.center, 12);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(customerMap);
+  if (customerMap) return; const el = $('customerMap'); if (!el) return; const region = REGIONS[state.region] || REGIONS.baghdad;
+  customerMap = L.map('customerMap').setView(region.center, 12); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(customerMap);
   customerMap.on('click', (e) => {
     const ll = { lat: e.latlng.lat, lng: e.latlng.lng };
-    if (state.mapMode === 'pickup') {
-      state.pickupCoords = ll; $('pickup').value = `${ll.lat.toFixed(4)}, ${ll.lng.toFixed(4)}`;
-      if (cPickupMarker) cPickupMarker.setLatLng(ll);
-      else cPickupMarker = L.marker(ll, { icon: makeIcon('#00d4a0', 'A') }).addTo(customerMap);
-    } else {
-      state.destCoords = ll; $('destination').value = `${ll.lat.toFixed(4)}, ${ll.lng.toFixed(4)}`;
-      if (cDestMarker) cDestMarker.setLatLng(ll);
-      else cDestMarker = L.marker(ll, { icon: makeIcon('#ff4d6d', 'B') }).addTo(customerMap);
-    }
+    if (state.mapMode === 'pickup') { state.pickupCoords = ll; $('pickup').value = `${ll.lat.toFixed(4)}, ${ll.lng.toFixed(4)}`; if (cPickupMarker) cPickupMarker.setLatLng(ll); else cPickupMarker = L.marker(ll, { icon: makeIcon('#00d4a0', 'A') }).addTo(customerMap); }
+    else { state.destCoords = ll; $('destination').value = `${ll.lat.toFixed(4)}, ${ll.lng.toFixed(4)}`; if (cDestMarker) cDestMarker.setLatLng(ll); else cDestMarker = L.marker(ll, { icon: makeIcon('#ff4d6d', 'B') }).addTo(customerMap); }
     updateRouteLine(); updatePricePreview();
   });
 }
-function setMapMode(mode) {
-  state.mapMode = mode;
-  document.querySelectorAll('.map-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === mode));
-  haptic();
-}
+function setMapMode(mode) { state.mapMode = mode; document.querySelectorAll('.map-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === mode)); haptic(); }
 function updateRouteLine() {
-  if (!customerMap) return;
-  if (cRouteLine) { customerMap.removeLayer(cRouteLine); cRouteLine = null; }
+  if (!customerMap) return; if (cRouteLine) { customerMap.removeLayer(cRouteLine); cRouteLine = null; }
   if (state.pickupCoords && state.destCoords) {
     cRouteLine = L.polyline([[state.pickupCoords.lat, state.pickupCoords.lng], [state.destCoords.lat, state.destCoords.lng]], { color: '#ffd24a', weight: 4, dashArray: '8 8' }).addTo(customerMap);
     try { customerMap.fitBounds(L.latLngBounds([[state.pickupCoords.lat, state.pickupCoords.lng], [state.destCoords.lat, state.destCoords.lng]]), { padding: [40, 40] }); } catch(e){}
@@ -1157,306 +628,137 @@ function updateRouteLine() {
 }
 function updatePricePreview() {
   const priceEl = $('price'); const surgeEl = $('surgeBadge'); if (!priceEl) return;
-  if (!state.pickupCoords || !state.destCoords) {
-    priceEl.textContent = '—'; if (surgeEl) surgeEl.classList.add('hidden'); return;
-  }
-  const km = haversine(state.pickupCoords, state.destCoords);
-  const detail = calcPriceDetailed(state.service, km, state.region);
-  if (detail.total) {
-    priceEl.textContent = fmt(detail.total) + ' د.ع';
-    if (surgeEl) {
-      if (detail.surge > 0) { surgeEl.textContent = detail.surgeLabel; surgeEl.classList.remove('hidden'); }
-      else surgeEl.classList.add('hidden');
-    }
-  }
+  if (!state.pickupCoords || !state.destCoords) { priceEl.textContent = '—'; if (surgeEl) surgeEl.classList.add('hidden'); return; }
+  const km = haversine(state.pickupCoords, state.destCoords); const detail = calcPriceDetailed(state.service, km, state.region);
+  if (detail.total) { priceEl.textContent = fmt(detail.total) + ' د.ع'; if (surgeEl) { if (detail.surge > 0) { surgeEl.textContent = detail.surgeLabel; surgeEl.classList.remove('hidden'); } else surgeEl.classList.add('hidden'); } }
 }
 function locateMe() {
-  if (!navigator.geolocation) { toast('المتصفح لا يدعم تحديد الموقع', 'error'); return; }
-  toast('🛰️ جاري تحديد موقعك...', 'info');
+  if (!navigator.geolocation) { toast('المتصفح لا يدعم تحديد الموقع', 'error'); return; } toast('🛰️ جاري تحديد موقعك...', 'info');
   navigator.geolocation.getCurrentPosition(
     (pos) => {
-      const ll = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-      state.pickupCoords = ll;
-      $('pickup').value = '📍 موقعي الحالي (' + ll.lat.toFixed(4) + ', ' + ll.lng.toFixed(4) + ')';
-      if (!customerMap) initCustomerMap();
-      if (customerMap) customerMap.setView([ll.lat, ll.lng], 15);
-      if (cPickupMarker) cPickupMarker.setLatLng(ll);
-      else if (customerMap) cPickupMarker = L.marker(ll, { icon: makeIcon('#00d4a0', 'A') }).addTo(customerMap);
+      const ll = { lat: pos.coords.latitude, lng: pos.coords.longitude }; state.pickupCoords = ll; $('pickup').value = '📍 موقعي الحالي (' + ll.lat.toFixed(4) + ', ' + ll.lng.toFixed(4) + ')';
+      if (!customerMap) initCustomerMap(); if (customerMap) customerMap.setView([ll.lat, ll.lng], 15);
+      if (cPickupMarker) cPickupMarker.setLatLng(ll); else if (customerMap) cPickupMarker = L.marker(ll, { icon: makeIcon('#00d4a0', 'A') }).addTo(customerMap);
       updateRouteLine(); updatePricePreview(); haptic();
-    },
-    () => toast('لم نتمكن من تحديد موقعك', 'error'), { enableHighAccuracy: true, timeout: 12000 }
+    }, () => toast('لم نتمكن من تحديد موقعك', 'error'), { enableHighAccuracy: true, timeout: 12000 }
   );
 }
-
 async function submitOrder() {
-  if (!state.pickupCoords) { toast('حدد موقع الانطلاق أولاً', 'error'); return; }
-  if (!state.destCoords) { toast('حدد الوجهة أولاً', 'error'); return; }
-  const km = haversine(state.pickupCoords, state.destCoords);
-  const detail = calcPriceDetailed(state.service, km, state.region);
-  if (!detail.total) { toast('تعذر حساب السعر', 'error'); return; }
-
+  if (!state.pickupCoords) { toast('حدد موقع الانطلاق أولاً', 'error'); return; } if (!state.destCoords) { toast('حدد الوجهة أولاً', 'error'); return; }
+  const km = haversine(state.pickupCoords, state.destCoords); const detail = calcPriceDetailed(state.service, km, state.region); if (!detail.total) { toast('تعذر حساب السعر', 'error'); return; }
   toast('جاري إرسال الطلب...', 'info');
   const orderId = 'ord_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
-  const newOrder = {
-    id: orderId,
-    customer_phone: state.user.phone,
-    customer_name: state.user.name,
-    service: state.service,
-    region: state.region,
-    pickup_text: $('pickup').value || '—',
-    dest_text: $('destination').value || '—',
-    pickup_lat: state.pickupCoords.lat,
-    pickup_lng: state.pickupCoords.lng,
-    dest_lat: state.destCoords.lat,
-    dest_lng: state.destCoords.lng,
-    km: Math.round(km * 10) / 10,
-    price: detail.total,
-    status: 'pending'
-  };
-
+  const newOrder = { id: orderId, customer_phone: state.user.phone, customer_name: state.user.name, service: state.service, region: state.region, pickup_text: $('pickup').value || '—', dest_text: $('destination').value || '—', pickup_lat: state.pickupCoords.lat, pickup_lng: state.pickupCoords.lng, dest_lat: state.destCoords.lat, dest_lng: state.destCoords.lng, km: Math.round(km * 10) / 10, price: detail.total, status: 'pending' };
   const { error } = await supabase.from('orders').insert([newOrder]);
-
   if (error) { console.error(error); toast('خطأ في إرسال الطلب', 'error'); return; }
-
-  haptic(); toast('✅ تم إرسال الطلب — بانتظار سائق', 'success');
-  state.pickupCoords = null; state.destCoords = null;
-  $('pickup').value = ''; $('destination').value = '';
-  if (customerMap) {
-    if (cPickupMarker) { customerMap.removeLayer(cPickupMarker); cPickupMarker = null; }
-    if (cDestMarker) { customerMap.removeLayer(cDestMarker); cDestMarker = null; }
-    if (cRouteLine) { customerMap.removeLayer(cRouteLine); cRouteLine = null; }
-  }
+  haptic(); toast('✅ تم إرسال الطلب — بانتظار سائق', 'success'); state.pickupCoords = null; state.destCoords = null; $('pickup').value = ''; $('destination').value = '';
+  if (customerMap) { if (cPickupMarker) { customerMap.removeLayer(cPickupMarker); cPickupMarker = null; } if (cDestMarker) { customerMap.removeLayer(cDestMarker); cDestMarker = null; } if (cRouteLine) { customerMap.removeLayer(cRouteLine); cRouteLine = null; } }
   goScreen('c-orders');
 }
 
 function renderOrderItem(o, viewer) {
-  const st = STATUS[o.status] || STATUS.pending;
-  const service = SERVICES[o.service] || SERVICES.taxi;
-  const region = REGIONS[o.region];
-  let actions = '';
-
+  const st = STATUS[o.status] || STATUS.pending; const service = SERVICES[o.service] || SERVICES.taxi; const region = REGIONS[o.region]; let actions = '';
   if (viewer === 'driver') {
-    if (o.status === 'pending') {
-      actions = `<button class="btn-accept" onclick="acceptOrder('${o.id}')">قبول الطلب</button>`;
-    } else if (o.driver_phone === state.user.phone) {
-      if (o.status === 'accepted') actions = `<button class="btn-next" onclick="advanceOrder('${o.id}','arrived')">وصلت</button>`;
-      else if (o.status === 'arrived') actions = `<button class="btn-next" onclick="advanceOrder('${o.id}','ongoing')">بدء الرحلة</button>`;
-      else if (o.status === 'ongoing') actions = `<button class="btn-next" onclick="advanceOrder('${o.id}','completed')">إنهاء الرحلة</button>`;
-    }
+    if (o.status === 'pending') actions = `<button class="btn-accept" onclick="acceptOrder('${o.id}')">قبول الطلب</button>`;
+    else if (o.driver_phone === state.user.phone) { if (o.status === 'accepted') actions = `<button class="btn-next" onclick="advanceOrder('${o.id}','arrived')">وصلت</button>`; else if (o.status === 'arrived') actions = `<button class="btn-next" onclick="advanceOrder('${o.id}','ongoing')">بدء الرحلة</button>`; else if (o.status === 'ongoing') actions = `<button class="btn-next" onclick="advanceOrder('${o.id}','completed')">إنهاء الرحلة</button>`; }
   }
-  if (viewer === 'customer' && o.status === 'pending') {
-    actions += `<button class="btn-cancel" onclick="cancelOrder('${o.id}')">إلغاء</button>`;
-  }
-
+  if (viewer === 'customer' && o.status === 'pending') actions += `<button class="btn-cancel" onclick="cancelOrder('${o.id}')">إلغاء</button>`;
   const driverInfo = o.driver_name ? `<div class="order-meta" style="margin-top:8px">🚕 ${esc(o.driver_name)} — ${esc(o.driver_car || '—')}</div>` : '';
-
-  return `<div class="order-item">
-    <div class="order-head"><div class="order-service">${service.label}</div><div class="status-badge ${st.cls}">${st.label}</div></div>
-    <div class="order-meta">
-      <div>📍 من: <b>${esc(o.pickup_text)}</b></div>
-      <div>🎯 إلى: <b>${esc(o.dest_text)}</b></div>
-      <div>📏 المسافة: <b>${o.km} كم</b>${region ? ' • ' + region.emoji + ' ' + region.name : ''}</div>
-    </div>
-    ${driverInfo}
-    <div class="order-price">${fmt(o.price)} د.ع</div>
-    ${actions ? `<div class="order-actions">${actions}</div>` : ''}
-  </div>`;
+  return `<div class="order-item"><div class="order-head"><div class="order-service">${service.label}</div><div class="status-badge ${st.cls}">${st.label}</div></div><div class="order-meta"><div>📍 من: <b>${esc(o.pickup_text)}</b></div><div>🎯 إلى: <b>${esc(o.dest_text)}</b></div><div>📏 المسافة: <b>${o.km} كم</b>${region ? ' • ' + region.emoji + ' ' + region.name : ''}</div></div>${driverInfo}<div class="order-price">${fmt(o.price)} د.ع</div>${actions ? `<div class="order-actions">${actions}</div>` : ''}</div>`;
 }
 
 async function renderCustomerOrders() {
-  const el = $('customerOrdersList'); if (!el) return;
-  el.innerHTML = '<div class="empty-state"><div class="ttl">جاري التحميل...</div></div>';
+  const el = $('customerOrdersList'); if (!el) return; el.innerHTML = '<div class="empty-state"><div class="ttl">جاري التحميل...</div></div>';
   const { data, error } = await supabase.from('orders').select('*').eq('customer_phone', state.user.phone).order('created_at', { ascending: false });
   if (error || !data) { el.innerHTML = '<div class="empty-state"><div class="ttl">حدث خطأ</div></div>'; return; }
-  if (data.length === 0) {
-    el.innerHTML = `<div class="empty-state"><div class="big">📭</div><div class="ttl">لا توجد طلبات</div><div class="muted" style="font-size:12px;margin-top:6px">اطلب رحلتك من الرئيسية</div></div>`;
-  } else {
-    el.innerHTML = data.map(o => renderOrderItem(o, 'customer')).join('');
-  }
+  if (data.length === 0) el.innerHTML = `<div class="empty-state"><div class="big">📭</div><div class="ttl">لا توجد طلبات</div><div class="muted" style="font-size:12px;margin-top:6px">اطلب رحلتك من الرئيسية</div></div>`;
+  else el.innerHTML = data.map(o => renderOrderItem(o, 'customer')).join('');
 }
-
 async function cancelOrder(id) {
   if (!confirm('إلغاء هذا الطلب؟')) return;
   const { error } = await supabase.from('orders').update({ status: 'cancelled' }).eq('id', id).eq('status', 'pending');
-  if (error) { toast('لا يمكن إلغاء الطلب', 'error'); return; }
-  toast('تم إلغاء الطلب', 'info'); renderCustomerOrders();
+  if (error) { toast('لا يمكن إلغاء الطلب', 'error'); return; } toast('تم إلغاء الطلب', 'info'); renderCustomerOrders();
 }
 
-/* ---------- خدمة السائق ---------- */
 function initDriverMap() {
-  if (driverMap) return; const el = $('driverMap'); if (!el) return;
-  const region = REGIONS[state.region] || REGIONS.baghdad;
-  driverMap = L.map('driverMap').setView(region.center, 12);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(driverMap);
+  if (driverMap) return; const el = $('driverMap'); if (!el) return; const region = REGIONS[state.region] || REGIONS.baghdad;
+  driverMap = L.map('driverMap').setView(region.center, 12); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(driverMap);
 }
 async function updateDriverMapMarkers() {
-  if (!driverMap) return;
-  dOrderMarkers.forEach(m => { try { driverMap.removeLayer(m); } catch(e){} });
-  dOrderMarkers = [];
+  if (!driverMap) return; dOrderMarkers.forEach(m => { try { driverMap.removeLayer(m); } catch(e){} }); dOrderMarkers = [];
   const { data } = await supabase.from('orders').select('*').eq('status', 'pending');
-  if (data) {
-    data.forEach(o => {
-      const m = L.marker([o.pickup_lat, o.pickup_lng], { icon: makeIcon('#ffd24a', '🚕') }).addTo(driverMap);
-      m.bindPopup(`<b>${SERVICES[o.service].label}</b><br>${esc(o.pickup_text)}<br>${fmt(o.price)} د.ع`);
-      dOrderMarkers.push(m);
-    });
-  }
+  if (data) { data.forEach(o => { const m = L.marker([o.pickup_lat, o.pickup_lng], { icon: makeIcon('#ffd24a', '🚕') }).addTo(driverMap); m.bindPopup(`<b>${SERVICES[o.service].label}</b><br>${esc(o.pickup_text)}<br>${fmt(o.price)} د.ع`); dOrderMarkers.push(m); }); }
 }
 async function renderDriverHome() {
-  const el = $('driverCurrentOrder'); if (!el) return;
-  el.innerHTML = '<div class="empty-state"><div class="ttl">جاري التحميل...</div></div>';
+  const el = $('driverCurrentOrder'); if (!el) return; el.innerHTML = '<div class="empty-state"><div class="ttl">جاري التحميل...</div></div>';
   const { data, error } = await supabase.from('orders').select('*').eq('driver_phone', state.user.phone).in('status', ['accepted', 'arrived', 'ongoing']).order('created_at', { ascending: false });
-
-  if (error || !data || data.length === 0) {
-    el.innerHTML = `<div class="empty-state"><div class="big">🚕</div><div class="ttl">لا توجد رحلة حالية</div><div class="muted" style="font-size:12px;margin-top:6px">${state.online ? 'انتظر طلبات جديدة' : 'فعّل الاتصال لاستقبال الطلبات'}</div></div>`;
-  } else {
-    el.innerHTML = renderOrderItem(data[0], 'driver');
-  }
-
-  // جلب الإحصائيات
+  if (error || !data || data.length === 0) el.innerHTML = `<div class="empty-state"><div class="big">🚕</div><div class="ttl">لا توجد رحلة حالية</div><div class="muted" style="font-size:12px;margin-top:6px">${state.online ? 'انتظر طلبات جديدة' : 'فعّل الاتصال لاستقبال الطلبات'}</div></div>`;
+  else el.innerHTML = renderOrderItem(data[0], 'driver');
   const { data: history } = await supabase.from('orders').select('price').eq('driver_phone', state.user.phone).eq('status', 'completed');
-  if (history) {
-    $('statTrips').textContent = history.length;
-    $('statEarnings').textContent = fmt(history.reduce((s, o) => s + o.price, 0));
-  }
+  if (history) { $('statTrips').textContent = history.length; $('statEarnings').textContent = fmt(history.reduce((s, o) => s + o.price, 0)); }
   if (driverMap) updateDriverMapMarkers();
 }
-
 async function renderDriverOrders() {
-  const availEl = $('driverAvailableOrders'); if (!availEl) return;
-  availEl.innerHTML = '<div class="empty-state"><div class="ttl">جاري التحميل...</div></div>';
-
-  if (!state.online) {
-    availEl.innerHTML = `<div class="empty-state"><div class="big">📴</div><div class="ttl">أنت غير متصل</div></div>`;
-  } else {
+  const availEl = $('driverAvailableOrders'); if (!availEl) return; availEl.innerHTML = '<div class="empty-state"><div class="ttl">جاري التحميل...</div></div>';
+  if (!state.online) availEl.innerHTML = `<div class="empty-state"><div class="big">📴</div><div class="ttl">أنت غير متصل</div></div>`;
+  else {
     const { data } = await supabase.from('orders').select('*').eq('status', 'pending').order('created_at', { ascending: false });
     if (!data || data.length === 0) availEl.innerHTML = `<div class="empty-state"><div class="big">⏳</div><div class="ttl">لا توجد طلبات حالياً</div></div>`;
     else availEl.innerHTML = data.map(o => renderOrderItem(o, 'driver')).join('');
   }
-
   const histEl = $('driverHistory'); if (!histEl) return;
   const { data: hist } = await supabase.from('orders').select('*').eq('driver_phone', state.user.phone).eq('status', 'completed').order('created_at', { ascending: false }).limit(10);
   if (!hist || hist.length === 0) histEl.innerHTML = `<div class="empty-state"><div class="big">📋</div><div class="ttl">لا يوجد سجل</div></div>`;
   else histEl.innerHTML = hist.map(o => renderOrderItem(o, 'driver')).join('');
 }
-
 async function acceptOrder(id) {
   toast('جاري القبول...', 'info');
-  const { error } = await supabase.from('orders').update({
-    status: 'accepted', driver_phone: state.user.phone, driver_name: state.user.name, driver_car: state.user.car || ''
-  }).eq('id', id).eq('status', 'pending');
-
-  if (error) { toast('الطلب لم يعد متاحاً', 'error'); renderDriverOrders(); return; }
+  const { error } = await supabase.from('orders').update({ status: 'accepted', driver_phone: state.user.phone, driver_name: state.user.name, driver_car: state.user.car || '' }).eq('id', id).eq('status', 'pending');
+  if (error) { console.error(error); toast('الطلب لم يعد متاحاً', 'error'); renderDriverOrders(); return; }
   haptic(); toast('✅ تم قبول الطلب', 'success'); renderDriverHome(); renderDriverOrders();
 }
-
 async function advanceOrder(id, newStatus) {
   const { error } = await supabase.from('orders').update({ status: newStatus }).eq('id', id).eq('driver_phone', state.user.phone);
-  if (error) return;
-  haptic(); const labels = { arrived: '✅ وصلت لموقع الزبون', ongoing: '🚀 بدأت الرحلة', completed: '🎉 انتهت الرحلة' };
-  toast(labels[newStatus] || 'تم التحديث', 'success'); renderDriverHome(); renderDriverOrders();
+  if (error) { console.error(error); return; } haptic(); const labels = { arrived: '✅ وصلت لموقع الزبون', ongoing: '🚀 بدأت الرحلة', completed: '🎉 انتهت الرحلة' }; toast(labels[newStatus] || 'تم التحديث', 'success'); renderDriverHome(); renderDriverOrders();
 }
-
 async function renderEarnings() {
-  const { data: mine } = await supabase.from('orders').select('*').eq('driver_phone', state.user.phone).eq('status', 'completed');
-  if (!mine) return;
-  const total = mine.reduce((s, o) => s + o.price, 0);
-  const today = new Date(); today.setHours(0, 0, 0, 0);
-  const todayEarn = mine.filter(o => new Date(o.created_at) >= today).reduce((s, o) => s + o.price, 0);
-  const avg = mine.length ? Math.round(total / mine.length) : 0;
-
-  $('earnTotal').textContent = fmt(total); $('earnToday').textContent = fmt(todayEarn);
-  $('earnTrips').textContent = mine.length; $('earnAvg').textContent = fmt(avg);
-
-  const listEl = $('earningsList');
-  if (!mine.length) listEl.innerHTML = `<div class="empty-state"><div class="big">💰</div><div class="ttl">لا توجد أرباح بعد</div></div>`;
-  else listEl.innerHTML = mine.slice(0, 15).map(o => renderOrderItem(o, 'driver')).join('');
+  const { data: mine } = await supabase.from('orders').select('*').eq('driver_phone', state.user.phone).eq('status', 'completed'); if (!mine) return;
+  const total = mine.reduce((s, o) => s + o.price, 0); const today = new Date(); today.setHours(0, 0, 0, 0); const todayEarn = mine.filter(o => new Date(o.created_at) >= today).reduce((s, o) => s + o.price, 0); const avg = mine.length ? Math.round(total / mine.length) : 0;
+  $('earnTotal').textContent = fmt(total); $('earnToday').textContent = fmt(todayEarn); $('earnTrips').textContent = mine.length; $('earnAvg').textContent = fmt(avg);
+  const listEl = $('earningsList'); if (!mine.length) listEl.innerHTML = `<div class="empty-state"><div class="big">💰</div><div class="ttl">لا توجد أرباح بعد</div></div>`; else listEl.innerHTML = mine.slice(0, 15).map(o => renderOrderItem(o, 'driver')).join('');
 }
-
 function toggleOnline() {
-  state.online = !state.online;
-  localStorage.setItem('kokton_online', state.online ? '1' : '0');
-  updateOnlineUI(); haptic();
-  toast(state.online ? '🟢 متصل — تستقبل الطلبات' : '⚪ غير متصل', state.online ? 'success' : 'info');
-  renderDriverHome(); renderDriverOrders();
+  state.online = !state.online; localStorage.setItem('kokton_online', state.online ? '1' : '0'); updateOnlineUI(); haptic();
+  toast(state.online ? '🟢 متصل — تستقبل الطلبات' : '⚪ غير متصل', state.online ? 'success' : 'info'); renderDriverHome(); renderDriverOrders();
 }
 function updateOnlineUI() {
   const btn = $('onlineToggle'); const label = $('onlineLabel'); const sub = $('onlineSub'); if (!btn) return;
   if (state.online) { btn.classList.add('on'); if (label) label.textContent = 'متصل'; if (sub) sub.textContent = 'تستقبل الطلبات الآن'; }
   else { btn.classList.remove('on'); if (label) label.textContent = 'غير متصل'; if (sub) sub.textContent = 'أنت غير متصل حالياً'; }
 }
-
-/* ---------- الحسابات (تعديل البيانات) ---------- */
 async function saveCustomerProfile() {
   const name = $('customerName').value.trim();
-  if (name) {
-    await supabase.from('accounts').update({ name: name }).eq('phone', state.user.phone).eq('role', 'customer');
-    state.user.name = name;
-    toast('✅ تم الحفظ في قاعدة البيانات', 'success');
-  }
+  if (name) { await supabase.from('accounts').update({ name: name }).eq('phone', state.user.phone).eq('role', 'customer'); state.user.name = name; toast('✅ تم الحفظ في قاعدة البيانات', 'success'); }
 }
 async function saveDriverProfile() {
   const name = $('driverName').value.trim(); const car = $('driverCar').value.trim();
-  if (name) {
-    await supabase.from('accounts').update({ name: name, car: car }).eq('phone', state.user.phone).eq('role', 'driver');
-    state.user.name = name; state.user.car = car;
-    toast('✅ تم الحفظ في قاعدة البيانات', 'success');
-  }
+  if (name) { await supabase.from('accounts').update({ name: name, car: car }).eq('phone', state.user.phone).eq('role', 'driver'); state.user.name = name; state.user.car = car; toast('✅ تم الحفظ في قاعدة البيانات', 'success'); }
 }
 
-/* ---------- التشغيل ---------- */
-function buildParticles() {
-  const wrap = $('particles'); if (!wrap) return;
-  for (let i = 0; i < 40; i++) {
-    const p = document.createElement('div'); p.className = 'particle';
-    const size = 2 + Math.random() * 4;
-    p.style.left = (Math.random() * 100) + '%'; p.style.width = size + 'px'; p.style.height = size + 'px';
-    p.style.animationDelay = (Math.random() * 3) + 's'; p.style.animationDuration = (3 + Math.random() * 3) + 's';
-    wrap.appendChild(p);
-  }
-}
-function initSplash() {
-  buildParticles();
-  setTimeout(() => {
-    $('splash').classList.add('done');
-    const activeRole = getActiveRole();
-    if (activeRole && getSessionPhone(activeRole)) enterApp(activeRole);
-    else showRolePicker();
-  }, 3400);
-}
-function showRolePicker() {
-  $('app').classList.add('hidden'); $('authScreen').classList.add('hidden');
-  const rp = $('rolePicker'); rp.classList.remove('hidden'); void rp.offsetWidth; rp.classList.remove('done');
-}
+function buildParticles() { const wrap = $('particles'); if (!wrap) return; for (let i = 0; i < 40; i++) { const p = document.createElement('div'); p.className = 'particle'; const size = 2 + Math.random() * 4; p.style.left = (Math.random() * 100) + '%'; p.style.width = size + 'px'; p.style.height = size + 'px'; p.style.animationDelay = (Math.random() * 3) + 's'; p.style.animationDuration = (3 + Math.random() * 3) + 's'; wrap.appendChild(p); } }
+function initSplash() { buildParticles(); setTimeout(() => { $('splash').classList.add('done'); const activeRole = getActiveRole(); if (activeRole && getSessionPhone(activeRole)) enterApp(activeRole); else showRolePicker(); }, 3400); }
+function showRolePicker() { $('app').classList.add('hidden'); $('authScreen').classList.add('hidden'); const rp = $('rolePicker'); rp.classList.remove('hidden'); void rp.offsetWidth; rp.classList.remove('done'); }
 function hideRolePicker() { const rp = $('rolePicker'); rp.classList.add('done'); setTimeout(() => rp.classList.add('hidden'), 500); }
-function pickRole(role) {
-  haptic(); state.pendingRole = role;
-  if (getSessionPhone(role)) enterApp(role);
-  else showAuth(role);
-}
-function showAuth(role) {
-  state.pendingRole = role; hideRolePicker(); $('app').classList.add('hidden'); $('authScreen').classList.remove('hidden');
-  $('authRoleLabel').textContent = role === 'customer' ? 'زبون' : 'سائق';
-  ['loginPhone','loginPassword','regName','regPhone','regPassword','regPassword2'].forEach(id => { const el = $(id); if (el) el.value = ''; });
-  switchAuthTab('login');
-}
-function switchAuthTab(tab) {
-  document.querySelectorAll('.auth-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
-  $('authLogin').classList.toggle('hidden', tab !== 'login'); $('authRegister').classList.toggle('hidden', tab !== 'register');
-}
+function pickRole(role) { haptic(); state.pendingRole = role; if (getSessionPhone(role)) enterApp(role); else showAuth(role); }
+function showAuth(role) { state.pendingRole = role; hideRolePicker(); $('app').classList.add('hidden'); $('authScreen').classList.remove('hidden'); $('authRoleLabel').textContent = role === 'customer' ? 'زبون' : 'سائق'; ['loginPhone','loginPassword','regName','regPhone','regPassword','regPassword2'].forEach(id => { const el = $(id); if (el) el.value = ''; }); switchAuthTab('login'); }
+function switchAuthTab(tab) { document.querySelectorAll('.auth-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab)); $('authLogin').classList.toggle('hidden', tab !== 'login'); $('authRegister').classList.toggle('hidden', tab !== 'register'); }
 function backToRolePicker() { $('authScreen').classList.add('hidden'); showRolePicker(); }
 
 window.addEventListener('DOMContentLoaded', () => {
   applyTheme(getStoredTheme()); initSplash();
-  // التحديث التلقائي للبيانات كل 5 ثواني
   setInterval(() => {
-    if (state.role === 'driver' && state.online) {
-      if (state.screen === 'd-home') renderDriverHome();
-      if (state.screen === 'd-orders') renderDriverOrders();
-    }
-    if (state.role === 'customer' && state.screen === 'c-orders') {
-      renderCustomerOrders();
-    }
+    if (state.role === 'driver' && state.online) { if (state.screen === 'd-home') renderDriverHome(); if (state.screen === 'd-orders') renderDriverOrders(); }
+    if (state.role === 'customer' && state.screen === 'c-orders') { renderCustomerOrders(); }
   }, 5000);
 });
 </script>
