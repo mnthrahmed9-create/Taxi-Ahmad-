@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#050507">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>KOKTON — تكسي العاصمة v2.3</title>
+<title>KOKTON — تكسي العاصمة v2.3.2</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -28,7 +28,6 @@ button{font-family:inherit;cursor:pointer;border:0;background:none;color:inherit
 }
 .hidden{display:none!important}
 
-/* ============ SPLASH ============ */
 #splash{
   position:fixed;inset:0;z-index:9999;
   background:radial-gradient(circle at 50% 45%, rgba(255,196,0,0.18) 0%, transparent 55%),
@@ -71,7 +70,6 @@ button{font-family:inherit;cursor:pointer;border:0;background:none;color:inherit
   animation:progressFill 2.4s cubic-bezier(.6,.05,.3,.95) forwards;transform-origin:right;transform:scaleX(0);}
 @keyframes progressFill{to{transform:scaleX(1)}}
 
-/* ============ ROLE PICKER ============ */
 #rolePicker{position:fixed;inset:0;z-index:9000;
   background:radial-gradient(circle at 50% 30%, rgba(255,196,0,0.10) 0%, transparent 60%),#050507;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -102,7 +100,6 @@ button{font-family:inherit;cursor:pointer;border:0;background:none;color:inherit
 .version-badge{position:absolute;top:20px;right:20px;font-size:10px;padding:4px 10px;border-radius:20px;
   background:rgba(0,212,160,0.15);color:#00d4a0;border:1px solid rgba(0,212,160,0.3);font-weight:700;}
 
-/* ============ AUTH ============ */
 #authScreen{position:fixed;inset:0;z-index:9100;
   background:radial-gradient(circle at 50% 20%, rgba(255,196,0,0.10) 0%, transparent 60%),#050507;
   display:flex;flex-direction:column;align-items:center;
@@ -113,7 +110,6 @@ button{font-family:inherit;cursor:pointer;border:0;background:none;color:inherit
 .auth-tab{flex:1;padding:12px;border-radius:12px;color:#a09a8a;font-size:13px;font-weight:900;transition:all .2s}
 .auth-tab.active{background:linear-gradient(180deg,rgba(255,196,0,0.18),rgba(255,196,0,0.04));color:var(--gold)}
 
-/* ============ APP ============ */
 #app{max-width:520px;min-height:100vh;margin:0 auto;position:relative;
   background:radial-gradient(circle at 50% 0%, rgba(255,196,0,0.06) 0%, transparent 40%),#050507;
   overflow:hidden;transition:background .3s;}
@@ -227,7 +223,6 @@ label:first-child{margin-top:0}
 .service-3d strong{display:block;font-size:13px;color:var(--gold);font-weight:900}
 .service-3d small{display:block;font-size:9.5px;color:#a09a8a;margin-top:4px}
 
-/* ============ FARE NOTICE ============ */
 .fare-notice{display:flex;align-items:center;gap:10px;
   margin-top:10px;padding:12px 14px;border-radius:14px;
   background:linear-gradient(160deg,rgba(0,212,160,0.15),rgba(0,212,160,0.03));
@@ -237,7 +232,6 @@ label:first-child{margin-top:0}
   transition:background .3s, border-color .3s, color .3s;}
 .fare-notice .big{font-size:24px;line-height:1}
 
-/* ============ REGION PICKER ============ */
 .region-picker{margin-top:12px;padding:14px;border-radius:16px;
   background:linear-gradient(160deg,#14121a 0%,#0a090f 100%);
   border:1px solid var(--border);
@@ -360,7 +354,6 @@ label:first-child{margin-top:0}
   box-shadow:0 0 20px currentColor, 0 4px 12px rgba(0,0,0,0.6);}
 .phone-link{color:#ffd24a}
 
-/* ============ الوضع النهاري ============ */
 [data-theme="light"]{color-scheme:light}
 [data-theme="light"] body{background:#f5f3ee;color:#17120a}
 [data-theme="light"] #app{background:radial-gradient(circle at 50% 0%, rgba(255,196,0,0.12) 0%, transparent 40%),#f5f3ee}
@@ -445,7 +438,6 @@ label:first-child{margin-top:0}
 </head>
 <body>
 
-<!-- SPLASH -->
 <div id="splash">
   <div class="splash-orb"></div>
   <div class="splash-particles" id="particles"></div>
@@ -456,9 +448,8 @@ label:first-child{margin-top:0}
   <div class="splash-progress"></div>
 </div>
 
-<!-- ROLE PICKER -->
 <div id="rolePicker" class="hidden">
-  <div class="version-badge">v2.3 ✅</div>
+  <div class="version-badge">v2.3.2 ✅</div>
   <div class="role-brand">
     <div class="brand-crown">♛</div>
     <div class="brand-name">KOKTON</div>
@@ -477,10 +468,9 @@ label:first-child{margin-top:0}
       <div class="role-desc">استقبل الطلبات<br>واكسب أكثر</div>
     </button>
   </div>
-  <div class="role-footer">v2.3 — تسعير ذكي لكل منطقة بالعراق</div>
+  <div class="role-footer">v2.3.2 — تسعير ذكي لكل منطقة بالعراق</div>
 </div>
 
-<!-- AUTH -->
 <div id="authScreen" class="hidden">
   <div class="auth-wrap">
     <div class="role-brand" style="margin-bottom:0">
@@ -522,7 +512,6 @@ label:first-child{margin-top:0}
   </div>
 </div>
 
-<!-- APP -->
 <div id="app" class="hidden">
   <header class="top">
     <div class="top-right-group">
@@ -572,7 +561,6 @@ label:first-child{margin-top:0}
         <span id="fareText">بغداد: 1000 دينار لكل 3 كم</span>
       </div>
 
-      <!-- محدد المنطقة -->
       <div class="region-picker">
         <div class="region-row">
           <span class="region-label-text">📍 منطقة التسعير</span>
@@ -704,21 +692,25 @@ label:first-child{margin-top:0}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 /* =========================================================
-   KOKTON — v2.3.1
-   ✅ محرك تسعير لكل منطقة بالعراق
-   ✅ إصلاح: اكتشاف المنطقة لا يستبدل اختيارك الصامت
-   ✅ إصلاح: نقاط مرجعية متعددة لكل محافظة (ذي قار / واسط)
+   KOKTON — v2.3.2  (النسخة الكاملة المُصلَّحة)
+   ✅ إصلاح السكربت المقطوع
+   ✅ استدعاء initSplash() عبر DOMContentLoaded
+   ✅ إضافة كل المتغيرات والدوال الناقصة (خرائط، طلبات، أرباح، حسابات)
+   ✅ منطق كامل للزبون + السائق
    ========================================================= */
-console.log('💰 KOKTON v2.3.1 — تسعير متعدد المناطق + كشف دقيق');
+console.log('💰 KOKTON v2.3.2 — نسخة كاملة');
 
 const $ = (id) => document.getElementById(id);
 const fmt = (n) => Number(n).toLocaleString('en-US');
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const haptic = () => { if (navigator.vibrate) try { navigator.vibrate(18); } catch(e){} };
 
-/* =========================================================
-   THEME
-   ========================================================= */
+/* ---------- متغيرات الخرائط ---------- */
+let customerMap = null, driverMap = null;
+let cPickupMarker = null, cDestMarker = null, cRouteLine = null;
+let dOrderMarkers = [];
+
+/* ---------- الثيم ---------- */
 const THEME_KEY = 'kokton_theme';
 function getStoredTheme() { try { return localStorage.getItem(THEME_KEY) || 'dark'; } catch(e) { return 'dark'; } }
 function applyTheme(theme) {
@@ -739,26 +731,20 @@ function toggleTheme() {
   haptic();
   toast(next === 'light' ? '☀️ الوضع النهاري' : '🌙 الوضع الليلي', 'success');
 }
-applyTheme(getStoredTheme());
 
-/* =========================================================
-   SERVICES
-   ========================================================= */
+/* ---------- الخدمات ---------- */
 const SERVICES = {
   taxi:     { label: 'تكسي 🚕',       icon: '🚕' },
   tuktuk:   { label: 'تكتك 🛺',       icon: '🛺' },
   delivery: { label: 'مندوب توصيل 🛵', icon: '🛵' }
 };
-
 const BASE_RATES = {
   taxi:     { perKm: 1000 / 3, min: 1000 },
   tuktuk:   { perKm: 1000,     min: 2000 },
   delivery: { perKm: 2000,     min: 4000 }
 };
 
-/* =========================================================
-   🌍 محافظات العراق
-   ========================================================= */
+/* ---------- المناطق ---------- */
 const REGIONS = {
   baghdad:      { name: 'بغداد',       emoji: '🏛️', level: 1.00, center: [33.3152, 44.3661] },
   basra:        { name: 'البصرة',       emoji: '🛢️', level: 1.10, center: [30.5085, 47.7804] },
@@ -780,7 +766,6 @@ const REGIONS = {
   saladdin:     { name: 'صلاح الدين',   emoji: '🏞️', level: 0.90, center: [34.6000, 43.6833] }
 };
 
-/* نقاط مرجعية متعددة لكل محافظة لزيادة دقة الاكتشاف */
 const REGION_SAMPLES = {
   baghdad:      [[33.3152,44.3661],[33.2000,44.3600],[33.4000,44.3500],[33.2800,44.4000]],
   basra:        [[30.5085,47.7804],[30.5000,47.8000],[30.5300,47.7500]],
@@ -792,33 +777,19 @@ const REGION_SAMPLES = {
   kirkuk:       [[35.4681,44.3922],[35.4600,44.3900]],
   anbar:        [[33.4206,43.3000],[33.4200,43.3000],[33.3000,43.0000],[33.5000,43.5000]],
   babil:        [[32.4833,44.4333],[32.4800,44.4300]],
-  diyala:       [[33.7500,44.6500],[33.7500,44.6500]],
-  dhi_qar:      [
-    [31.0500, 46.2500],  // الناصرية
-    [31.4100, 46.1700],  // الشطرة
-    [31.7200, 46.1100],  // الرفاعي
-    [30.9500, 47.0200],  // الجبايش
-    [31.0000, 46.5000]   // سوق الشيوخ
-  ],
-  wasit:        [
-    [32.5167, 45.8167],  // الكوت
-    [32.1700, 46.0000],  // الحي
-    [32.9000, 45.0700],  // العزيزية
-    [32.4000, 45.5000]   // النعمانية
-  ],
+  diyala:       [[33.7500,44.6500],[33.7800,44.6000]],
+  dhi_qar:      [[31.0500,46.2500],[31.4100,46.1700],[31.7200,46.1100],[30.9500,47.0200],[31.0000,46.5000]],
+  wasit:        [[32.5167,45.8167],[32.1700,46.0000],[32.9000,45.0700],[32.4000,45.5000]],
   maysan:       [[31.8333,47.1500],[31.8300,47.1500]],
   muthanna:     [[30.5000,45.2833],[30.5000,45.2800]],
-  qadisiyyah:   [[31.9900,44.9200],[31.9900,44.9200]],
+  qadisiyyah:   [[31.9900,44.9200],[31.9800,44.9100]],
   duhok:        [[36.8669,42.9503],[36.8600,42.9500]],
   saladdin:     [[34.6000,43.6833],[34.6000,43.6800],[34.2000,43.8000]]
 };
 
 const REGION_KEY = 'kokton_region';
 function getSavedRegion() {
-  try {
-    const r = localStorage.getItem(REGION_KEY);
-    if (r && REGIONS[r]) return r;
-  } catch(e){}
+  try { const r = localStorage.getItem(REGION_KEY); if (r && REGIONS[r]) return r; } catch(e){}
   return 'baghdad';
 }
 function setSavedRegion(key) { try { localStorage.setItem(REGION_KEY, key); } catch(e){} }
@@ -829,7 +800,7 @@ const STATUS = {
   arrived:   { label: 'السائق وصل',          cls: 'arrived' },
   ongoing:   { label: 'الرحلة جارية',        cls: 'ongoing' },
   completed: { label: 'مكتملة',              cls: 'completed' },
-  cancelled: { label: 'ملغاة',               cls: 'cancelled' }
+  cancelled: { label: 'ملغاة',              cls: 'cancelled' }
 };
 
 const ROLE_NAV = {
@@ -863,9 +834,7 @@ const state = {
   region: getSavedRegion()
 };
 
-/* =========================================================
-   🧮 محرك حساب السعر
-   ========================================================= */
+/* ---------- محرك حساب السعر ---------- */
 function haversine(a, b) {
   if (!a || !b) return null;
   const R = 6371, toRad = d => d * Math.PI / 180;
@@ -884,21 +853,15 @@ function calcPriceDetailed(service, km, regionKey) {
   const level = region.level;
   const perKm = base.perKm * level;
   const minFare = base.min * level;
-
-  let distanceFare = km * perKm;
+  const distanceFare = km * perKm;
 
   const hour = new Date().getHours();
   let timeMult = 1, timeSurge = 0, timeLabel = '';
-  if (hour >= 23 || hour < 5) {
-    timeMult = 1.25; timeSurge = 0.25; timeLabel = '🌙 ليلي +25%';
-  } else if ((hour >= 7 && hour < 10) || (hour >= 16 && hour < 19)) {
-    timeMult = 1.15; timeSurge = 0.15; timeLabel = '⏰ ذروة +15%';
-  }
+  if (hour >= 23 || hour < 5) { timeMult = 1.25; timeSurge = 0.25; timeLabel = '🌙 ليلي +25%'; }
+  else if ((hour >= 7 && hour < 10) || (hour >= 16 && hour < 19)) { timeMult = 1.15; timeSurge = 0.15; timeLabel = '⏰ ذروة +15%'; }
 
   let distMult = 1, distSurge = 0, distLabel = '';
-  if (km > 30) {
-    distMult = 1.10; distSurge = 0.10; distLabel = '🛣️ مسافة طويلة +10%';
-  }
+  if (km > 30) { distMult = 1.10; distSurge = 0.10; distLabel = '🛣️ مسافة طويلة +10%'; }
 
   let total = distanceFare * timeMult * distMult;
   if (total < minFare) total = minFare;
@@ -914,18 +877,12 @@ function calcPriceDetailed(service, km, regionKey) {
     minFare: Math.round(minFare),
     regionLevel: level,
     perKm: Math.round(perKm * 10) / 10,
-    timeMult,
-    distMult,
+    timeMult, distMult,
     surge: timeSurge + distSurge,
     surgeLabel: labels.join(' • ')
   };
 }
 
-function calcPrice(service, km, regionKey) {
-  return calcPriceDetailed(service, km, regionKey).total;
-}
-
-/* ✅ كشف المنطقة بنقاط مرجعية متعددة (يحل مشكلة ذي قار/واسط) */
 function detectRegionFromCoords(lat, lng) {
   let best = 'baghdad', bestDist = Infinity;
   for (const [key, samples] of Object.entries(REGION_SAMPLES)) {
@@ -938,15 +895,12 @@ function detectRegionFromCoords(lat, lng) {
 }
 
 function getRegionRateText(key) {
-  const r = REGIONS[key];
-  if (!r) return '';
+  const r = REGIONS[key]; if (!r) return '';
   const taxiPer3km = Math.round(BASE_RATES.taxi.perKm * r.level * 3 / 100) * 100;
   return `التكسي ≈ ${fmt(taxiPer3km)} د.ع / 3 كم`;
 }
 
-/* =========================================================
-   AUTH
-   ========================================================= */
+/* ---------- المصادقة ---------- */
 function hashPwd(p) {
   let h = 0;
   for (let i = 0; i < p.length; i++) h = ((h << 5) - h + p.charCodeAt(i)) | 0;
@@ -997,9 +951,7 @@ function syncProfileFromAccount(role, acc) {
   }
 }
 
-/* =========================================================
-   STORAGE
-   ========================================================= */
+/* ---------- التخزين ---------- */
 function getOrders() { try { return JSON.parse(localStorage.getItem(LS.orders) || '[]'); } catch(e) { return []; } }
 function setOrders(list) { try { localStorage.setItem(LS.orders, JSON.stringify(list)); } catch(e){} broadcastUpdate(); }
 function getCustomer() { try { return JSON.parse(localStorage.getItem(LS.customer) || '{}'); } catch(e){ return {}; } }
@@ -1022,7 +974,7 @@ let bc = null;
 try {
   if ('BroadcastChannel' in window) {
     bc = new BroadcastChannel('kokton');
-    bc.onmessage = () => refreshFromStorage();
+    bc.onmessage = () => refreshFromStorage(true);
   }
 } catch(e){}
 function broadcastUpdate() { if (bc) try { bc.postMessage('update'); } catch(e){} }
@@ -1043,9 +995,7 @@ function toast(msg, type = 'info') {
   }, 2800);
 }
 
-/* =========================================================
-   SPLASH
-   ========================================================= */
+/* ---------- السبلاش ---------- */
 function buildParticles() {
   const wrap = $('particles');
   if (!wrap) return;
@@ -1226,6 +1176,7 @@ function goScreen(id) {
     renderRegionChips();
     updateRegionInfo();
     updateFareNotice();
+    updatePricePreview();
   }, 200);
   if (id === 'd-home')    setTimeout(() => { initDriverMap(); if (driverMap) driverMap.invalidateSize(); renderDriverHome(); }, 200);
   if (id === 'c-orders')  renderCustomerOrders();
@@ -1236,9 +1187,7 @@ function goScreen(id) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-/* =========================================================
-   REGION UI
-   ========================================================= */
+/* ---------- واجهة المناطق ---------- */
 function renderRegionChips() {
   const el = $('regionChips');
   if (!el) return;
@@ -1299,7 +1248,6 @@ function updateFareNotice() {
   }
 }
 
-/* ✅ زر "تحديد تلقائي" — يعرض تأكيداً قبل تغيير المنطقة */
 function detectMyRegion() {
   if (!navigator.geolocation) { toast('المتصفح لا يدعم تحديد الموقع', 'error'); return; }
   toast('🛰️ جاري تحديد منطقتك...', 'info');
@@ -1309,7 +1257,6 @@ function detectMyRegion() {
       const key = detectRegionFromCoords(lat, lng);
       const r = REGIONS[key];
 
-      // زر تحديد تلقائي صريح: يعرض تأكيداً
       if (key !== state.region) {
         const ok = confirm(`📍 موقعك يقع ضمن: ${r.name}\n\nهل تريد تحويل التسعير إلى ${r.name}؟`);
         if (ok) selectRegion(key, false);
@@ -1317,10 +1264,10 @@ function detectMyRegion() {
         toast(`✅ أنت بالفعل في ${r.name}`, 'success');
       }
 
-      // تحديد موقع الانطلاق على أي حال
       const latlng = { lat, lng };
       state.pickupCoords = latlng;
       $('pickup').value = '📍 موقعي الحالي (' + lat.toFixed(4) + ', ' + lng.toFixed(4) + ')';
+      if (!customerMap) initCustomerMap();
       if (customerMap) customerMap.setView([lat, lng], 15);
       if (cPickupMarker) cPickupMarker.setLatLng(latlng);
       else if (customerMap) cPickupMarker = L.marker(latlng, { icon: makeIcon('#00d4a0', 'A') }).addTo(customerMap);
@@ -1332,12 +1279,470 @@ function detectMyRegion() {
   );
 }
 
-/* =========================================================
-   CUSTOMER BOOKING
-   ========================================================= */
+/* ---------- خدمة الزبون ---------- */
 function selectService(s) {
   haptic();
   state.service = s;
   $('bookingTitle').textContent = SERVICES[s].label + ' — تحديد الرحلة';
   $('chosenService').textContent = SERVICES[s].label;
-  updateFareNotice(
+  updateFareNotice();
+  updatePricePreview();
+  goScreen('c-booking');
+}
+
+function makeIcon(color, text) {
+  return L.divIcon({
+    className: '',
+    html: `<div class="kokton-marker" style="background:${color};color:${color};">${text}</div>`,
+    iconSize: [36, 36],
+    iconAnchor: [18, 18]
+  });
+}
+
+function initCustomerMap() {
+  if (customerMap) return;
+  const el = $('customerMap');
+  if (!el) return;
+  const region = REGIONS[state.region] || REGIONS.baghdad;
+  customerMap = L.map('customerMap').setView(region.center, 12);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '© OpenStreetMap'
+  }).addTo(customerMap);
+
+  customerMap.on('click', (e) => {
+    const ll = { lat: e.latlng.lat, lng: e.latlng.lng };
+    if (state.mapMode === 'pickup') {
+      state.pickupCoords = ll;
+      $('pickup').value = `${ll.lat.toFixed(4)}, ${ll.lng.toFixed(4)}`;
+      if (cPickupMarker) cPickupMarker.setLatLng(ll);
+      else cPickupMarker = L.marker(ll, { icon: makeIcon('#00d4a0', 'A') }).addTo(customerMap);
+    } else {
+      state.destCoords = ll;
+      $('destination').value = `${ll.lat.toFixed(4)}, ${ll.lng.toFixed(4)}`;
+      if (cDestMarker) cDestMarker.setLatLng(ll);
+      else cDestMarker = L.marker(ll, { icon: makeIcon('#ff4d6d', 'B') }).addTo(customerMap);
+    }
+    updateRouteLine();
+    updatePricePreview();
+  });
+}
+
+function setMapMode(mode) {
+  state.mapMode = mode;
+  document.querySelectorAll('.map-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === mode));
+  haptic();
+}
+
+function updateRouteLine() {
+  if (!customerMap) return;
+  if (cRouteLine) { customerMap.removeLayer(cRouteLine); cRouteLine = null; }
+  if (state.pickupCoords && state.destCoords) {
+    cRouteLine = L.polyline(
+      [[state.pickupCoords.lat, state.pickupCoords.lng], [state.destCoords.lat, state.destCoords.lng]],
+      { color: '#ffd24a', weight: 4, dashArray: '8 8' }
+    ).addTo(customerMap);
+    try {
+      customerMap.fitBounds(L.latLngBounds([
+        [state.pickupCoords.lat, state.pickupCoords.lng],
+        [state.destCoords.lat, state.destCoords.lng]
+      ]), { padding: [40, 40] });
+    } catch(e){}
+  }
+}
+
+function updatePricePreview() {
+  const priceEl = $('price');
+  const surgeEl = $('surgeBadge');
+  if (!priceEl) return;
+  if (!state.pickupCoords || !state.destCoords) {
+    priceEl.textContent = '—';
+    if (surgeEl) surgeEl.classList.add('hidden');
+    return;
+  }
+  const km = haversine(state.pickupCoords, state.destCoords);
+  const detail = calcPriceDetailed(state.service, km, state.region);
+  if (detail.total) {
+    priceEl.textContent = fmt(detail.total) + ' د.ع';
+    if (surgeEl) {
+      if (detail.surge > 0) {
+        surgeEl.textContent = detail.surgeLabel;
+        surgeEl.classList.remove('hidden');
+      } else {
+        surgeEl.classList.add('hidden');
+      }
+    }
+  }
+}
+
+function locateMe() {
+  if (!navigator.geolocation) { toast('المتصفح لا يدعم تحديد الموقع', 'error'); return; }
+  toast('🛰️ جاري تحديد موقعك...', 'info');
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      const ll = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      state.pickupCoords = ll;
+      $('pickup').value = '📍 موقعي الحالي (' + ll.lat.toFixed(4) + ', ' + ll.lng.toFixed(4) + ')';
+      if (!customerMap) initCustomerMap();
+      if (customerMap) customerMap.setView([ll.lat, ll.lng], 15);
+      if (cPickupMarker) cPickupMarker.setLatLng(ll);
+      else if (customerMap) cPickupMarker = L.marker(ll, { icon: makeIcon('#00d4a0', 'A') }).addTo(customerMap);
+      updateRouteLine();
+      updatePricePreview();
+      haptic();
+    },
+    () => toast('لم نتمكن من تحديد موقعك', 'error'),
+    { enableHighAccuracy: true, timeout: 12000 }
+  );
+}
+
+function submitOrder() {
+  if (!state.pickupCoords) { toast('حدد موقع الانطلاق أولاً', 'error'); return; }
+  if (!state.destCoords) { toast('حدد الوجهة أولاً', 'error'); return; }
+  const km = haversine(state.pickupCoords, state.destCoords);
+  const detail = calcPriceDetailed(state.service, km, state.region);
+  if (!detail.total) { toast('تعذر حساب السعر', 'error'); return; }
+
+  const cust = getCustomer();
+  const order = {
+    id: 'ord_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+    customerPhone: cust.phone || '',
+    customerName: cust.name || 'زبون',
+    service: state.service,
+    region: state.region,
+    pickup: state.pickupCoords,
+    dest: state.destCoords,
+    pickupText: $('pickup').value || '—',
+    destText: $('destination').value || '—',
+    km: Math.round(km * 10) / 10,
+    price: detail.total,
+    status: 'pending',
+    driverId: null,
+    driverName: null,
+    driverPhone: null,
+    driverCar: null,
+    createdAt: Date.now()
+  };
+
+  const orders = getOrders();
+  orders.unshift(order);
+  setOrders(orders);
+  haptic();
+  toast('✅ تم إرسال الطلب — بانتظار سائق', 'success');
+
+  state.pickupCoords = null;
+  state.destCoords = null;
+  $('pickup').value = '';
+  $('destination').value = '';
+  if (customerMap) {
+    if (cPickupMarker) { customerMap.removeLayer(cPickupMarker); cPickupMarker = null; }
+    if (cDestMarker) { customerMap.removeLayer(cDestMarker); cDestMarker = null; }
+    if (cRouteLine) { customerMap.removeLayer(cRouteLine); cRouteLine = null; }
+  }
+  goScreen('c-orders');
+}
+
+function renderOrderItem(o, viewer) {
+  const st = STATUS[o.status] || STATUS.pending;
+  const service = SERVICES[o.service] || SERVICES.taxi;
+  const region = REGIONS[o.region];
+  const canCancel = (viewer === 'customer' && o.status === 'pending');
+  let actions = '';
+
+  if (viewer === 'driver') {
+    if (o.status === 'pending') {
+      actions = `<button class="btn-accept" onclick="acceptOrder('${o.id}')">قبول الطلب</button>`;
+    } else if (o.driverId === state.driverId) {
+      if (o.status === 'accepted') actions = `<button class="btn-next" onclick="advanceOrder('${o.id}','arrived')">وصلت</button>`;
+      else if (o.status === 'arrived') actions = `<button class="btn-next" onclick="advanceOrder('${o.id}','ongoing')">بدء الرحلة</button>`;
+      else if (o.status === 'ongoing') actions = `<button class="btn-next" onclick="advanceOrder('${o.id}','completed')">إنهاء الرحلة</button>`;
+    }
+  }
+  if (canCancel) {
+    actions += `<button class="btn-cancel" onclick="cancelOrder('${o.id}')">إلغاء</button>`;
+  }
+
+  const driverInfo = o.driverName
+    ? `<div class="order-meta" style="margin-top:8px">🚕 ${esc(o.driverName)} — ${esc(o.driverCar || '—')}</div>`
+    : '';
+
+  return `<div class="order-item">
+    <div class="order-head">
+      <div class="order-service">${service.label}</div>
+      <div class="status-badge ${st.cls}">${st.label}</div>
+    </div>
+    <div class="order-meta">
+      <div>📍 من: <b>${esc(o.pickupText)}</b></div>
+      <div>🎯 إلى: <b>${esc(o.destText)}</b></div>
+      <div>📏 المسافة: <b>${o.km} كم</b>${region ? ' • ' + region.emoji + ' ' + region.name : ''}</div>
+    </div>
+    ${driverInfo}
+    <div class="order-price">${fmt(o.price)} د.ع</div>
+    ${actions ? `<div class="order-actions">${actions}</div>` : ''}
+  </div>`;
+}
+
+function renderCustomerOrders() {
+  const el = $('customerOrdersList');
+  if (!el) return;
+  const phone = getCustomer().phone || '';
+  const orders = getOrders().filter(o => o.customerPhone === phone);
+  if (!orders.length) {
+    el.innerHTML = `<div class="empty-state"><div class="big">📭</div><div class="ttl">لا توجد طلبات</div><div class="muted" style="font-size:12px;margin-top:6px">اطلب رحلتك من الرئيسية</div></div>`;
+    return;
+  }
+  el.innerHTML = orders.map(o => renderOrderItem(o, 'customer')).join('');
+}
+
+function cancelOrder(id) {
+  if (!confirm('إلغاء هذا الطلب؟')) return;
+  const orders = getOrders();
+  const o = orders.find(x => x.id === id);
+  if (!o || o.status !== 'pending') { toast('لا يمكن إلغاء الطلب الآن', 'error'); return; }
+  o.status = 'cancelled';
+  setOrders(orders);
+  toast('تم إلغاء الطلب', 'info');
+  refreshFromStorage();
+}
+
+/* ---------- خدمة السائق ---------- */
+function initDriverMap() {
+  if (driverMap) return;
+  const el = $('driverMap');
+  if (!el) return;
+  const region = REGIONS[state.region] || REGIONS.baghdad;
+  driverMap = L.map('driverMap').setView(region.center, 12);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '© OpenStreetMap'
+  }).addTo(driverMap);
+}
+
+function updateDriverMapMarkers() {
+  if (!driverMap) return;
+  dOrderMarkers.forEach(m => { try { driverMap.removeLayer(m); } catch(e){} });
+  dOrderMarkers = [];
+  const avail = getOrders().filter(o => o.status === 'pending' && o.pickup);
+  avail.forEach(o => {
+    const m = L.marker([o.pickup.lat, o.pickup.lng], { icon: makeIcon('#ffd24a', '🚕') }).addTo(driverMap);
+    m.bindPopup(`<b>${SERVICES[o.service].label}</b><br>${esc(o.pickupText)}<br>${fmt(o.price)} د.ع`);
+    dOrderMarkers.push(m);
+  });
+}
+
+function renderDriverHome() {
+  const el = $('driverCurrentOrder');
+  if (!el) return;
+  const orders = getOrders();
+  const current = orders.find(o =>
+    o.driverId === state.driverId &&
+    ['accepted', 'arrived', 'ongoing'].includes(o.status)
+  );
+
+  if (!current) {
+    el.innerHTML = `<div class="empty-state"><div class="big">🚕</div><div class="ttl">لا توجد رحلة حالية</div><div class="muted" style="font-size:12px;margin-top:6px">${state.online ? 'انتظر طلبات جديدة' : 'فعّل الاتصال لاستقبال الطلبات'}</div></div>`;
+  } else {
+    el.innerHTML = renderOrderItem(current, 'driver');
+  }
+
+  const mine = orders.filter(o => o.driverId === state.driverId && o.status === 'completed');
+  $('statTrips').textContent = mine.length;
+  $('statEarnings').textContent = fmt(mine.reduce((s, o) => s + o.price, 0));
+
+  if (driverMap) updateDriverMapMarkers();
+}
+
+function renderDriverOrders() {
+  const orders = getOrders();
+  const available = orders.filter(o => o.status === 'pending');
+  const myHistory = orders.filter(o => o.driverId === state.driverId && o.status === 'completed');
+
+  const availEl = $('driverAvailableOrders');
+  if (!availEl) return;
+  if (!state.online) {
+    availEl.innerHTML = `<div class="empty-state"><div class="big">📴</div><div class="ttl">أنت غير متصل</div><div class="muted" style="font-size:12px;margin-top:6px">فعّل الاتصال من الصفحة الرئيسية</div></div>`;
+  } else if (!available.length) {
+    availEl.innerHTML = `<div class="empty-state"><div class="big">⏳</div><div class="ttl">لا توجد طلبات حالياً</div></div>`;
+  } else {
+    availEl.innerHTML = available.map(o => renderOrderItem(o, 'driver')).join('');
+  }
+
+  const histEl = $('driverHistory');
+  if (!histEl) return;
+  if (!myHistory.length) {
+    histEl.innerHTML = `<div class="empty-state"><div class="big">📋</div><div class="ttl">لا يوجد سجل</div></div>`;
+  } else {
+    histEl.innerHTML = myHistory.slice(0, 10).map(o => renderOrderItem(o, 'driver')).join('');
+  }
+}
+
+function acceptOrder(id) {
+  const orders = getOrders();
+  const o = orders.find(x => x.id === id);
+  if (!o) return;
+  if (o.status !== 'pending') { toast('الطلب لم يعد متاحاً', 'error'); refreshFromStorage(); return; }
+  const drv = getDriver();
+  o.status = 'accepted';
+  o.driverId = state.driverId;
+  o.driverName = drv.name || 'سائق';
+  o.driverPhone = drv.phone || '';
+  o.driverCar = drv.car || '';
+  setOrders(orders);
+  haptic();
+  toast('✅ تم قبول الطلب', 'success');
+  refreshFromStorage();
+}
+
+function advanceOrder(id, newStatus) {
+  const orders = getOrders();
+  const o = orders.find(x => x.id === id);
+  if (!o) return;
+  if (o.driverId !== state.driverId) return;
+  o.status = newStatus;
+  setOrders(orders);
+  haptic();
+  const labels = { arrived: '✅ وصلت لموقع الزبون', ongoing: '🚀 بدأت الرحلة', completed: '🎉 انتهت الرحلة' };
+  toast(labels[newStatus] || 'تم التحديث', 'success');
+  refreshFromStorage();
+}
+
+function renderEarnings() {
+  const orders = getOrders();
+  const mine = orders.filter(o => o.driverId === state.driverId && o.status === 'completed');
+  const total = mine.reduce((s, o) => s + o.price, 0);
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const todayEarn = mine.filter(o => o.createdAt >= today.getTime()).reduce((s, o) => s + o.price, 0);
+  const avg = mine.length ? Math.round(total / mine.length) : 0;
+
+  $('earnTotal').textContent = fmt(total);
+  $('earnToday').textContent = fmt(todayEarn);
+  $('earnTrips').textContent = mine.length;
+  $('earnAvg').textContent = fmt(avg);
+
+  const listEl = $('earningsList');
+  if (!listEl) return;
+  if (!mine.length) {
+    listEl.innerHTML = `<div class="empty-state"><div class="big">💰</div><div class="ttl">لا توجد أرباح بعد</div></div>`;
+  } else {
+    listEl.innerHTML = mine.slice(0, 15).map(o => renderOrderItem(o, 'driver')).join('');
+  }
+}
+
+function toggleOnline() {
+  state.online = !state.online;
+  setOnline(state.online);
+  updateOnlineUI();
+  haptic();
+  toast(state.online ? '🟢 متصل — تستقبل الطلبات' : '⚪ غير متصل', state.online ? 'success' : 'info');
+  renderDriverHome();
+  renderDriverOrders();
+}
+
+function updateOnlineUI() {
+  const btn = $('onlineToggle');
+  const label = $('onlineLabel');
+  const sub = $('onlineSub');
+  if (!btn) return;
+  if (state.online) {
+    btn.classList.add('on');
+    if (label) label.textContent = 'متصل';
+    if (sub) sub.textContent = 'تستقبل الطلبات الآن';
+  } else {
+    btn.classList.remove('on');
+    if (label) label.textContent = 'غير متصل';
+    if (sub) sub.textContent = 'أنت غير متصل حالياً';
+  }
+}
+
+/* ---------- الحسابات ---------- */
+function loadCustomerProfileForm() {
+  const c = getCustomer();
+  const nameEl = $('customerName'); if (nameEl) nameEl.value = c.name || '';
+  const phoneEl = $('customerPhone'); if (phoneEl) phoneEl.value = c.phone || '';
+}
+
+function loadDriverProfileForm() {
+  const d = getDriver();
+  const nameEl = $('driverName'); if (nameEl) nameEl.value = d.name || '';
+  const phoneEl = $('driverPhone'); if (phoneEl) phoneEl.value = d.phone || '';
+  const carEl = $('driverCar'); if (carEl) carEl.value = d.car || '';
+}
+
+function saveCustomerProfile() {
+  const c = getCustomer();
+  const name = $('customerName').value.trim();
+  if (name) c.name = name;
+  try { localStorage.setItem(LS.customer, JSON.stringify(c)); } catch(e){}
+  const session = getSession('customer');
+  if (session) {
+    const accounts = getAccounts();
+    if (accounts.customer[session.phone]) {
+      accounts.customer[session.phone].name = c.name;
+      setAccounts(accounts);
+    }
+  }
+  toast('✅ تم الحفظ', 'success');
+}
+
+function saveDriverProfile() {
+  const d = getDriver();
+  const name = $('driverName').value.trim();
+  const car = $('driverCar').value.trim();
+  if (name) d.name = name;
+  d.car = car;
+  try { localStorage.setItem(LS.driver, JSON.stringify(d)); } catch(e){}
+  const session = getSession('driver');
+  if (session) {
+    const accounts = getAccounts();
+    if (accounts.driver[session.phone]) {
+      accounts.driver[session.phone].name = d.name;
+      accounts.driver[session.phone].car = d.car;
+      setAccounts(accounts);
+    }
+  }
+  toast('✅ تم الحفظ', 'success');
+}
+
+/* ---------- التحديث العام ---------- */
+function refreshFromStorage(silent) {
+  if (state.role === 'customer') {
+    if (state.screen === 'c-orders') renderCustomerOrders();
+  }
+  if (state.role === 'driver') {
+    if (state.screen === 'd-home') renderDriverHome();
+    if (state.screen === 'd-orders') renderDriverOrders();
+    if (state.screen === 'd-earnings') renderEarnings();
+  }
+  if (!silent) broadcastUpdate();
+}
+
+function resetAll() {
+  if (!confirm('⚠️ هل تريد مسح كل البيانات؟')) return;
+  if (!confirm('تأكيد أخير — لا يمكن التراجع!')) return;
+  try {
+    Object.values(LS).forEach(k => localStorage.removeItem(k));
+    sessionStorage.clear();
+  } catch(e){}
+  toast('تم مسح البيانات', 'info');
+  setTimeout(() => location.reload(), 800);
+}
+
+/* ---------- التشغيل ---------- */
+window.addEventListener('DOMContentLoaded', () => {
+  applyTheme(getStoredTheme());
+  initSplash();
+
+  // تحديث تلقائي للطلبات
+  setInterval(() => {
+    if (state.role === 'driver') {
+      if (state.screen === 'd-home') renderDriverHome();
+      if (state.screen === 'd-orders') renderDriverOrders();
+    }
+    if (state.role === 'customer' && state.screen === 'c-orders') {
+      renderCustomerOrders();
+    }
+  }, 4000);
+});
+</script>
+</body>
+</html>
