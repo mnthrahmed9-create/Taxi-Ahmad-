@@ -8,6 +8,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>KOKTON — تكسي العاصمة v2.3.2</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<!-- استدعاء مكتبة سوبابيس -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0}
@@ -618,7 +620,6 @@ label:first-child{margin-top:0}
       <button class="cta-ghost" onclick="switchRole()">⇄ تبديل إلى واجهة السائق</button>
       <button class="cta-ghost" onclick="toggleTheme()">🌓 تبديل الوضع (ليلي/نهاري)</button>
       <button class="cta-ghost" onclick="logout()" style="color:#ff8a8a;border-color:rgba(255,77,109,0.25)">🚪 تسجيل الخروج</button>
-      <button class="cta-ghost" onclick="resetAll()" style="color:#ff4d6d;border-color:rgba(255,77,109,0.25)">مسح كل البيانات</button>
     </section>
 
     <section id="d-home" class="screen">
@@ -683,7 +684,6 @@ label:first-child{margin-top:0}
       <button class="cta-ghost" onclick="switchRole()">⇄ تبديل إلى واجهة الزبون</button>
       <button class="cta-ghost" onclick="toggleTheme()">🌓 تبديل الوضع (ليلي/نهاري)</button>
       <button class="cta-ghost" onclick="logout()" style="color:#ff8a8a;border-color:rgba(255,77,109,0.25)">🚪 تسجيل الخروج</button>
-      <button class="cta-ghost" onclick="resetAll()" style="color:#ff4d6d;border-color:rgba(255,77,109,0.25)">مسح كل البيانات</button>
     </section>
   </main>
   <nav class="bottom" id="bottomNav"></nav>
@@ -692,25 +692,24 @@ label:first-child{margin-top:0}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 /* =========================================================
-   KOKTON — v2.3.2  (النسخة الكاملة المُصلَّحة)
-   ✅ إصلاح السكربت المقطوع
-   ✅ استدعاء initSplash() عبر DOMContentLoaded
-   ✅ إضافة كل المتغيرات والدوال الناقصة (خرائط، طلبات، أرباح، حسابات)
-   ✅ منطق كامل للزبون + السائق
+   KOKTON — v2.3.2 (متصل بـ Supabase)
    ========================================================= */
-console.log('💰 KOKTON v2.3.2 — نسخة كاملة');
+console.log('💰 KOKTON v2.3.2 — متصل بقاعدة البيانات');
+
+// ⚠️ إعدادات سوبابيس ⚠️
+const supabaseUrl = 'https://vvyqsimhvxnfxethwqvi.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2eXFzaW1odnhuZnhldGh3cXZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQzOTE5MzYsImV4cCI6MjEwOTk2NzkzNn0._5qizYY5lAfFWqPG5LggqzCDFJyfH2Xyy7obTsTS5_8';
+const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
 const $ = (id) => document.getElementById(id);
 const fmt = (n) => Number(n).toLocaleString('en-US');
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const haptic = () => { if (navigator.vibrate) try { navigator.vibrate(18); } catch(e){} };
 
-/* ---------- متغيرات الخرائط ---------- */
 let customerMap = null, driverMap = null;
 let cPickupMarker = null, cDestMarker = null, cRouteLine = null;
 let dOrderMarkers = [];
 
-/* ---------- الثيم ---------- */
 const THEME_KEY = 'kokton_theme';
 function getStoredTheme() { try { return localStorage.getItem(THEME_KEY) || 'dark'; } catch(e) { return 'dark'; } }
 function applyTheme(theme) {
@@ -727,12 +726,10 @@ function applyTheme(theme) {
 function toggleTheme() {
   const current = document.documentElement.getAttribute('data-theme') || 'dark';
   const next = current === 'dark' ? 'light' : 'dark';
-  applyTheme(next);
-  haptic();
+  applyTheme(next); haptic();
   toast(next === 'light' ? '☀️ الوضع النهاري' : '🌙 الوضع الليلي', 'success');
 }
 
-/* ---------- الخدمات ---------- */
 const SERVICES = {
   taxi:     { label: 'تكسي 🚕',       icon: '🚕' },
   tuktuk:   { label: 'تكتك 🛺',       icon: '🛺' },
@@ -744,7 +741,6 @@ const BASE_RATES = {
   delivery: { perKm: 2000,     min: 4000 }
 };
 
-/* ---------- المناطق ---------- */
 const REGIONS = {
   baghdad:      { name: 'بغداد',       emoji: '🏛️', level: 1.00, center: [33.3152, 44.3661] },
   basra:        { name: 'البصرة',       emoji: '🛢️', level: 1.10, center: [30.5085, 47.7804] },
@@ -817,21 +813,14 @@ const ROLE_NAV = {
   ]
 };
 
-const LS = {
-  orders:   'kokton_orders',
-  customer: 'kokton_customer',
-  driver:   'kokton_driver',
-  driverId: 'kokton_driver_id',
-  online:   'kokton_online',
-  accounts: 'kokton_accounts'
-};
-
+// تم إزالة LS (localStorage) للحسابات والطلبات، وبقي فقط للجلسة والثيم
 const state = {
   role: null, pendingRole: null, screen: null,
   service: 'taxi', mapMode: 'pickup',
   pickupCoords: null, destCoords: null,
   driverId: null, online: false,
-  region: getSavedRegion()
+  region: getSavedRegion(),
+  user: null // سيحفظ بيانات المستخدم الحالي
 };
 
 /* ---------- محرك حساب السعر ---------- */
@@ -871,16 +860,7 @@ function calcPriceDetailed(service, km, regionKey) {
   if (timeSurge > 0) labels.push(timeLabel);
   if (distSurge > 0) labels.push(distLabel);
 
-  return {
-    total,
-    distanceFare: Math.round(distanceFare),
-    minFare: Math.round(minFare),
-    regionLevel: level,
-    perKm: Math.round(perKm * 10) / 10,
-    timeMult, distMult,
-    surge: timeSurge + distSurge,
-    surgeLabel: labels.join(' • ')
-  };
+  return { total, surge: timeSurge + distSurge, surgeLabel: labels.join(' • ') };
 }
 
 function detectRegionFromCoords(lat, lng) {
@@ -900,30 +880,13 @@ function getRegionRateText(key) {
   return `التكسي ≈ ${fmt(taxiPer3km)} د.ع / 3 كم`;
 }
 
-/* ---------- المصادقة ---------- */
+/* ---------- المصادقة (متصل بسوبابيس) ---------- */
 function hashPwd(p) {
   let h = 0;
   for (let i = 0; i < p.length; i++) h = ((h << 5) - h + p.charCodeAt(i)) | 0;
   return 'h' + Math.abs(h).toString(36);
 }
-function getAccounts() {
-  try {
-    const raw = localStorage.getItem(LS.accounts);
-    if (!raw) return { customer: {}, driver: {} };
-    const a = JSON.parse(raw);
-    return { customer: a.customer || {}, driver: a.driver || {} };
-  } catch(e) { return { customer: {}, driver: {} }; }
-}
-function setAccounts(a) { try { localStorage.setItem(LS.accounts, JSON.stringify(a)); } catch(e){} }
-function getSession(role) {
-  try {
-    const phone = sessionStorage.getItem('kokton_phone_' + role);
-    if (!phone) return null;
-    const acc = getAccounts()[role] || {};
-    if (!acc[phone]) return null;
-    return { role, phone };
-  } catch(e) { return null; }
-}
+
 function setSession(role, phone) {
   try {
     sessionStorage.setItem('kokton_phone_' + role, phone);
@@ -941,168 +904,80 @@ function clearSession(role) {
   } catch(e){}
 }
 function getActiveRole() { try { return sessionStorage.getItem('kokton_active_role'); } catch(e) { return null; } }
-function syncProfileFromAccount(role, acc) {
-  const data = { name: acc.name || '', phone: acc.phone || '' };
-  if (role === 'customer') {
-    try { localStorage.setItem(LS.customer, JSON.stringify(data)); } catch(e){}
-  } else {
-    data.car = acc.car || '';
-    try { localStorage.setItem(LS.driver, JSON.stringify(data)); } catch(e){}
-  }
-}
+function getSessionPhone(role) { try { return sessionStorage.getItem('kokton_phone_' + role); } catch(e) { return null; } }
 
-/* ---------- التخزين ---------- */
-function getOrders() { try { return JSON.parse(localStorage.getItem(LS.orders) || '[]'); } catch(e) { return []; } }
-function setOrders(list) { try { localStorage.setItem(LS.orders, JSON.stringify(list)); } catch(e){} broadcastUpdate(); }
-function getCustomer() { try { return JSON.parse(localStorage.getItem(LS.customer) || '{}'); } catch(e){ return {}; } }
-function getDriver()   { try { return JSON.parse(localStorage.getItem(LS.driver)   || '{}'); } catch(e){ return {}; } }
-function getDriverId() {
-  const s = getSession('driver');
-  if (s) return 'driver_' + s.phone;
-  let id = null;
-  try { id = localStorage.getItem(LS.driverId); } catch(e){}
-  if (!id) {
-    id = 'drv_' + Math.random().toString(36).slice(2, 10);
-    try { localStorage.setItem(LS.driverId, id); } catch(e){}
-  }
-  return id;
-}
-function getOnline() { try { return localStorage.getItem(LS.online) === '1'; } catch(e){ return false; } }
-function setOnline(v) { try { localStorage.setItem(LS.online, v ? '1' : '0'); } catch(e){} }
-
-let bc = null;
-try {
-  if ('BroadcastChannel' in window) {
-    bc = new BroadcastChannel('kokton');
-    bc.onmessage = () => refreshFromStorage(true);
-  }
-} catch(e){}
-function broadcastUpdate() { if (bc) try { bc.postMessage('update'); } catch(e){} }
-
-let toastTimer = null;
-function toast(msg, type = 'info') {
-  const old = document.querySelector('.toast');
-  if (old) old.remove();
-  clearTimeout(toastTimer);
-  const el = document.createElement('div');
-  el.className = 'toast ' + type;
-  el.textContent = msg;
-  document.body.appendChild(el);
-  requestAnimationFrame(() => el.classList.add('show'));
-  toastTimer = setTimeout(() => {
-    el.classList.remove('show');
-    setTimeout(() => el.remove(), 350);
-  }, 2800);
-}
-
-/* ---------- السبلاش ---------- */
-function buildParticles() {
-  const wrap = $('particles');
-  if (!wrap) return;
-  for (let i = 0; i < 40; i++) {
-    const p = document.createElement('div');
-    p.className = 'particle';
-    const size = 2 + Math.random() * 4;
-    p.style.left = (Math.random() * 100) + '%';
-    p.style.width = size + 'px';
-    p.style.height = size + 'px';
-    p.style.animationDelay = (Math.random() * 3) + 's';
-    p.style.animationDuration = (3 + Math.random() * 3) + 's';
-    wrap.appendChild(p);
-  }
-}
-function initSplash() {
-  buildParticles();
-  setTimeout(() => {
-    $('splash').classList.add('done');
-    const activeRole = getActiveRole();
-    if (activeRole && getSession(activeRole)) enterApp(activeRole);
-    else showRolePicker();
-  }, 3400);
-}
-function showRolePicker() {
-  $('app').classList.add('hidden');
-  $('authScreen').classList.add('hidden');
-  const rp = $('rolePicker');
-  rp.classList.remove('hidden');
-  void rp.offsetWidth;
-  rp.classList.remove('done');
-}
-function hideRolePicker() {
-  const rp = $('rolePicker');
-  rp.classList.add('done');
-  setTimeout(() => rp.classList.add('hidden'), 500);
-}
-function pickRole(role) {
-  haptic();
-  state.pendingRole = role;
-  if (getSession(role)) enterApp(role);
-  else showAuth(role);
-}
-function showAuth(role) {
-  state.pendingRole = role;
-  hideRolePicker();
-  $('app').classList.add('hidden');
-  $('authScreen').classList.remove('hidden');
-  $('authRoleLabel').textContent = role === 'customer' ? 'زبون' : 'سائق';
-  ['loginPhone','loginPassword','regName','regPhone','regPassword','regPassword2']
-    .forEach(id => { const el = $(id); if (el) el.value = ''; });
-  switchAuthTab('login');
-}
-function switchAuthTab(tab) {
-  document.querySelectorAll('.auth-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
-  $('authLogin').classList.toggle('hidden', tab !== 'login');
-  $('authRegister').classList.toggle('hidden', tab !== 'register');
-}
-function backToRolePicker() {
-  $('authScreen').classList.add('hidden');
-  showRolePicker();
-}
-function doLogin() {
+async function doLogin() {
   const phone = $('loginPhone').value.trim();
   const password = $('loginPassword').value;
   const role = state.pendingRole;
   if (!phone) { toast('اكتب رقم الهاتف', 'error'); return; }
   if (!password) { toast('اكتب كلمة السر', 'error'); return; }
-  const acc = (getAccounts()[role] || {})[phone];
-  if (!acc) { toast('رقم الهاتف غير مسجل', 'error'); return; }
-  if (acc.password !== hashPwd(password)) { toast('كلمة السر غير صحيحة', 'error'); return; }
+
+  toast('جاري التحقق...', 'info');
+  const { data, error } = await supabase.from('accounts').select('*').eq('phone', phone).eq('role', role).single();
+
+  if (error || !data) { toast('رقم الهاتف غير مسجل كـ ' + (role === 'customer' ? 'زبون' : 'سائق'), 'error'); return; }
+  if (data.password !== hashPwd(password)) { toast('كلمة السر غير صحيحة', 'error'); return; }
+
   setSession(role, phone);
-  syncProfileFromAccount(role, acc);
+  state.user = data; // حفظ بيانات المستخدم
   haptic();
-  toast('✅ مرحباً ' + acc.name, 'success');
+  toast('✅ مرحباً ' + data.name, 'success');
   setTimeout(() => enterApp(role), 400);
 }
-function doRegister() {
+
+async function doRegister() {
   const name = $('regName').value.trim();
   const phone = $('regPhone').value.trim();
   const password = $('regPassword').value;
   const password2 = $('regPassword2').value;
   const role = state.pendingRole;
+
   if (!name) { toast('اكتب اسمك', 'error'); return; }
   if (!/^07\d{9}$/.test(phone)) { toast('رقم الهاتف لازم يبدأ بـ 07 و 11 رقم', 'error'); return; }
   if (password.length < 4) { toast('كلمة السر لازم 4 أحرف على الأقل', 'error'); return; }
   if (password !== password2) { toast('كلمتا السر غير متطابقتين', 'error'); return; }
-  const accounts = getAccounts();
-  if (!accounts[role]) accounts[role] = {};
-  if (accounts[role][phone]) { toast('هذا الرقم مسجل مسبقاً', 'error'); return; }
-  accounts[role][phone] = { name, phone, password: hashPwd(password), createdAt: Date.now() };
-  setAccounts(accounts);
+
+  toast('جاري إنشاء الحساب...', 'info');
+  const { error } = await supabase.from('accounts').insert([{
+    phone: phone, name: name, password: hashPwd(password), role: role, car: ''
+  }]);
+
+  if (error) { toast('هذا الرقم مسجل مسبقاً أو حدث خطأ', 'error'); return; }
+
   setSession(role, phone);
-  syncProfileFromAccount(role, accounts[role][phone]);
+  state.user = { phone, name, role, car: '' };
   haptic();
   toast('✅ تم إنشاء الحساب', 'success');
   setTimeout(() => enterApp(role), 400);
 }
+
 function logout() {
   if (!confirm('هل تريد تسجيل الخروج؟')) return;
   clearSession(state.role);
-  state.role = null;
+  state.role = null; state.user = null;
   $('app').classList.add('hidden');
   showRolePicker();
   toast('تم تسجيل الخروج', 'info');
 }
-function enterApp(role) {
+
+async function syncProfileFromDB(role, phone) {
+  const { data } = await supabase.from('accounts').select('*').eq('phone', phone).eq('role', role).single();
+  if (data) {
+    state.user = data;
+    if (role === 'customer') {
+      $('customerName').value = data.name || '';
+      $('customerPhone').value = data.phone || '';
+    } else {
+      $('driverName').value = data.name || '';
+      $('driverPhone').value = data.phone || '';
+      $('driverCar').value = data.car || '';
+      state.driverId = 'driver_' + phone;
+    }
+  }
+}
+
+async function enterApp(role) {
   state.role = role;
   state.pendingRole = null;
   hideRolePicker();
@@ -1110,43 +985,30 @@ function enterApp(role) {
   $('app').classList.remove('hidden');
   $('roleTag').textContent = role === 'customer' ? 'زبون' : 'سائق';
   $('switchLabel').innerHTML = (role === 'customer' ? 'سائق' : 'زبون') + '<small>تبديل</small>';
+
+  const phone = getSessionPhone(role);
+  await syncProfileFromDB(role, phone);
+
   renderNav();
   const first = role === 'customer' ? 'c-home' : 'd-home';
   goScreen(first);
+
   if (role === 'driver') {
-    state.driverId = getDriverId();
-    state.online = getOnline();
+    state.online = localStorage.getItem('kokton_online') === '1';
     setTimeout(() => { updateOnlineUI(); renderDriverHome(); }, 250);
   }
-  refreshFromStorage(true);
 }
+
 function switchRole() {
   haptic();
   const newRole = state.role === 'customer' ? 'driver' : 'customer';
-  if (getSession(newRole)) {
+  const curPhone = getSessionPhone(state.role);
+
+  if (curPhone) {
+    setSession(newRole, curPhone);
     enterApp(newRole);
     toast('✅ تم التبديل إلى واجهة ' + (newRole === 'customer' ? 'الزبون' : 'السائق'), 'success');
     return;
-  }
-  const curSession = getSession(state.role);
-  if (curSession) {
-    const accounts = getAccounts();
-    const curAcc = accounts[state.role] && accounts[state.role][curSession.phone];
-    if (curAcc) {
-      if (!accounts[newRole]) accounts[newRole] = {};
-      if (!accounts[newRole][curSession.phone]) {
-        accounts[newRole][curSession.phone] = {
-          name: curAcc.name || '', phone: curAcc.phone || curSession.phone,
-          password: curAcc.password, car: '', createdAt: Date.now()
-        };
-        setAccounts(accounts);
-      }
-      setSession(newRole, curSession.phone);
-      syncProfileFromAccount(newRole, accounts[newRole][curSession.phone]);
-      enterApp(newRole);
-      toast('✅ تم التبديل إلى واجهة ' + (newRole === 'customer' ? 'الزبون' : 'السائق'), 'success');
-      return;
-    }
   }
   state.pendingRole = newRole;
   $('app').classList.add('hidden');
@@ -1171,19 +1033,13 @@ function goScreen(id) {
   state.screen = id;
   updateNavActive();
   if (id === 'c-booking') setTimeout(() => {
-    initCustomerMap();
-    if (customerMap) customerMap.invalidateSize();
-    renderRegionChips();
-    updateRegionInfo();
-    updateFareNotice();
-    updatePricePreview();
+    initCustomerMap(); if (customerMap) customerMap.invalidateSize();
+    renderRegionChips(); updateRegionInfo(); updateFareNotice(); updatePricePreview();
   }, 200);
   if (id === 'd-home')    setTimeout(() => { initDriverMap(); if (driverMap) driverMap.invalidateSize(); renderDriverHome(); }, 200);
   if (id === 'c-orders')  renderCustomerOrders();
   if (id === 'd-orders')  renderDriverOrders();
   if (id === 'd-earnings') renderEarnings();
-  if (id === 'c-account') loadCustomerProfileForm();
-  if (id === 'd-account') loadDriverProfileForm();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -1197,48 +1053,30 @@ function renderRegionChips() {
     </button>`
   ).join('');
 }
-
 function selectRegion(key, silent) {
   if (!REGIONS[key]) return;
   const changed = state.region !== key;
-  state.region = key;
-  setSavedRegion(key);
-  renderRegionChips();
-  updateRegionInfo();
-  updateFareNotice();
-  updatePricePreview();
-
+  state.region = key; setSavedRegion(key);
+  renderRegionChips(); updateRegionInfo(); updateFareNotice(); updatePricePreview();
   if (!silent && changed) {
-    haptic();
-    const r = REGIONS[key];
+    haptic(); const r = REGIONS[key];
     toast(`📍 ${r.name} — ${getRegionRateText(key)}`, 'success');
-    if (customerMap && !state.pickupCoords && !state.destCoords) {
-      customerMap.setView(r.center, 13);
-    }
+    if (customerMap && !state.pickupCoords && !state.destCoords) customerMap.setView(r.center, 13);
   }
 }
-
 function updateRegionInfo() {
-  const r = REGIONS[state.region];
-  if (!r) return;
-  const el = $('regionInfo');
-  if (el) el.textContent = `${r.emoji} ${r.name}`;
+  const r = REGIONS[state.region]; if (!r) return;
+  const el = $('regionInfo'); if (el) el.textContent = `${r.emoji} ${r.name}`;
   const line = $('regionInfoLine');
   if (line) {
-    const level = r.level;
-    const taxiPerKm = Math.round(BASE_RATES.taxi.perKm * level * 10) / 10;
-    const taxiMin = Math.round(BASE_RATES.taxi.min * level);
-    const levelTxt = level > 1 ? `مرتفع (×${level})` : level < 1 ? `منخفض (×${level})` : 'قياسي';
-    line.innerHTML = `<b>${r.name}</b> — مستوى التسعير: ${levelTxt}<br>
-      التكسي: <b>${taxiPerKm} د.ع/كم</b> • الحد الأدنى: <b>${fmt(taxiMin)} د.ع</b>`;
+    const taxiPerKm = Math.round(BASE_RATES.taxi.perKm * r.level * 10) / 10;
+    const taxiMin = Math.round(BASE_RATES.taxi.min * r.level);
+    line.innerHTML = `<b>${r.name}</b> — التكسي: <b>${taxiPerKm} د.ع/كم</b> • الحد الأدنى: <b>${fmt(taxiMin)} د.ع</b>`;
   }
 }
-
 function updateFareNotice() {
-  const el = $('fareText');
-  if (!el) return;
-  const r = REGIONS[state.region];
-  if (!r) return;
+  const el = $('fareText'); if (!el) return;
+  const r = REGIONS[state.region]; if (!r) return;
   if (state.service === 'taxi') {
     const per3km = Math.round(BASE_RATES.taxi.perKm * r.level * 3 / 100) * 100;
     el.textContent = `${r.emoji} ${r.name}: ${fmt(per3km)} دينار لكل 3 كم`;
@@ -1247,7 +1085,6 @@ function updateFareNotice() {
     el.textContent = `${r.emoji} ${r.name}: ${fmt(perKm)} دينار لكل كم`;
   }
 }
-
 function detectMyRegion() {
   if (!navigator.geolocation) { toast('المتصفح لا يدعم تحديد الموقع', 'error'); return; }
   toast('🛰️ جاري تحديد منطقتك...', 'info');
@@ -1256,14 +1093,9 @@ function detectMyRegion() {
       const lat = pos.coords.latitude, lng = pos.coords.longitude;
       const key = detectRegionFromCoords(lat, lng);
       const r = REGIONS[key];
-
       if (key !== state.region) {
-        const ok = confirm(`📍 موقعك يقع ضمن: ${r.name}\n\nهل تريد تحويل التسعير إلى ${r.name}؟`);
-        if (ok) selectRegion(key, false);
-      } else {
-        toast(`✅ أنت بالفعل في ${r.name}`, 'success');
-      }
-
+        if (confirm(`📍 موقعك يقع ضمن: ${r.name}\n\nهل تريد تحويل التسعير إلى ${r.name}؟`)) selectRegion(key, false);
+      } else { toast(`✅ أنت بالفعل في ${r.name}`, 'success'); }
       const latlng = { lat, lng };
       state.pickupCoords = latlng;
       $('pickup').value = '📍 موقعي الحالي (' + lat.toFixed(4) + ', ' + lng.toFixed(4) + ')';
@@ -1271,110 +1103,73 @@ function detectMyRegion() {
       if (customerMap) customerMap.setView([lat, lng], 15);
       if (cPickupMarker) cPickupMarker.setLatLng(latlng);
       else if (customerMap) cPickupMarker = L.marker(latlng, { icon: makeIcon('#00d4a0', 'A') }).addTo(customerMap);
-      updateRouteLine();
-      updatePricePreview();
+      updateRouteLine(); updatePricePreview();
     },
-    () => toast('لم نتمكن من تحديد موقعك', 'error'),
-    { enableHighAccuracy: true, timeout: 12000 }
+    () => toast('لم نتمكن من تحديد موقعك', 'error'), { enableHighAccuracy: true, timeout: 12000 }
   );
 }
 
 /* ---------- خدمة الزبون ---------- */
 function selectService(s) {
-  haptic();
-  state.service = s;
+  haptic(); state.service = s;
   $('bookingTitle').textContent = SERVICES[s].label + ' — تحديد الرحلة';
   $('chosenService').textContent = SERVICES[s].label;
-  updateFareNotice();
-  updatePricePreview();
-  goScreen('c-booking');
+  updateFareNotice(); updatePricePreview(); goScreen('c-booking');
 }
-
 function makeIcon(color, text) {
   return L.divIcon({
-    className: '',
-    html: `<div class="kokton-marker" style="background:${color};color:${color};">${text}</div>`,
-    iconSize: [36, 36],
-    iconAnchor: [18, 18]
+    className: '', html: `<div class="kokton-marker" style="background:${color};color:${color};">${text}</div>`,
+    iconSize: [36, 36], iconAnchor: [18, 18]
   });
 }
-
 function initCustomerMap() {
   if (customerMap) return;
-  const el = $('customerMap');
-  if (!el) return;
+  const el = $('customerMap'); if (!el) return;
   const region = REGIONS[state.region] || REGIONS.baghdad;
   customerMap = L.map('customerMap').setView(region.center, 12);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '© OpenStreetMap'
-  }).addTo(customerMap);
-
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(customerMap);
   customerMap.on('click', (e) => {
     const ll = { lat: e.latlng.lat, lng: e.latlng.lng };
     if (state.mapMode === 'pickup') {
-      state.pickupCoords = ll;
-      $('pickup').value = `${ll.lat.toFixed(4)}, ${ll.lng.toFixed(4)}`;
+      state.pickupCoords = ll; $('pickup').value = `${ll.lat.toFixed(4)}, ${ll.lng.toFixed(4)}`;
       if (cPickupMarker) cPickupMarker.setLatLng(ll);
       else cPickupMarker = L.marker(ll, { icon: makeIcon('#00d4a0', 'A') }).addTo(customerMap);
     } else {
-      state.destCoords = ll;
-      $('destination').value = `${ll.lat.toFixed(4)}, ${ll.lng.toFixed(4)}`;
+      state.destCoords = ll; $('destination').value = `${ll.lat.toFixed(4)}, ${ll.lng.toFixed(4)}`;
       if (cDestMarker) cDestMarker.setLatLng(ll);
       else cDestMarker = L.marker(ll, { icon: makeIcon('#ff4d6d', 'B') }).addTo(customerMap);
     }
-    updateRouteLine();
-    updatePricePreview();
+    updateRouteLine(); updatePricePreview();
   });
 }
-
 function setMapMode(mode) {
   state.mapMode = mode;
   document.querySelectorAll('.map-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === mode));
   haptic();
 }
-
 function updateRouteLine() {
   if (!customerMap) return;
   if (cRouteLine) { customerMap.removeLayer(cRouteLine); cRouteLine = null; }
   if (state.pickupCoords && state.destCoords) {
-    cRouteLine = L.polyline(
-      [[state.pickupCoords.lat, state.pickupCoords.lng], [state.destCoords.lat, state.destCoords.lng]],
-      { color: '#ffd24a', weight: 4, dashArray: '8 8' }
-    ).addTo(customerMap);
-    try {
-      customerMap.fitBounds(L.latLngBounds([
-        [state.pickupCoords.lat, state.pickupCoords.lng],
-        [state.destCoords.lat, state.destCoords.lng]
-      ]), { padding: [40, 40] });
-    } catch(e){}
+    cRouteLine = L.polyline([[state.pickupCoords.lat, state.pickupCoords.lng], [state.destCoords.lat, state.destCoords.lng]], { color: '#ffd24a', weight: 4, dashArray: '8 8' }).addTo(customerMap);
+    try { customerMap.fitBounds(L.latLngBounds([[state.pickupCoords.lat, state.pickupCoords.lng], [state.destCoords.lat, state.destCoords.lng]]), { padding: [40, 40] }); } catch(e){}
   }
 }
-
 function updatePricePreview() {
-  const priceEl = $('price');
-  const surgeEl = $('surgeBadge');
-  if (!priceEl) return;
+  const priceEl = $('price'); const surgeEl = $('surgeBadge'); if (!priceEl) return;
   if (!state.pickupCoords || !state.destCoords) {
-    priceEl.textContent = '—';
-    if (surgeEl) surgeEl.classList.add('hidden');
-    return;
+    priceEl.textContent = '—'; if (surgeEl) surgeEl.classList.add('hidden'); return;
   }
   const km = haversine(state.pickupCoords, state.destCoords);
   const detail = calcPriceDetailed(state.service, km, state.region);
   if (detail.total) {
     priceEl.textContent = fmt(detail.total) + ' د.ع';
     if (surgeEl) {
-      if (detail.surge > 0) {
-        surgeEl.textContent = detail.surgeLabel;
-        surgeEl.classList.remove('hidden');
-      } else {
-        surgeEl.classList.add('hidden');
-      }
+      if (detail.surge > 0) { surgeEl.textContent = detail.surgeLabel; surgeEl.classList.remove('hidden'); }
+      else surgeEl.classList.add('hidden');
     }
   }
 }
-
 function locateMe() {
   if (!navigator.geolocation) { toast('المتصفح لا يدعم تحديد الموقع', 'error'); return; }
   toast('🛰️ جاري تحديد موقعك...', 'info');
@@ -1387,53 +1182,45 @@ function locateMe() {
       if (customerMap) customerMap.setView([ll.lat, ll.lng], 15);
       if (cPickupMarker) cPickupMarker.setLatLng(ll);
       else if (customerMap) cPickupMarker = L.marker(ll, { icon: makeIcon('#00d4a0', 'A') }).addTo(customerMap);
-      updateRouteLine();
-      updatePricePreview();
-      haptic();
+      updateRouteLine(); updatePricePreview(); haptic();
     },
-    () => toast('لم نتمكن من تحديد موقعك', 'error'),
-    { enableHighAccuracy: true, timeout: 12000 }
+    () => toast('لم نتمكن من تحديد موقعك', 'error'), { enableHighAccuracy: true, timeout: 12000 }
   );
 }
 
-function submitOrder() {
+async function submitOrder() {
   if (!state.pickupCoords) { toast('حدد موقع الانطلاق أولاً', 'error'); return; }
   if (!state.destCoords) { toast('حدد الوجهة أولاً', 'error'); return; }
   const km = haversine(state.pickupCoords, state.destCoords);
   const detail = calcPriceDetailed(state.service, km, state.region);
   if (!detail.total) { toast('تعذر حساب السعر', 'error'); return; }
 
-  const cust = getCustomer();
-  const order = {
-    id: 'ord_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
-    customerPhone: cust.phone || '',
-    customerName: cust.name || 'زبون',
+  toast('جاري إرسال الطلب...', 'info');
+  const orderId = 'ord_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+  const newOrder = {
+    id: orderId,
+    customer_phone: state.user.phone,
+    customer_name: state.user.name,
     service: state.service,
     region: state.region,
-    pickup: state.pickupCoords,
-    dest: state.destCoords,
-    pickupText: $('pickup').value || '—',
-    destText: $('destination').value || '—',
+    pickup_text: $('pickup').value || '—',
+    dest_text: $('destination').value || '—',
+    pickup_lat: state.pickupCoords.lat,
+    pickup_lng: state.pickupCoords.lng,
+    dest_lat: state.destCoords.lat,
+    dest_lng: state.destCoords.lng,
     km: Math.round(km * 10) / 10,
     price: detail.total,
-    status: 'pending',
-    driverId: null,
-    driverName: null,
-    driverPhone: null,
-    driverCar: null,
-    createdAt: Date.now()
+    status: 'pending'
   };
 
-  const orders = getOrders();
-  orders.unshift(order);
-  setOrders(orders);
-  haptic();
-  toast('✅ تم إرسال الطلب — بانتظار سائق', 'success');
+  const { error } = await supabase.from('orders').insert([newOrder]);
 
-  state.pickupCoords = null;
-  state.destCoords = null;
-  $('pickup').value = '';
-  $('destination').value = '';
+  if (error) { console.error(error); toast('خطأ في إرسال الطلب', 'error'); return; }
+
+  haptic(); toast('✅ تم إرسال الطلب — بانتظار سائق', 'success');
+  state.pickupCoords = null; state.destCoords = null;
+  $('pickup').value = ''; $('destination').value = '';
   if (customerMap) {
     if (cPickupMarker) { customerMap.removeLayer(cPickupMarker); cPickupMarker = null; }
     if (cDestMarker) { customerMap.removeLayer(cDestMarker); cDestMarker = null; }
@@ -1446,34 +1233,28 @@ function renderOrderItem(o, viewer) {
   const st = STATUS[o.status] || STATUS.pending;
   const service = SERVICES[o.service] || SERVICES.taxi;
   const region = REGIONS[o.region];
-  const canCancel = (viewer === 'customer' && o.status === 'pending');
   let actions = '';
 
   if (viewer === 'driver') {
     if (o.status === 'pending') {
       actions = `<button class="btn-accept" onclick="acceptOrder('${o.id}')">قبول الطلب</button>`;
-    } else if (o.driverId === state.driverId) {
+    } else if (o.driver_phone === state.user.phone) {
       if (o.status === 'accepted') actions = `<button class="btn-next" onclick="advanceOrder('${o.id}','arrived')">وصلت</button>`;
       else if (o.status === 'arrived') actions = `<button class="btn-next" onclick="advanceOrder('${o.id}','ongoing')">بدء الرحلة</button>`;
       else if (o.status === 'ongoing') actions = `<button class="btn-next" onclick="advanceOrder('${o.id}','completed')">إنهاء الرحلة</button>`;
     }
   }
-  if (canCancel) {
+  if (viewer === 'customer' && o.status === 'pending') {
     actions += `<button class="btn-cancel" onclick="cancelOrder('${o.id}')">إلغاء</button>`;
   }
 
-  const driverInfo = o.driverName
-    ? `<div class="order-meta" style="margin-top:8px">🚕 ${esc(o.driverName)} — ${esc(o.driverCar || '—')}</div>`
-    : '';
+  const driverInfo = o.driver_name ? `<div class="order-meta" style="margin-top:8px">🚕 ${esc(o.driver_name)} — ${esc(o.driver_car || '—')}</div>` : '';
 
   return `<div class="order-item">
-    <div class="order-head">
-      <div class="order-service">${service.label}</div>
-      <div class="status-badge ${st.cls}">${st.label}</div>
-    </div>
+    <div class="order-head"><div class="order-service">${service.label}</div><div class="status-badge ${st.cls}">${st.label}</div></div>
     <div class="order-meta">
-      <div>📍 من: <b>${esc(o.pickupText)}</b></div>
-      <div>🎯 إلى: <b>${esc(o.destText)}</b></div>
+      <div>📍 من: <b>${esc(o.pickup_text)}</b></div>
+      <div>🎯 إلى: <b>${esc(o.dest_text)}</b></div>
       <div>📏 المسافة: <b>${o.km} كم</b>${region ? ' • ' + region.emoji + ' ' + region.name : ''}</div>
     </div>
     ${driverInfo}
@@ -1482,266 +1263,201 @@ function renderOrderItem(o, viewer) {
   </div>`;
 }
 
-function renderCustomerOrders() {
-  const el = $('customerOrdersList');
-  if (!el) return;
-  const phone = getCustomer().phone || '';
-  const orders = getOrders().filter(o => o.customerPhone === phone);
-  if (!orders.length) {
+async function renderCustomerOrders() {
+  const el = $('customerOrdersList'); if (!el) return;
+  el.innerHTML = '<div class="empty-state"><div class="ttl">جاري التحميل...</div></div>';
+  const { data, error } = await supabase.from('orders').select('*').eq('customer_phone', state.user.phone).order('created_at', { ascending: false });
+  if (error || !data) { el.innerHTML = '<div class="empty-state"><div class="ttl">حدث خطأ</div></div>'; return; }
+  if (data.length === 0) {
     el.innerHTML = `<div class="empty-state"><div class="big">📭</div><div class="ttl">لا توجد طلبات</div><div class="muted" style="font-size:12px;margin-top:6px">اطلب رحلتك من الرئيسية</div></div>`;
-    return;
+  } else {
+    el.innerHTML = data.map(o => renderOrderItem(o, 'customer')).join('');
   }
-  el.innerHTML = orders.map(o => renderOrderItem(o, 'customer')).join('');
 }
 
-function cancelOrder(id) {
+async function cancelOrder(id) {
   if (!confirm('إلغاء هذا الطلب؟')) return;
-  const orders = getOrders();
-  const o = orders.find(x => x.id === id);
-  if (!o || o.status !== 'pending') { toast('لا يمكن إلغاء الطلب الآن', 'error'); return; }
-  o.status = 'cancelled';
-  setOrders(orders);
-  toast('تم إلغاء الطلب', 'info');
-  refreshFromStorage();
+  const { error } = await supabase.from('orders').update({ status: 'cancelled' }).eq('id', id).eq('status', 'pending');
+  if (error) { toast('لا يمكن إلغاء الطلب', 'error'); return; }
+  toast('تم إلغاء الطلب', 'info'); renderCustomerOrders();
 }
 
 /* ---------- خدمة السائق ---------- */
 function initDriverMap() {
-  if (driverMap) return;
-  const el = $('driverMap');
-  if (!el) return;
+  if (driverMap) return; const el = $('driverMap'); if (!el) return;
   const region = REGIONS[state.region] || REGIONS.baghdad;
   driverMap = L.map('driverMap').setView(region.center, 12);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '© OpenStreetMap'
-  }).addTo(driverMap);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(driverMap);
 }
-
-function updateDriverMapMarkers() {
+async function updateDriverMapMarkers() {
   if (!driverMap) return;
   dOrderMarkers.forEach(m => { try { driverMap.removeLayer(m); } catch(e){} });
   dOrderMarkers = [];
-  const avail = getOrders().filter(o => o.status === 'pending' && o.pickup);
-  avail.forEach(o => {
-    const m = L.marker([o.pickup.lat, o.pickup.lng], { icon: makeIcon('#ffd24a', '🚕') }).addTo(driverMap);
-    m.bindPopup(`<b>${SERVICES[o.service].label}</b><br>${esc(o.pickupText)}<br>${fmt(o.price)} د.ع`);
-    dOrderMarkers.push(m);
-  });
+  const { data } = await supabase.from('orders').select('*').eq('status', 'pending');
+  if (data) {
+    data.forEach(o => {
+      const m = L.marker([o.pickup_lat, o.pickup_lng], { icon: makeIcon('#ffd24a', '🚕') }).addTo(driverMap);
+      m.bindPopup(`<b>${SERVICES[o.service].label}</b><br>${esc(o.pickup_text)}<br>${fmt(o.price)} د.ع`);
+      dOrderMarkers.push(m);
+    });
+  }
 }
+async function renderDriverHome() {
+  const el = $('driverCurrentOrder'); if (!el) return;
+  el.innerHTML = '<div class="empty-state"><div class="ttl">جاري التحميل...</div></div>';
+  const { data, error } = await supabase.from('orders').select('*').eq('driver_phone', state.user.phone).in('status', ['accepted', 'arrived', 'ongoing']).order('created_at', { ascending: false });
 
-function renderDriverHome() {
-  const el = $('driverCurrentOrder');
-  if (!el) return;
-  const orders = getOrders();
-  const current = orders.find(o =>
-    o.driverId === state.driverId &&
-    ['accepted', 'arrived', 'ongoing'].includes(o.status)
-  );
-
-  if (!current) {
+  if (error || !data || data.length === 0) {
     el.innerHTML = `<div class="empty-state"><div class="big">🚕</div><div class="ttl">لا توجد رحلة حالية</div><div class="muted" style="font-size:12px;margin-top:6px">${state.online ? 'انتظر طلبات جديدة' : 'فعّل الاتصال لاستقبال الطلبات'}</div></div>`;
   } else {
-    el.innerHTML = renderOrderItem(current, 'driver');
+    el.innerHTML = renderOrderItem(data[0], 'driver');
   }
 
-  const mine = orders.filter(o => o.driverId === state.driverId && o.status === 'completed');
-  $('statTrips').textContent = mine.length;
-  $('statEarnings').textContent = fmt(mine.reduce((s, o) => s + o.price, 0));
-
+  // جلب الإحصائيات
+  const { data: history } = await supabase.from('orders').select('price').eq('driver_phone', state.user.phone).eq('status', 'completed');
+  if (history) {
+    $('statTrips').textContent = history.length;
+    $('statEarnings').textContent = fmt(history.reduce((s, o) => s + o.price, 0));
+  }
   if (driverMap) updateDriverMapMarkers();
 }
 
-function renderDriverOrders() {
-  const orders = getOrders();
-  const available = orders.filter(o => o.status === 'pending');
-  const myHistory = orders.filter(o => o.driverId === state.driverId && o.status === 'completed');
+async function renderDriverOrders() {
+  const availEl = $('driverAvailableOrders'); if (!availEl) return;
+  availEl.innerHTML = '<div class="empty-state"><div class="ttl">جاري التحميل...</div></div>';
 
-  const availEl = $('driverAvailableOrders');
-  if (!availEl) return;
   if (!state.online) {
-    availEl.innerHTML = `<div class="empty-state"><div class="big">📴</div><div class="ttl">أنت غير متصل</div><div class="muted" style="font-size:12px;margin-top:6px">فعّل الاتصال من الصفحة الرئيسية</div></div>`;
-  } else if (!available.length) {
-    availEl.innerHTML = `<div class="empty-state"><div class="big">⏳</div><div class="ttl">لا توجد طلبات حالياً</div></div>`;
+    availEl.innerHTML = `<div class="empty-state"><div class="big">📴</div><div class="ttl">أنت غير متصل</div></div>`;
   } else {
-    availEl.innerHTML = available.map(o => renderOrderItem(o, 'driver')).join('');
+    const { data } = await supabase.from('orders').select('*').eq('status', 'pending').order('created_at', { ascending: false });
+    if (!data || data.length === 0) availEl.innerHTML = `<div class="empty-state"><div class="big">⏳</div><div class="ttl">لا توجد طلبات حالياً</div></div>`;
+    else availEl.innerHTML = data.map(o => renderOrderItem(o, 'driver')).join('');
   }
 
-  const histEl = $('driverHistory');
-  if (!histEl) return;
-  if (!myHistory.length) {
-    histEl.innerHTML = `<div class="empty-state"><div class="big">📋</div><div class="ttl">لا يوجد سجل</div></div>`;
-  } else {
-    histEl.innerHTML = myHistory.slice(0, 10).map(o => renderOrderItem(o, 'driver')).join('');
-  }
+  const histEl = $('driverHistory'); if (!histEl) return;
+  const { data: hist } = await supabase.from('orders').select('*').eq('driver_phone', state.user.phone).eq('status', 'completed').order('created_at', { ascending: false }).limit(10);
+  if (!hist || hist.length === 0) histEl.innerHTML = `<div class="empty-state"><div class="big">📋</div><div class="ttl">لا يوجد سجل</div></div>`;
+  else histEl.innerHTML = hist.map(o => renderOrderItem(o, 'driver')).join('');
 }
 
-function acceptOrder(id) {
-  const orders = getOrders();
-  const o = orders.find(x => x.id === id);
-  if (!o) return;
-  if (o.status !== 'pending') { toast('الطلب لم يعد متاحاً', 'error'); refreshFromStorage(); return; }
-  const drv = getDriver();
-  o.status = 'accepted';
-  o.driverId = state.driverId;
-  o.driverName = drv.name || 'سائق';
-  o.driverPhone = drv.phone || '';
-  o.driverCar = drv.car || '';
-  setOrders(orders);
-  haptic();
-  toast('✅ تم قبول الطلب', 'success');
-  refreshFromStorage();
+async function acceptOrder(id) {
+  toast('جاري القبول...', 'info');
+  const { error } = await supabase.from('orders').update({
+    status: 'accepted', driver_phone: state.user.phone, driver_name: state.user.name, driver_car: state.user.car || ''
+  }).eq('id', id).eq('status', 'pending');
+
+  if (error) { toast('الطلب لم يعد متاحاً', 'error'); renderDriverOrders(); return; }
+  haptic(); toast('✅ تم قبول الطلب', 'success'); renderDriverHome(); renderDriverOrders();
 }
 
-function advanceOrder(id, newStatus) {
-  const orders = getOrders();
-  const o = orders.find(x => x.id === id);
-  if (!o) return;
-  if (o.driverId !== state.driverId) return;
-  o.status = newStatus;
-  setOrders(orders);
-  haptic();
-  const labels = { arrived: '✅ وصلت لموقع الزبون', ongoing: '🚀 بدأت الرحلة', completed: '🎉 انتهت الرحلة' };
-  toast(labels[newStatus] || 'تم التحديث', 'success');
-  refreshFromStorage();
+async function advanceOrder(id, newStatus) {
+  const { error } = await supabase.from('orders').update({ status: newStatus }).eq('id', id).eq('driver_phone', state.user.phone);
+  if (error) return;
+  haptic(); const labels = { arrived: '✅ وصلت لموقع الزبون', ongoing: '🚀 بدأت الرحلة', completed: '🎉 انتهت الرحلة' };
+  toast(labels[newStatus] || 'تم التحديث', 'success'); renderDriverHome(); renderDriverOrders();
 }
 
-function renderEarnings() {
-  const orders = getOrders();
-  const mine = orders.filter(o => o.driverId === state.driverId && o.status === 'completed');
+async function renderEarnings() {
+  const { data: mine } = await supabase.from('orders').select('*').eq('driver_phone', state.user.phone).eq('status', 'completed');
+  if (!mine) return;
   const total = mine.reduce((s, o) => s + o.price, 0);
   const today = new Date(); today.setHours(0, 0, 0, 0);
-  const todayEarn = mine.filter(o => o.createdAt >= today.getTime()).reduce((s, o) => s + o.price, 0);
+  const todayEarn = mine.filter(o => new Date(o.created_at) >= today).reduce((s, o) => s + o.price, 0);
   const avg = mine.length ? Math.round(total / mine.length) : 0;
 
-  $('earnTotal').textContent = fmt(total);
-  $('earnToday').textContent = fmt(todayEarn);
-  $('earnTrips').textContent = mine.length;
-  $('earnAvg').textContent = fmt(avg);
+  $('earnTotal').textContent = fmt(total); $('earnToday').textContent = fmt(todayEarn);
+  $('earnTrips').textContent = mine.length; $('earnAvg').textContent = fmt(avg);
 
   const listEl = $('earningsList');
-  if (!listEl) return;
-  if (!mine.length) {
-    listEl.innerHTML = `<div class="empty-state"><div class="big">💰</div><div class="ttl">لا توجد أرباح بعد</div></div>`;
-  } else {
-    listEl.innerHTML = mine.slice(0, 15).map(o => renderOrderItem(o, 'driver')).join('');
-  }
+  if (!mine.length) listEl.innerHTML = `<div class="empty-state"><div class="big">💰</div><div class="ttl">لا توجد أرباح بعد</div></div>`;
+  else listEl.innerHTML = mine.slice(0, 15).map(o => renderOrderItem(o, 'driver')).join('');
 }
 
 function toggleOnline() {
   state.online = !state.online;
-  setOnline(state.online);
-  updateOnlineUI();
-  haptic();
+  localStorage.setItem('kokton_online', state.online ? '1' : '0');
+  updateOnlineUI(); haptic();
   toast(state.online ? '🟢 متصل — تستقبل الطلبات' : '⚪ غير متصل', state.online ? 'success' : 'info');
-  renderDriverHome();
-  renderDriverOrders();
+  renderDriverHome(); renderDriverOrders();
 }
-
 function updateOnlineUI() {
-  const btn = $('onlineToggle');
-  const label = $('onlineLabel');
-  const sub = $('onlineSub');
-  if (!btn) return;
-  if (state.online) {
-    btn.classList.add('on');
-    if (label) label.textContent = 'متصل';
-    if (sub) sub.textContent = 'تستقبل الطلبات الآن';
-  } else {
-    btn.classList.remove('on');
-    if (label) label.textContent = 'غير متصل';
-    if (sub) sub.textContent = 'أنت غير متصل حالياً';
-  }
+  const btn = $('onlineToggle'); const label = $('onlineLabel'); const sub = $('onlineSub'); if (!btn) return;
+  if (state.online) { btn.classList.add('on'); if (label) label.textContent = 'متصل'; if (sub) sub.textContent = 'تستقبل الطلبات الآن'; }
+  else { btn.classList.remove('on'); if (label) label.textContent = 'غير متصل'; if (sub) sub.textContent = 'أنت غير متصل حالياً'; }
 }
 
-/* ---------- الحسابات ---------- */
-function loadCustomerProfileForm() {
-  const c = getCustomer();
-  const nameEl = $('customerName'); if (nameEl) nameEl.value = c.name || '';
-  const phoneEl = $('customerPhone'); if (phoneEl) phoneEl.value = c.phone || '';
-}
-
-function loadDriverProfileForm() {
-  const d = getDriver();
-  const nameEl = $('driverName'); if (nameEl) nameEl.value = d.name || '';
-  const phoneEl = $('driverPhone'); if (phoneEl) phoneEl.value = d.phone || '';
-  const carEl = $('driverCar'); if (carEl) carEl.value = d.car || '';
-}
-
-function saveCustomerProfile() {
-  const c = getCustomer();
+/* ---------- الحسابات (تعديل البيانات) ---------- */
+async function saveCustomerProfile() {
   const name = $('customerName').value.trim();
-  if (name) c.name = name;
-  try { localStorage.setItem(LS.customer, JSON.stringify(c)); } catch(e){}
-  const session = getSession('customer');
-  if (session) {
-    const accounts = getAccounts();
-    if (accounts.customer[session.phone]) {
-      accounts.customer[session.phone].name = c.name;
-      setAccounts(accounts);
-    }
+  if (name) {
+    await supabase.from('accounts').update({ name: name }).eq('phone', state.user.phone).eq('role', 'customer');
+    state.user.name = name;
+    toast('✅ تم الحفظ في قاعدة البيانات', 'success');
   }
-  toast('✅ تم الحفظ', 'success');
 }
-
-function saveDriverProfile() {
-  const d = getDriver();
-  const name = $('driverName').value.trim();
-  const car = $('driverCar').value.trim();
-  if (name) d.name = name;
-  d.car = car;
-  try { localStorage.setItem(LS.driver, JSON.stringify(d)); } catch(e){}
-  const session = getSession('driver');
-  if (session) {
-    const accounts = getAccounts();
-    if (accounts.driver[session.phone]) {
-      accounts.driver[session.phone].name = d.name;
-      accounts.driver[session.phone].car = d.car;
-      setAccounts(accounts);
-    }
+async function saveDriverProfile() {
+  const name = $('driverName').value.trim(); const car = $('driverCar').value.trim();
+  if (name) {
+    await supabase.from('accounts').update({ name: name, car: car }).eq('phone', state.user.phone).eq('role', 'driver');
+    state.user.name = name; state.user.car = car;
+    toast('✅ تم الحفظ في قاعدة البيانات', 'success');
   }
-  toast('✅ تم الحفظ', 'success');
-}
-
-/* ---------- التحديث العام ---------- */
-function refreshFromStorage(silent) {
-  if (state.role === 'customer') {
-    if (state.screen === 'c-orders') renderCustomerOrders();
-  }
-  if (state.role === 'driver') {
-    if (state.screen === 'd-home') renderDriverHome();
-    if (state.screen === 'd-orders') renderDriverOrders();
-    if (state.screen === 'd-earnings') renderEarnings();
-  }
-  if (!silent) broadcastUpdate();
-}
-
-function resetAll() {
-  if (!confirm('⚠️ هل تريد مسح كل البيانات؟')) return;
-  if (!confirm('تأكيد أخير — لا يمكن التراجع!')) return;
-  try {
-    Object.values(LS).forEach(k => localStorage.removeItem(k));
-    sessionStorage.clear();
-  } catch(e){}
-  toast('تم مسح البيانات', 'info');
-  setTimeout(() => location.reload(), 800);
 }
 
 /* ---------- التشغيل ---------- */
-window.addEventListener('DOMContentLoaded', () => {
-  applyTheme(getStoredTheme());
-  initSplash();
+function buildParticles() {
+  const wrap = $('particles'); if (!wrap) return;
+  for (let i = 0; i < 40; i++) {
+    const p = document.createElement('div'); p.className = 'particle';
+    const size = 2 + Math.random() * 4;
+    p.style.left = (Math.random() * 100) + '%'; p.style.width = size + 'px'; p.style.height = size + 'px';
+    p.style.animationDelay = (Math.random() * 3) + 's'; p.style.animationDuration = (3 + Math.random() * 3) + 's';
+    wrap.appendChild(p);
+  }
+}
+function initSplash() {
+  buildParticles();
+  setTimeout(() => {
+    $('splash').classList.add('done');
+    const activeRole = getActiveRole();
+    if (activeRole && getSessionPhone(activeRole)) enterApp(activeRole);
+    else showRolePicker();
+  }, 3400);
+}
+function showRolePicker() {
+  $('app').classList.add('hidden'); $('authScreen').classList.add('hidden');
+  const rp = $('rolePicker'); rp.classList.remove('hidden'); void rp.offsetWidth; rp.classList.remove('done');
+}
+function hideRolePicker() { const rp = $('rolePicker'); rp.classList.add('done'); setTimeout(() => rp.classList.add('hidden'), 500); }
+function pickRole(role) {
+  haptic(); state.pendingRole = role;
+  if (getSessionPhone(role)) enterApp(role);
+  else showAuth(role);
+}
+function showAuth(role) {
+  state.pendingRole = role; hideRolePicker(); $('app').classList.add('hidden'); $('authScreen').classList.remove('hidden');
+  $('authRoleLabel').textContent = role === 'customer' ? 'زبون' : 'سائق';
+  ['loginPhone','loginPassword','regName','regPhone','regPassword','regPassword2'].forEach(id => { const el = $(id); if (el) el.value = ''; });
+  switchAuthTab('login');
+}
+function switchAuthTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  $('authLogin').classList.toggle('hidden', tab !== 'login'); $('authRegister').classList.toggle('hidden', tab !== 'register');
+}
+function backToRolePicker() { $('authScreen').classList.add('hidden'); showRolePicker(); }
 
-  // تحديث تلقائي للطلبات
+window.addEventListener('DOMContentLoaded', () => {
+  applyTheme(getStoredTheme()); initSplash();
+  // التحديث التلقائي للبيانات كل 5 ثواني
   setInterval(() => {
-    if (state.role === 'driver') {
+    if (state.role === 'driver' && state.online) {
       if (state.screen === 'd-home') renderDriverHome();
       if (state.screen === 'd-orders') renderDriverOrders();
     }
     if (state.role === 'customer' && state.screen === 'c-orders') {
       renderCustomerOrders();
     }
-  }, 4000);
+  }, 5000);
 });
 </script>
 </body>
